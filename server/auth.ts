@@ -1,0 +1,113 @@
+import NextAuth from "next-auth"
+import { PrismaAdapter } from "@auth/prisma-adapter"
+import { prisma } from "@/server/prisma"
+import Google from "next-auth/providers/google"
+import { string } from "zod"
+import { stripe } from "./stripe"
+
+
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+
+  secret: process.env.AUTH_SECRET!,
+  session: { strategy: "jwt" },
+
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    })
+  ],
+
+  events: {
+    createUser: async (message) => {
+        const userId = message.user.id
+        const email = message.user.email
+        const name = message.user.name
+
+        if(!userId || !email){
+          return;
+        }
+        
+        const stripeCustomer = await stripe.customers.create({
+            email: email,
+            name: name ?? undefined,
+        })
+
+        await prisma.user.update({
+          where: {
+            id: userId,
+          }, 
+          data: {
+            stripeCustomerId: stripeCustomer.id,
+          }
+        })
+        
+      
+    } 
+  },
+
+
+  callbacks: {
+    async session({ session, token }) {
+      if (session && token.sub) {
+        session.user.id = token.sub
+      }
+
+      if (session.user && token.role) {
+        session.user.role = token.role as string
+      }
+
+      if (session.user) {
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
+        session.user.name = token.name
+        session.user.email = token.email as string
+        session.user.isOAuth = token.isOAuth as boolean
+        session.user.image = token.image as string
+      }
+
+      return session
+    },
+
+    async jwt({ token }) {
+      if (!token.sub) return token
+
+      try {
+        // Utilisation de la transaction Prisma pour combiner les deux requêtes
+          const existingUser = await prisma.user.findUnique({
+            where: { id: token.sub },
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              isTwoFactorEnabled: true,
+              image: true,
+              plan: true,
+            },
+          });
+
+          if (!existingUser) return token;
+
+          // Vérifie s'il existe un compte OAuth
+          const existingAccount = await prisma.account.findFirst({
+            where: { userId: existingUser.id },
+          });
+
+          token.isOAuth = !!existingAccount;
+          token.name = existingUser.name;
+          token.email = existingUser.email;
+          token.role = existingUser.role;
+          token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+          token.image = existingUser.image;
+ 
+
+        return token;
+      } catch (error) {
+        console.error("JWT Transaction Error:", error);
+        return token; // Retourne le token même en cas d'erreur pour éviter de bloquer l'authentification
+      }
+    },
+  },
+})
