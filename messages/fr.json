@@ -1,0 +1,404 @@
+{
+  "nav": {
+    "pricing": "Tarifs",
+    "about": "A propos",
+    "dashboard": "Dashboard",
+    "login": "Se connecter",
+    "trial": "Essai gratuit"
+  },
+  "footer": {
+    "tagline": "Suivi du temps pour debut, pause et reprise.",
+    "linksTitle": "Liens",
+    "links": {
+      "home": "Accueil",
+      "pricing": "Tarifs",
+      "about": "A propos",
+      "login": "Connexion"
+    },
+    "languageLabel": "Langue",
+    "copy": "TempoWork. Stats claires, temps reel."
+  },
+  "auth": {
+    "title": "Welcome back",
+    "subtitle": "Bienvenue sur TempoWork. Connectez-vous avec un social ou un lien magique.",
+    "backLabel": "Creer un nouveau compte",
+    "emailLabel": "Email",
+    "emailPlaceholder": "nom@entreprise.com",
+    "magicLink": "Recevoir un lien magique",
+    "sending": "Envoi en cours...",
+    "helperIdle": "Recevez un lien de connexion par email.",
+    "helperSent": "Lien magique envoye si le compte existe.",
+    "helperError": "Impossible d'envoyer le lien. Verifiez votre email.",
+    "google": "Se connecter avec Google"
+  },
+  "home": {
+    "hero": {
+      "badge": "Nouveau - suivi du temps en temps reel",
+      "title": "Notez debut, pause, reprise.",
+      "titleAccent": "Vos stats arrivent toutes seules.",
+      "subtitle": "Un SaaS clair pour suivre vos heures sans tableur. Un clic pour commencer, un clic pour mettre en pause, et des rapports qui rendent le temps visible par jour, semaine et equipe.",
+      "ctaPrimary": "Demarrer l'essai gratuit",
+      "ctaSecondary": "Voir la demo",
+      "bullets": [
+        "Rappels discrets anti-oubli",
+        "Exports CSV et PDF",
+        "Multi-equipes & roles"
+      ]
+    },
+    "demo": {
+      "eyebrow": "Aujourd'hui",
+      "hours": "6h 24m",
+      "status": "Pause active",
+      "events": [
+        {"label": "Debut", "time": "08:12"},
+        {"label": "Pause", "time": "11:02"},
+        {"label": "Reprise", "time": "11:22"},
+        {"label": "Fin estimee", "time": "17:10"}
+      ],
+      "stats": [
+        {"title": "Semaine", "value": "31h 40m"},
+        {"title": "Moy. pause", "value": "18m"},
+        {"title": "Objectif", "value": "35h"}
+      ]
+    },
+    "quickStats": [
+      {"value": "2 min", "label": "pour demarrer la journee"},
+      {"value": "100%", "label": "des pauses tracees"},
+      {"value": "1 vue", "label": "hebdo & mensuelle combinee"}
+    ],
+    "features": {
+      "eyebrow": "Fonctions cle",
+      "title": "Un suivi du temps qui reste humain.",
+      "subtitle": "Combinez le chrono, les pauses et les projets pour avoir une vision nette de vos vraies heures et de votre energie.",
+      "cards": [
+        {
+          "title": "Modes de pointage",
+          "copy": "Debut, pause, reprise, fin. Rien de plus, rien de moins."
+        },
+        {
+          "title": "Planning souple",
+          "copy": "Fixez un objectif hebdo, laissez l'outil ajuster."
+        },
+        {
+          "title": "Alertes intelligentes",
+          "copy": "Notification douce si une pause dure trop longtemps."
+        },
+        {
+          "title": "Analyse d'equipe",
+          "copy": "Comparez charge, pauses et focus par equipe."
+        },
+        {
+          "title": "Zones de temps",
+          "copy": "Lissages automatiques pour le remote et les shifts."
+        },
+        {
+          "title": "Exports propres",
+          "copy": "CSV, PDF ou connexion a votre outil de paie."
+        }
+      ]
+    },
+    "steps": {
+      "eyebrow": "Comment ca marche",
+      "title": "Une journee type en 3 gestes.",
+      "subtitle": "Fini les oublis et les ajustements manuels. Les donnees se construisent toutes seules.",
+      "items": [
+        "Lancez votre chrono des l'ouverture du bureau.",
+        "Activez une pause d'un clic, la reprise se fait idem.",
+        "Fermez la journee et obtenez vos stats instantanement."
+      ],
+      "summaryTitle": "Synthese hebdo",
+      "summaryRange": "18 - 22 mars",
+      "days": ["Lun", "Mar", "Mer", "Jeu", "Ven"],
+      "summaryStats": [
+        {"label": "Temps moyen", "value": "6h 12m"},
+        {"label": "Pauses moy.", "value": "22m"}
+      ]
+    },
+    "pricing": {
+      "eyebrow": "Tarifs simples",
+      "title": "Une offre claire pour chaque equipe.",
+      "subtitle": "Commencez gratuitement, puis passez en mode equipe quand votre suivi devient critique.",
+      "cta": "Choisir {plan}",
+      "plans": [
+        {
+          "name": "Solo",
+          "price": "0 EUR",
+          "desc": "Pour les independants qui veulent un suivi net.",
+          "perks": ["1 espace", "Exports basiques", "Stats hebdo"]
+        },
+        {
+          "name": "Equipe",
+          "price": "6 EUR",
+          "suffix": "/utilisateur",
+          "desc": "Pour 3 a 25 personnes, alertes et roles inclus.",
+          "perks": ["Reporting avance", "Export paie", "Support prioritaire"],
+          "highlight": true
+        },
+        {
+          "name": "Studio",
+          "price": "Sur devis",
+          "desc": "Pour les grands comptes et besoins specifiques.",
+          "perks": ["SLA dedie", "SSO", "Onboarding equipe"]
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "Questions frequentes",
+      "title": "Vous pilotez, nous calculons.",
+      "subtitle": "Pas de complexe, juste un suivi propre et une visibilite utile pour vos equipes.",
+      "items": [
+        {
+          "q": "Peut-on modifier une journee ?",
+          "a": "Oui, avec un journal d'audit pour garder la trace."
+        },
+        {
+          "q": "Les pauses sont-elles obligatoires ?",
+          "a": "Non, mais vous pouvez activer un rappel automatique."
+        },
+        {
+          "q": "Est-ce compatible remote ?",
+          "a": "Oui, chaque utilisateur choisit son fuseau."
+        }
+      ]
+    },
+    "closing": {
+      "eyebrow": "Pret pour la clarte",
+      "title": "Transformez le temps en decisions utiles.",
+      "subtitle": "Activez TempoWork, suivez vos heures sans friction et partagez des stats simples avec votre equipe.",
+      "ctaPrimary": "Lancer l'essai gratuit",
+      "ctaSecondary": "Voir le tableau"
+    }
+  },
+  "pricingPage": {
+    "hero": {
+      "eyebrow": "Tarifs",
+      "title": "Pricing simple pour suivre vos heures sans friction.",
+      "subtitle": "Commencez gratuitement, puis passez en mode equipe quand les stats deviennent critiques.",
+      "ctaPrimary": "Demarrer l'essai gratuit",
+      "ctaSecondary": "Voir la demo"
+    },
+    "cta": "Choisir {plan}",
+    "plans": [
+      {
+        "name": "Solo",
+        "price": "0 EUR",
+        "desc": "Pour les independants qui veulent suivre leurs heures sans friction.",
+        "perks": ["1 espace", "Exports CSV", "Stats hebdo"]
+      },
+      {
+        "name": "Equipe",
+        "price": "6 EUR",
+        "suffix": "/utilisateur",
+        "desc": "Pour 3 a 25 personnes, roles et alertes inclus.",
+        "perks": ["Reporting avance", "Export paie", "Support prioritaire"],
+        "highlight": true
+      },
+      {
+        "name": "Studio",
+        "price": "Sur devis",
+        "desc": "Pour les structures multi-sites et besoins specifiques.",
+        "perks": ["SLA dedie", "SSO", "Onboarding equipe"]
+      }
+    ],
+    "included": {
+      "eyebrow": "Inclus dans chaque plan",
+      "title": "Tout pour suivre debut, pause et reprise sans effort.",
+      "subtitle": "Les fonctions cle restent disponibles quel que soit votre plan. Vous gagnez surtout en profondeur de stats et en gestion d'equipe.",
+      "items": [
+        "Chrono en 1 clic",
+        "Export CSV et PDF",
+        "Alertes anti-oubli",
+        "Tableau hebdo",
+        "Roles et permissions",
+        "Support rapide"
+      ]
+    },
+    "example": {
+      "title": "Exemple de gain",
+      "subtitle": "Une equipe de 8 personnes recupere en moyenne 3 heures par mois en eliminant les oublis de pointage.",
+      "stats": [
+        {"label": "Temps recupere", "value": "3h / mois"},
+        {"label": "Pauses mieux gerees", "value": "+18%"},
+        {"label": "Rapports envoyes", "value": "2 min"}
+      ]
+    },
+    "faq": {
+      "items": [
+        {
+          "q": "Puis-je changer de plan a tout moment ?",
+          "a": "Oui, la facturation est ajustee au pro-rata du mois."
+        },
+        {
+          "q": "Le plan gratuit a-t-il une limite ?",
+          "a": "Oui, il est limite a 1 utilisateur et 1 espace."
+        },
+        {
+          "q": "Puis-je importer mes anciennes donnees ?",
+          "a": "Oui, un assistant CSV est disponible des le plan Equipe."
+        }
+      ]
+    },
+    "closing": {
+      "eyebrow": "Pret a demarrer",
+      "title": "Lancez votre suivi aujourd'hui.",
+      "subtitle": "Creez votre espace, ajoutez une equipe et suivez vos pauses des la premiere journee.",
+      "ctaPrimary": "Essai gratuit",
+      "ctaSecondary": "En savoir plus"
+    }
+  },
+  "aboutPage": {
+    "hero": {
+      "eyebrow": "A propos",
+      "title": "Nous aidons les equipes a rendre le temps visible.",
+      "subtitle": "TempoWork est ne d'un besoin simple: arreter les tableurs et donner aux equipes une vision nette de leurs vraies heures. Nous construisons un outil qui respecte le rythme de chacun, avec des stats claires et des rapports propres.",
+      "ctaPrimary": "Essai gratuit",
+      "ctaSecondary": "Voir les tarifs"
+    },
+    "impact": {
+      "title": "Impact en chiffres",
+      "stats": [
+        {"label": "Heures suivies", "value": "1.2M"},
+        {"label": "Equipes actives", "value": "480"},
+        {"label": "Pays couverts", "value": "12"},
+        {"label": "Temps gagne", "value": "22%"}
+      ]
+    },
+    "mission": {
+      "eyebrow": "Notre mission",
+      "title": "Donner un rythme sain aux equipes modernes.",
+      "subtitle": "Nous croyons que le temps de travail doit rester lisible et humain. Notre mission est d'aider les managers, freelances et equipes distribuees a comprendre leur charge reelle et a agir vite.",
+      "values": [
+        {"title": "Clarte", "copy": "Un suivi limpide, sans frictions ni jargon."},
+        {"title": "Rythme", "copy": "Des pauses respectees pour des equipes durables."},
+        {"title": "Confiance", "copy": "Des donnees transparentes, partagees avec l'equipe."},
+        {"title": "Focus", "copy": "Moins d'administration, plus de temps utile."}
+      ]
+    },
+    "build": {
+      "title": "Notre facon de construire",
+      "steps": [
+        {"title": "Ecouter", "copy": "On part toujours des retours terrain des equipes."},
+        {"title": "Prototyper", "copy": "Une semaine pour tester une idee, pas plus."},
+        {"title": "Livrer", "copy": "On prefere les petits gains regulierement."}
+      ]
+    },
+    "story": {
+      "eyebrow": "Notre histoire",
+      "title": "De la feuille de calcul a une suite claire.",
+      "subtitle": "Nous avons lance TempoWork en 2023 pour remplacer un systeme de suivi manuel utilise par une equipe hybride. Depuis, le produit a evolue avec des rythmes differents, des fuseaux horaires et des contraintes de paie.",
+      "timeline": [
+        "2023 - Lancement beta avec 4 equipes pilotes.",
+        "2024 - Export paie et rapports mensuels.",
+        "2025 - API et dashboards personnalises."
+      ]
+    },
+    "closing": {
+      "eyebrow": "Rejoignez TempoWork",
+      "title": "Pret a rendre vos heures visibles ?",
+      "subtitle": "Lancez un essai gratuit et voyez vos stats des la premiere semaine.",
+      "ctaPrimary": "Essai gratuit",
+      "ctaSecondary": "Voir pricing"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Dashboard",
+    "sidebar": {
+      "title": "TempoWork",
+      "subtitle": "Espace",
+      "time": "Suivi du temps",
+      "stats": "Statistiques",
+      "settings": "Parametres",
+      "hint": "Espace demo pret pour votre premier suivi."
+    },
+    "time": {
+      "title": "Suivi du temps",
+      "subtitle": "Demarrez une session, faites une pause et gardez le rythme."
+    },
+    "summary": {
+      "eyebrow": "Resume rapide",
+      "subtitle": "Statistiques et tendance du jour.",
+      "today": "Aujourd'hui",
+      "week": "Cette semaine",
+      "breaks": "Pauses",
+      "goal": "Objectif {hours}",
+      "daysActive": "{count} jours actifs",
+      "breakAvg": "Moyenne {minutes}m"
+    },
+    "timer": {
+      "eyebrow": "Chrono en cours",
+      "running": "En cours",
+      "paused": "Pause active",
+      "stopped": "Arrete",
+      "start": "Demarrer",
+      "resume": "Reprendre",
+      "stop": "Pause",
+      "end": "Terminer",
+      "hint": "Prochaine alerte: pause max dans {minutes} minutes."
+    },
+    "timeline": {
+      "title": "Timeline du jour",
+      "range": "Aujourd'hui",
+      "start": "Debut",
+      "pause": "Pause",
+      "resume": "Reprise",
+      "end": "Fin"
+    },
+    "stats": {
+      "title": "Stats de travail",
+      "week": "Semaine {week}"
+    },
+    "statsPage": {
+      "title": "Statistiques",
+      "subtitle": "Vue hebdo, tendances et export CSV pret.",
+      "weekLabel": "Semaine {week}",
+      "cards": {
+        "productivity": "Productivite",
+        "productivityHint": "Part du temps focus"
+      },
+      "highlights": {
+        "title": "Points forts",
+        "activeDays": "Jours actifs",
+        "breakAverage": "Pause moyenne",
+        "breakAverageValue": "{minutes}m par pause",
+        "productivity": "Taux de productivite"
+      },
+      "tips": {
+        "label": "Conseil",
+        "text": "Planifiez des blocs plus legers apres un long focus."
+      },
+      "export": {
+        "title": "Exporter CSV",
+        "subtitle": "Choisissez les donnees a inclure.",
+        "hint": "Une ligne par jour de semaine.",
+        "button": "Generer le CSV",
+        "empty": "Selectionnez au moins un champ.",
+        "selectAll": "Tout selectionner",
+        "clear": "Effacer",
+        "fields": {
+          "date": "Date",
+          "workHours": "Heures travaillees",
+          "workMinutes": "Minutes travaillees",
+          "breakMinutes": "Minutes de pause",
+          "breakCount": "Nombre de pauses",
+          "productivity": "Productivite %",
+          "weekTotal": "Total semaine",
+          "timezone": "Fuseau horaire"
+        }
+      },
+      "context": {
+        "title": "Contexte",
+        "subtitle": "Details utiles pour les exports et resumes.",
+        "timezone": "Fuseau horaire",
+        "breaks": "Pauses du jour",
+        "breaksValue": "{count} pauses enregistrees",
+        "sessions": "Jours actifs",
+        "sessionsValue": "{count} jours suivis"
+      }
+    },
+    "empty": {
+      "subtitle": "Cliquez sur Start pour lancer votre premier suivi."
+    },
+    "loading": "Chargement des donnees...",
+    "currentTime": "Heure actuelle"
+  }
+}

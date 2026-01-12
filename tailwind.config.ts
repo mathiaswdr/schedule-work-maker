@@ -75,7 +75,17 @@ const config: Config = withUt({
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
-  			}
+  			},
+			paper: '#f7f1e6',
+			ink: '#1d1b16',
+			'ink-muted': '#6b645d',
+			panel: '#fffaf2',
+			line: 'rgb(29 27 22 / 0.12)',
+			'line-strong': 'rgb(29 27 22 / 0.2)',
+			'ink-soft': 'rgb(29 27 22 / 0.1)',
+			brand: 'rgb(249 115 22 / <alpha-value>)',
+			'brand-2': 'rgb(15 118 110 / <alpha-value>)',
+			'brand-3': 'rgb(250 204 21 / <alpha-value>)'
   		}
   	}
   },

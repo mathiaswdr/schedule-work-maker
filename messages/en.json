@@ -1,0 +1,404 @@
+{
+  "nav": {
+    "pricing": "Pricing",
+    "about": "About",
+    "dashboard": "Dashboard",
+    "login": "Sign in",
+    "trial": "Free trial"
+  },
+  "footer": {
+    "tagline": "Time tracking for start, break and resume.",
+    "linksTitle": "Links",
+    "links": {
+      "home": "Home",
+      "pricing": "Pricing",
+      "about": "About",
+      "login": "Sign in"
+    },
+    "languageLabel": "Language",
+    "copy": "TempoWork. Clear stats, real time."
+  },
+  "auth": {
+    "title": "Welcome back",
+    "subtitle": "Welcome to TempoWork. Sign in with social or a magic link.",
+    "backLabel": "Create a new account",
+    "emailLabel": "Email",
+    "emailPlaceholder": "name@company.com",
+    "magicLink": "Send magic link",
+    "sending": "Sending...",
+    "helperIdle": "Receive a sign-in link by email.",
+    "helperSent": "Magic link sent if the account exists.",
+    "helperError": "Unable to send the link. Check your email.",
+    "google": "Sign in with Google"
+  },
+  "home": {
+    "hero": {
+      "badge": "New - real time work tracking",
+      "title": "Track start, break, resume.",
+      "titleAccent": "Your stats update automatically.",
+      "subtitle": "A clear SaaS to track hours without spreadsheets. One click to start, one click to pause, and reports that make time visible by day, week and team.",
+      "ctaPrimary": "Start free trial",
+      "ctaSecondary": "See the demo",
+      "bullets": [
+        "Gentle anti-miss reminders",
+        "CSV and PDF exports",
+        "Multi-team roles"
+      ]
+    },
+    "demo": {
+      "eyebrow": "Today",
+      "hours": "6h 24m",
+      "status": "Break running",
+      "events": [
+        {"label": "Start", "time": "08:12"},
+        {"label": "Break", "time": "11:02"},
+        {"label": "Resume", "time": "11:22"},
+        {"label": "Estimated end", "time": "17:10"}
+      ],
+      "stats": [
+        {"title": "Week", "value": "31h 40m"},
+        {"title": "Avg break", "value": "18m"},
+        {"title": "Goal", "value": "35h"}
+      ]
+    },
+    "quickStats": [
+      {"value": "2 min", "label": "to start the day"},
+      {"value": "100%", "label": "breaks tracked"},
+      {"value": "1 view", "label": "weekly and monthly combined"}
+    ],
+    "features": {
+      "eyebrow": "Key features",
+      "title": "Human-first time tracking.",
+      "subtitle": "Combine timer, breaks and projects to see your real hours and energy.",
+      "cards": [
+        {
+          "title": "Punch modes",
+          "copy": "Start, break, resume, end. Nothing more, nothing less."
+        },
+        {
+          "title": "Flexible planning",
+          "copy": "Set a weekly target, let the tool adjust."
+        },
+        {
+          "title": "Smart alerts",
+          "copy": "Gentle notification if a break runs too long."
+        },
+        {
+          "title": "Team insights",
+          "copy": "Compare load, breaks and focus by team."
+        },
+        {
+          "title": "Time zones",
+          "copy": "Automatic smoothing for remote and shift work."
+        },
+        {
+          "title": "Clean exports",
+          "copy": "CSV, PDF or connect to your payroll tool."
+        }
+      ]
+    },
+    "steps": {
+      "eyebrow": "How it works",
+      "title": "A typical day in 3 moves.",
+      "subtitle": "No more missed punches and manual edits. The data builds itself.",
+      "items": [
+        "Start your timer when the day begins.",
+        "Pause with one click, resume just the same.",
+        "End the day and get instant stats."
+      ],
+      "summaryTitle": "Weekly summary",
+      "summaryRange": "Mar 18 - 22",
+      "days": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+      "summaryStats": [
+        {"label": "Average time", "value": "6h 12m"},
+        {"label": "Avg breaks", "value": "22m"}
+      ]
+    },
+    "pricing": {
+      "eyebrow": "Simple pricing",
+      "title": "A clear plan for every team.",
+      "subtitle": "Start free, then switch to team mode when tracking gets critical.",
+      "cta": "Choose {plan}",
+      "plans": [
+        {
+          "name": "Solo",
+          "price": "0 USD",
+          "desc": "For independents who want clean tracking.",
+          "perks": ["1 space", "Basic exports", "Weekly stats"]
+        },
+        {
+          "name": "Team",
+          "price": "6 USD",
+          "suffix": "/user",
+          "desc": "For 3 to 25 people, alerts and roles included.",
+          "perks": ["Advanced reporting", "Payroll export", "Priority support"],
+          "highlight": true
+        },
+        {
+          "name": "Studio",
+          "price": "Custom",
+          "desc": "For larger orgs and specific needs.",
+          "perks": ["Dedicated SLA", "SSO", "Team onboarding"]
+        }
+      ]
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "You lead, we compute.",
+      "subtitle": "No complexity, just clean tracking and useful visibility for teams.",
+      "items": [
+        {
+          "q": "Can I edit a day?",
+          "a": "Yes, with an audit trail to keep history."
+        },
+        {
+          "q": "Are breaks required?",
+          "a": "No, but you can enable an automatic reminder."
+        },
+        {
+          "q": "Is it remote friendly?",
+          "a": "Yes, each user selects their time zone."
+        }
+      ]
+    },
+    "closing": {
+      "eyebrow": "Ready for clarity",
+      "title": "Turn time into useful decisions.",
+      "subtitle": "Activate TempoWork, track hours without friction and share simple stats with your team.",
+      "ctaPrimary": "Start free trial",
+      "ctaSecondary": "View the board"
+    }
+  },
+  "pricingPage": {
+    "hero": {
+      "eyebrow": "Pricing",
+      "title": "Simple pricing to track your hours without friction.",
+      "subtitle": "Start free, then switch to team mode when stats become critical.",
+      "ctaPrimary": "Start free trial",
+      "ctaSecondary": "See the demo"
+    },
+    "cta": "Choose {plan}",
+    "plans": [
+      {
+        "name": "Solo",
+        "price": "0 USD",
+        "desc": "For independents who want clean hour tracking.",
+        "perks": ["1 space", "CSV exports", "Weekly stats"]
+      },
+      {
+        "name": "Team",
+        "price": "6 USD",
+        "suffix": "/user",
+        "desc": "For 3 to 25 people, roles and alerts included.",
+        "perks": ["Advanced reporting", "Payroll export", "Priority support"],
+        "highlight": true
+      },
+      {
+        "name": "Studio",
+        "price": "Custom",
+        "desc": "For multi-site orgs and specific needs.",
+        "perks": ["Dedicated SLA", "SSO", "Team onboarding"]
+      }
+    ],
+    "included": {
+      "eyebrow": "Included in every plan",
+      "title": "Everything to track start, break and resume without effort.",
+      "subtitle": "Core features stay available on every plan. The difference is depth of insights and team management.",
+      "items": [
+        "One-click timer",
+        "CSV and PDF export",
+        "Anti-miss alerts",
+        "Weekly board",
+        "Roles and permissions",
+        "Fast support"
+      ]
+    },
+    "example": {
+      "title": "Example impact",
+      "subtitle": "An 8-person team saves about 3 hours per month by removing missed punches.",
+      "stats": [
+        {"label": "Time saved", "value": "3h / month"},
+        {"label": "Better breaks", "value": "+18%"},
+        {"label": "Reports sent", "value": "2 min"}
+      ]
+    },
+    "faq": {
+      "items": [
+        {
+          "q": "Can I change plans anytime?",
+          "a": "Yes, billing is prorated for the month."
+        },
+        {
+          "q": "Is the free plan limited?",
+          "a": "Yes, it is limited to 1 user and 1 space."
+        },
+        {
+          "q": "Can I import my old data?",
+          "a": "Yes, a CSV assistant is available from the Team plan."
+        }
+      ]
+    },
+    "closing": {
+      "eyebrow": "Ready to start",
+      "title": "Launch your tracking today.",
+      "subtitle": "Create your space, add a team and track breaks from day one.",
+      "ctaPrimary": "Free trial",
+      "ctaSecondary": "Learn more"
+    }
+  },
+  "aboutPage": {
+    "hero": {
+      "eyebrow": "About",
+      "title": "We help teams make time visible.",
+      "subtitle": "TempoWork was born from a simple need: stop spreadsheets and give teams a clear view of their real hours. We build a tool that respects each rhythm, with clear stats and clean reports.",
+      "ctaPrimary": "Free trial",
+      "ctaSecondary": "See pricing"
+    },
+    "impact": {
+      "title": "Impact in numbers",
+      "stats": [
+        {"label": "Hours tracked", "value": "1.2M"},
+        {"label": "Active teams", "value": "480"},
+        {"label": "Countries covered", "value": "12"},
+        {"label": "Time saved", "value": "22%"}
+      ]
+    },
+    "mission": {
+      "eyebrow": "Our mission",
+      "title": "Give modern teams a healthier rhythm.",
+      "subtitle": "We believe work time should stay readable and human. Our mission is to help managers, freelancers and distributed teams understand real workload and act fast.",
+      "values": [
+        {"title": "Clarity", "copy": "Crisp tracking, no friction or jargon."},
+        {"title": "Rhythm", "copy": "Respected breaks for sustainable teams."},
+        {"title": "Trust", "copy": "Transparent data, shared with the team."},
+        {"title": "Focus", "copy": "Less admin, more useful time."}
+      ]
+    },
+    "build": {
+      "title": "How we build",
+      "steps": [
+        {"title": "Listen", "copy": "We start from real team feedback."},
+        {"title": "Prototype", "copy": "One week to test an idea, no more."},
+        {"title": "Ship", "copy": "We prefer small wins, regularly."}
+      ]
+    },
+    "story": {
+      "eyebrow": "Our story",
+      "title": "From spreadsheet to a clear suite.",
+      "subtitle": "We launched TempoWork in 2023 to replace a manual tracker used by a hybrid team. Since then, the product evolved with different rhythms, time zones and payroll constraints.",
+      "timeline": [
+        "2023 - Beta launch with 4 pilot teams.",
+        "2024 - Payroll export and monthly reports.",
+        "2025 - API and custom dashboards."
+      ]
+    },
+    "closing": {
+      "eyebrow": "Join TempoWork",
+      "title": "Ready to make your hours visible?",
+      "subtitle": "Start a free trial and see your stats from week one.",
+      "ctaPrimary": "Free trial",
+      "ctaSecondary": "View pricing"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Dashboard",
+    "sidebar": {
+      "title": "TempoWork",
+      "subtitle": "Workspace",
+      "time": "Time tracking",
+      "stats": "Statistics",
+      "settings": "Settings",
+      "hint": "Demo workspace ready for your first session."
+    },
+    "time": {
+      "title": "Time tracking",
+      "subtitle": "Start a session, pause when needed, and keep your day on track."
+    },
+    "summary": {
+      "eyebrow": "Quick summary",
+      "subtitle": "Today stats and trends.",
+      "today": "Today",
+      "week": "This week",
+      "breaks": "Breaks",
+      "goal": "Goal {hours}",
+      "daysActive": "{count} active days",
+      "breakAvg": "Average {minutes}m"
+    },
+    "timer": {
+      "eyebrow": "Current timer",
+      "running": "Running",
+      "paused": "Break active",
+      "stopped": "Stopped",
+      "start": "Start",
+      "resume": "Resume",
+      "stop": "Pause",
+      "end": "Finish",
+      "hint": "Next alert: max break in {minutes} minutes."
+    },
+    "timeline": {
+      "title": "Today's timeline",
+      "range": "Today",
+      "start": "Start",
+      "pause": "Break",
+      "resume": "Resume",
+      "end": "End"
+    },
+    "stats": {
+      "title": "Work stats",
+      "week": "Week {week}"
+    },
+    "statsPage": {
+      "title": "Statistics",
+      "subtitle": "Weekly overview, focus trends, and export-ready insights.",
+      "weekLabel": "Week {week}",
+      "cards": {
+        "productivity": "Productivity",
+        "productivityHint": "Share of focused time"
+      },
+      "highlights": {
+        "title": "Highlights",
+        "activeDays": "Active days",
+        "breakAverage": "Average break",
+        "breakAverageValue": "{minutes}m per break",
+        "productivity": "Productivity rate"
+      },
+      "tips": {
+        "label": "Insight",
+        "text": "Plan lighter blocks after long focus streaks to protect energy."
+      },
+      "export": {
+        "title": "Export CSV",
+        "subtitle": "Choose the metrics to include in your report.",
+        "hint": "Rows are generated per weekday.",
+        "button": "Generate CSV",
+        "empty": "Select at least one field.",
+        "selectAll": "Select all",
+        "clear": "Clear",
+        "fields": {
+          "date": "Date",
+          "workHours": "Work hours",
+          "workMinutes": "Work minutes",
+          "breakMinutes": "Break minutes",
+          "breakCount": "Break count",
+          "productivity": "Productivity %",
+          "weekTotal": "Week total",
+          "timezone": "Timezone"
+        }
+      },
+      "context": {
+        "title": "Context",
+        "subtitle": "Extra details that will show up in exports and summaries.",
+        "timezone": "Timezone",
+        "breaks": "Breaks today",
+        "breaksValue": "{count} breaks logged",
+        "sessions": "Active days",
+        "sessionsValue": "{count} days tracked"
+      }
+    },
+    "empty": {
+      "subtitle": "Click Start to begin your first session."
+    },
+    "loading": "Loading data...",
+    "currentTime": "Current time"
+  }
+}

@@ -1,44 +1,61 @@
 
-import {auth} from "@/server/auth"
+import { auth } from "@/server/auth";
 import { UserButton } from "./user-button";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { LogIn } from "lucide-react";
-import CartDrawer from "../cart/test-drawer";
-import { ExistingUserType } from "@/types";
-import BuyButton from "../payment/BuyButton";
-import BuyButtonClient from "../payment/BuyButtonClient";
+import { getTranslations } from "next-intl/server";
 
+export default async function Nav() {
+  const session = await auth();
+  const t = await getTranslations("nav");
 
-export default async function Nav(){
-
-    const session = await auth();
-
-    return(
-        <nav className="flex justify-center items-center p-6 w-screen backdrop-blur-sm	bg-white/30 fixed top-0">
-            <ul className="flex justify-between items-center w-full maxW">
-                <li>
-                    <Link href={"/"}>
-                        Pokedy
-                    </Link>
-                </li>
-                <li>
-                    <div className="flex gap-x-3 items-center">
-                        {/* <CartDrawer /> */}
-                        {!session ? (
-                            <Button  asChild className="gap-4 bg-primary">
-                                <Link href={"/auth/login"}><LogIn size={16} /><span>Login</span></Link>
-                            </Button>
-                        ) : (
-                            <>                               
-                                <UserButton expires={session?.expires as string} user={session?.user} />
-                            </>
-                        )}
-                    </div>
-                </li>  
-                
-            </ul>
-           
-        </nav>
-    )
+  return (
+    <nav className="fixed top-0 z-50 w-screen border-b border-black/5 bg-white/70 backdrop-blur-md">
+      <div className="mx-auto flex w-full maxW flex-col gap-4 px-6 py-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="text-lg font-semibold tracking-tight">
+            TempoWork
+          </Link>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-700">
+            <Link
+              href="/pricing"
+              className="transition hover:text-neutral-900"
+            >
+              {t("pricing")}
+            </Link>
+            <Link href="/about" className="transition hover:text-neutral-900">
+              {t("about")}
+            </Link>
+            {session ? (
+              <Link
+                href="/dashboard"
+                className="transition hover:text-neutral-900"
+              >
+                {t("dashboard")}
+              </Link>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {!session ? (
+              <>
+                <Button asChild variant="outline" className="px-4">
+                  <Link href="/auth/login">{t("login")}</Link>
+                </Button>
+                <Button asChild className="px-4">
+                  <Link href="/auth/login">{t("trial")}</Link>
+                </Button>
+              </>
+            ) : (
+              <UserButton
+                expires={session?.expires as string}
+                user={session?.user}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
 }
