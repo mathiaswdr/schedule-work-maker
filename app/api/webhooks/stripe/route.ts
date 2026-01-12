@@ -84,7 +84,7 @@ export const POST = async (req:NextRequest) => {
 
 
 
-export const findUserFromCustomerId = async (stripeCustomerId: unknown) => {
+const findUserFromCustomerId = async (stripeCustomerId: unknown) => {
 
     if(typeof stripeCustomerId !== "string"){
         return null;
