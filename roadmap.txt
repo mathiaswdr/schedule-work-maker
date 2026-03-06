@@ -1,0 +1,54 @@
+🎯 Positionnement
+
+Outil d’admin minimal pour indépendants qui facturent à l’heure.
+Transformer son temps en facture simplement.
+
+Pas un ERP.
+Pas un logiciel comptable.
+Pas un outil RH.
+
+🧱 Module 1 — MVP (V1)
+🟢 Cœur du produit
+1️⃣ Clients
+
+Nom
+
+Email
+
+Taux horaire par défaut
+
+TVA applicable
+
+2️⃣ Projets
+
+Lié à un client
+
+Taux spécifique optionnel
+
+3️⃣ Sessions de travail
+
+Start / Stop
+
+Projet associé
+
+Modification manuelle possible
+
+Total automatique
+
+4️⃣ Génération facture
+
+Sélection projet ou période
+
+Calcul heures × taux
+
+TVA automatique
+
+QR facture suisse
+
+PDF propre
+
+Statut : payé / impayé
+
+5️⃣ Rappels automatiques simples
+
+Email si facture non payée après X jours

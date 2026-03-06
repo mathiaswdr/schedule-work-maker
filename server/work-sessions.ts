@@ -42,6 +42,8 @@ export async function getActiveSession(userId: string) {
       breaks: {
         orderBy: { startedAt: "asc" },
       },
+      client: { select: { id: true, name: true, color: true } },
+      project: { select: { id: true, name: true } },
     },
   });
 }
@@ -186,7 +188,25 @@ export async function getWorkSummary(userId: string): Promise<WorkSummary> {
   };
 }
 
-export async function startOrResumeSession(userId: string, timezone?: string) {
+export async function getRecentSessions(userId: string, limit = 5) {
+  return prisma.workSession.findMany({
+    where: { userId, status: WorkSessionStatus.ENDED },
+    orderBy: { startedAt: "desc" },
+    take: limit,
+    include: {
+      breaks: { orderBy: { startedAt: "asc" } },
+      client: { select: { id: true, name: true, color: true } },
+      project: { select: { id: true, name: true } },
+    },
+  });
+}
+
+export async function startOrResumeSession(
+  userId: string,
+  timezone?: string,
+  clientId?: string,
+  projectId?: string
+) {
   const now = new Date();
   const session = await getActiveSession(userId);
 
@@ -197,9 +217,13 @@ export async function startOrResumeSession(userId: string, timezone?: string) {
         status: WorkSessionStatus.RUNNING,
         startedAt: now,
         timezone,
+        clientId: clientId ?? null,
+        projectId: projectId ?? null,
       },
       include: {
         breaks: true,
+        client: { select: { id: true, name: true, color: true } },
+        project: { select: { id: true, name: true } },
       },
     });
   }

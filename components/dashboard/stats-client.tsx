@@ -30,6 +30,8 @@ type ApiResponse = {
 
 type StatsClientProps = {
   displayClassName: string;
+  currency: string;
+  hourlyRate: number;
 };
 
 type ExportField = {
@@ -69,12 +71,13 @@ const escapeCsv = (value: string | number) => {
   return text;
 };
 
-export default function StatsClient({ displayClassName }: StatsClientProps) {
+export default function StatsClient({ displayClassName, currency, hourlyRate }: StatsClientProps) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion();
   const [data, setData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [invoiceRevenue, setInvoiceRevenue] = useState(0);
   const [selectedFields, setSelectedFields] = useState<Record<string, boolean>>({
     date: true,
     workHours: true,
@@ -97,6 +100,16 @@ export default function StatsClient({ displayClassName }: StatsClientProps) {
     { key: "weekTotal", label: t("statsPage.export.fields.weekTotal") },
     { key: "timezone", label: t("statsPage.export.fields.timezone") },
   ];
+
+  const currencyFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency,
+        minimumFractionDigits: 2,
+      }),
+    [locale, currency]
+  );
 
   const dateFormatter = useMemo(() => {
     return new Intl.DateTimeFormat(locale, {
@@ -128,6 +141,12 @@ export default function StatsClient({ displayClassName }: StatsClientProps) {
       .finally(() => {
         if (isMounted) setIsLoading(false);
       });
+    fetch("/api/invoices/revenue", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (isMounted) setInvoiceRevenue(d.monthTotal ?? 0);
+      })
+      .catch(() => null);
     return () => {
       isMounted = false;
     };
@@ -304,7 +323,7 @@ export default function StatsClient({ displayClassName }: StatsClientProps) {
 
           <motion.section
             variants={fadeUp}
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
           >
             {[
               {
@@ -318,14 +337,26 @@ export default function StatsClient({ displayClassName }: StatsClientProps) {
                 detail: t("summary.daysActive", { count: daysActive }),
               },
               {
+                label: t("statsPage.cards.productivity"),
+                value: `${productivity}%`,
+                detail: t("statsPage.cards.productivityHint"),
+              },
+              {
                 label: t("summary.breaks"),
                 value: formatDuration(summary.breakMs),
                 detail: t("summary.breakAvg", { minutes: breakAverage }),
               },
               {
-                label: t("statsPage.cards.productivity"),
-                value: `${productivity}%`,
-                detail: t("statsPage.cards.productivityHint"),
+                label: t("statsPage.cards.revenueHourly"),
+                value: hourlyRate > 0
+                  ? currencyFormatter.format(hourlyRate * summary.weekMs / 3600000)
+                  : "—",
+                detail: t("statsPage.cards.revenueHourlyHint"),
+              },
+              {
+                label: t("statsPage.cards.revenueInvoices"),
+                value: currencyFormatter.format(invoiceRevenue),
+                detail: t("statsPage.cards.revenueInvoicesHint"),
               },
             ].map((card) => (
               <motion.div

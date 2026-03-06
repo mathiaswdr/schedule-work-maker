@@ -1,9 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ChevronDown, Pause, Pencil, Play, Square, Trash2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { deleteWorkSession } from "@/server/actions/work-session-update";
+import { useConfirm } from "@/components/ui/confirm-dialog";
+import { toast } from "sonner";
 import TimeCard from "@/components/dashboard/time-card";
+import SessionEditDialog from "@/components/dashboard/session-edit-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type SessionStatus = "RUNNING" | "PAUSED" | "ENDED";
 
@@ -20,7 +33,21 @@ type SessionItem = {
   endedAt: string | null;
   timezone?: string | null;
   breaks: BreakItem[];
+  client?: { id: string; name: string; color: string | null } | null;
+  project?: { id: string; name: string } | null;
 } | null;
+
+type ClientOption = {
+  id: string;
+  name: string;
+  color: string | null;
+};
+
+type ProjectOption = {
+  id: string;
+  name: string;
+  client: { id: string; name: string; color: string | null } | null;
+};
 
 type SummaryDay = {
   date: string;
@@ -40,6 +67,7 @@ type Summary = {
 type ApiResponse = {
   session: SessionItem;
   summary: Summary;
+  recentSessions: NonNullable<SessionItem>[];
 };
 
 type TimeTrackingClientProps = {
@@ -73,16 +101,36 @@ const formatTimer = (ms: number) => {
   )}:${String(seconds).padStart(2, "0")}`;
 };
 
+const getSessionDurationMs = (s: { startedAt: string; endedAt: string | null; breaks: { startedAt: string; endedAt: string | null }[] }) => {
+  const start = new Date(s.startedAt);
+  const end = s.endedAt ? new Date(s.endedAt) : new Date();
+  const breakMs = s.breaks.reduce((total, b) => {
+    const bStart = new Date(b.startedAt);
+    const bEnd = b.endedAt ? new Date(b.endedAt) : new Date();
+    return total + (bEnd.getTime() - bStart.getTime());
+  }, 0);
+  return Math.max(end.getTime() - start.getTime() - breakMs, 0);
+};
+
 export default function TimeTrackingClient({
   displayClassName,
 }: TimeTrackingClientProps) {
   const t = useTranslations("dashboard");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion();
+  const { confirm, ConfirmDialogElement } = useConfirm();
   const [data, setData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [now, setNow] = useState(() => new Date());
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [clients, setClients] = useState<ClientOption[]>([]);
+  const [projects, setProjects] = useState<ProjectOption[]>([]);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingSession, setEditingSession] = useState<NonNullable<SessionItem> | null>(null);
+  const [timelineExpanded, setTimelineExpanded] = useState(false);
 
   const timeFormatter = useMemo(() => {
     return new Intl.DateTimeFormat(locale, {
@@ -91,15 +139,23 @@ export default function TimeTrackingClient({
     });
   }, [locale]);
 
-  const fetchStatus = async () => {
+  const fetchStatus = useCallback(async () => {
     const response = await fetch("/api/work-sessions", { cache: "no-store" });
     if (!response.ok) {
       throw new Error("Failed to load session status");
     }
     const payload = (await response.json()) as ApiResponse;
     setData(payload);
-  };
+  }, []);
 
+  const { execute: executeDeleteSession } = useAction(deleteWorkSession, {
+    onSuccess: () => {
+      toast.success(t("sessionEdit.deleted"));
+      fetchStatus();
+    },
+  });
+
+  // Initial fetch
   useEffect(() => {
     let isMounted = true;
     fetchStatus()
@@ -110,12 +166,46 @@ export default function TimeTrackingClient({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [fetchStatus]);
+
+  // Poll every 5s when a session is active (RUNNING or PAUSED) for multi-device sync
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    if (pollRef.current) clearInterval(pollRef.current);
+
+    const hasActiveSession = data?.session && data.session.status !== "ENDED";
+    if (hasActiveSession) {
+      pollRef.current = setInterval(() => {
+        fetchStatus().catch(() => null);
+      }, 5000);
+    }
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [data?.session?.status, fetchStatus]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    fetch("/api/clients", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setClients(d.clients))
+      .catch(() => null);
+  }, []);
+
+  useEffect(() => {
+    const url = selectedClientId
+      ? `/api/projects?clientId=${selectedClientId}`
+      : "/api/projects";
+    fetch(url, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => setProjects(d.projects))
+      .catch(() => null);
+  }, [selectedClientId]);
 
   const handleAction = async (action: "start" | "stop") => {
     setIsActionLoading(true);
@@ -126,6 +216,8 @@ export default function TimeTrackingClient({
         body: JSON.stringify({
           action,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          clientId: selectedClientId ?? undefined,
+          projectId: selectedProjectId ?? undefined,
         }),
       });
       await fetchStatus();
@@ -136,6 +228,7 @@ export default function TimeTrackingClient({
 
   const session = data?.session ?? null;
   const summary = data?.summary ?? emptySummary;
+  const recentSessions = data?.recentSessions ?? [];
   const breaks = session?.breaks ?? [];
 
   const sessionMs = useMemo(() => {
@@ -219,6 +312,51 @@ export default function TimeTrackingClient({
       : t("timer.stop")
     : t("timer.stop");
 
+  const primaryAction = useMemo(() => {
+    if (!session) {
+      return {
+        label: t("timer.start"),
+        icon: Play,
+        action: "start" as const,
+        disabled: isActionLoading,
+        color: "bg-brand",
+        shadow: "shadow-[0_20px_60px_-12px_rgba(249,115,22,0.6)]",
+        ring: "ring-brand/20",
+      };
+    }
+    if (session.status === "RUNNING") {
+      return {
+        label: t("timer.stop"),
+        icon: Pause,
+        action: "stop" as const,
+        disabled: isActionLoading,
+        color: "bg-brand-3",
+        shadow: "shadow-[0_20px_60px_-12px_rgba(250,204,21,0.5)]",
+        ring: "ring-brand-3/20",
+      };
+    }
+    return {
+      label: t("timer.resume"),
+      icon: Play,
+      action: "start" as const,
+      disabled: isActionLoading,
+      color: "bg-brand-2",
+      shadow: "shadow-[0_20px_60px_-12px_rgba(15,118,110,0.5)]",
+      ring: "ring-brand-2/20",
+    };
+  }, [session, isActionLoading, t]);
+
+  const secondaryAction = useMemo(() => {
+    if (session?.status === "PAUSED") {
+      return {
+        label: t("timer.end"),
+        action: "stop" as const,
+        disabled: isActionLoading,
+      };
+    }
+    return null;
+  }, [session, isActionLoading, t]);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -270,9 +408,335 @@ export default function TimeTrackingClient({
           initial="hidden"
           animate="show"
         >
+          {/* ========== MOBILE LAYOUT ========== */}
+          <div className="lg:hidden">
+            {/* Header compact */}
+            <motion.div variants={fadeUp} className="flex items-center justify-between">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-ink-muted">
+                {t("timer.eyebrow")}
+              </p>
+              <TimeCard />
+            </motion.div>
+
+            {/* Status badge */}
+            <motion.div variants={fadeUp} className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                  session?.status === "RUNNING"
+                    ? "bg-brand-2/10 text-brand-2"
+                    : session?.status === "PAUSED"
+                    ? "bg-brand-3/10 text-brand-3"
+                    : "bg-ink-soft text-ink-muted"
+                }`}
+              >
+                {session?.status === "RUNNING" && (
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-2 opacity-75" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-2" />
+                  </span>
+                )}
+                {statusLabel}
+              </span>
+              {session?.client && (
+                <span className="flex items-center gap-1.5 rounded-full bg-ink-soft px-3 py-1 text-xs font-medium text-ink">
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: session.client.color ?? "#6B7280" }}
+                  />
+                  {session.client.name}
+                </span>
+              )}
+              {session?.project && (
+                <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+                  {session.project.name}
+                </span>
+              )}
+            </motion.div>
+
+            {/* Large timer */}
+            <motion.div variants={fadeUp} className="mt-8 text-center">
+              <p
+                className="text-6xl font-semibold tracking-tight text-ink"
+                style={{ fontVariantNumeric: "tabular-nums" }}
+              >
+                {formatTimer(sessionMs)}
+              </p>
+            </motion.div>
+
+            {/* Primary action button */}
+            <motion.div variants={fadeUp} className="mt-8 flex flex-col items-center gap-4">
+              <motion.button
+                type="button"
+                onClick={() => handleAction(primaryAction.action)}
+                disabled={primaryAction.disabled}
+                whileTap={{ scale: 0.92 }}
+                className={`flex h-24 w-24 items-center justify-center rounded-full ${primaryAction.color} ${primaryAction.shadow} ring-4 ${primaryAction.ring} text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                <primaryAction.icon className="h-10 w-10" fill="currentColor" strokeWidth={0} />
+              </motion.button>
+              <span className="text-sm font-semibold text-ink-muted">
+                {primaryAction.label}
+              </span>
+
+              {/* Secondary action (PAUSED → End) */}
+              <AnimatePresence>
+                {secondaryAction && (
+                  <motion.button
+                    type="button"
+                    key="secondary-action"
+                    onClick={() => handleAction(secondaryAction.action)}
+                    disabled={secondaryAction.disabled}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-2 rounded-full border border-line-strong bg-white/80 px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-white disabled:opacity-50"
+                  >
+                    <Square className="h-4 w-4" />
+                    {secondaryAction.label}
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Client/Project selectors (no session) */}
+            <AnimatePresence>
+              {!session && (
+                <motion.div
+                  key="mobile-selectors"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-6 space-y-3 overflow-hidden"
+                >
+                  <Select
+                    value={selectedClientId ?? "none"}
+                    onValueChange={(v) => {
+                      setSelectedClientId(v === "none" ? null : v);
+                      setSelectedProjectId(null);
+                    }}
+                  >
+                    <SelectTrigger className="rounded-2xl border-line">
+                      <SelectValue placeholder={t("timer.selectClient")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">{t("timer.noClient")}</SelectItem>
+                      {clients.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          <span className="flex items-center gap-2">
+                            <span
+                              className="inline-block h-2 w-2 rounded-full"
+                              style={{ backgroundColor: c.color ?? "#6B7280" }}
+                            />
+                            {c.name}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={selectedProjectId ?? "none"}
+                    onValueChange={(v) => setSelectedProjectId(v === "none" ? null : v)}
+                  >
+                    <SelectTrigger className="rounded-2xl border-line">
+                      <SelectValue placeholder={t("timer.selectProject")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">{t("timer.noProject")}</SelectItem>
+                      {projects.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Summary stats (horizontal scroll) */}
+            <motion.div variants={fadeUp} className="mt-8">
+              <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-ink-muted">
+                {t("summary.eyebrow")}
+              </p>
+              <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-2">
+                {[
+                  { label: t("summary.today"), value: formatDuration(summary.todayMs) },
+                  { label: t("summary.week"), value: formatDuration(summary.weekMs) },
+                  { label: t("summary.breaks"), value: formatDuration(summary.breakMs) },
+                ].map((card) => (
+                  <div
+                    key={card.label}
+                    className="min-w-[120px] flex-shrink-0 rounded-2xl border border-line bg-white/80 px-4 py-3"
+                  >
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-ink-muted">
+                      {card.label}
+                    </p>
+                    <p className="mt-1 text-lg font-semibold">{card.value}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Collapsible timeline */}
+            <motion.div variants={fadeUp} className="mt-6">
+              <button
+                type="button"
+                onClick={() => setTimelineExpanded((prev) => !prev)}
+                className="flex w-full items-center justify-between rounded-2xl border border-line bg-white/80 px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <p className="text-sm font-semibold">{t("timeline.title")}</p>
+                  {timeline.length > 0 && (
+                    <span className="rounded-full bg-ink-soft px-2 py-0.5 text-[10px] font-medium text-ink-muted">
+                      {timeline.length}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  {session && (
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingSession(session);
+                        setEditDialogOpen(true);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") { e.stopPropagation(); setEditingSession(session); setEditDialogOpen(true); }
+                      }}
+                      className="rounded-lg p-1.5 text-ink-muted transition hover:bg-ink-soft hover:text-ink"
+                      title={t("sessionEdit.title")}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </span>
+                  )}
+                  <motion.div
+                    animate={{ rotate: timelineExpanded ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown className="h-4 w-4 text-ink-muted" />
+                  </motion.div>
+                </div>
+              </button>
+              <AnimatePresence>
+                {timelineExpanded && (
+                  <motion.div
+                    key="timeline-content"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="space-y-2 pt-3">
+                      {timeline.length ? (
+                        timeline.map((item) => (
+                          <div
+                            key={`${item.label}-${item.time}`}
+                            className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`h-2.5 w-2.5 rounded-full ${item.state}`} />
+                              <span className="font-medium">{item.label}</span>
+                            </div>
+                            <span className="text-ink-muted">{item.time}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="rounded-2xl border border-line bg-white/70 px-4 py-6 text-center text-sm text-ink-muted">
+                          {t("empty.subtitle")}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Recent sessions */}
+            {recentSessions.length > 0 && (
+              <motion.div variants={fadeUp} className="mt-6">
+                <p className="mb-3 text-sm font-semibold">{t("recentSessions.title")}</p>
+                <div className="space-y-2">
+                  {recentSessions.map((rs) => (
+                    <div
+                      key={rs.id}
+                      className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-ink-muted" />
+                          <span className="font-medium">
+                            {new Date(rs.startedAt).toLocaleDateString(locale, { day: "numeric", month: "short" })}
+                          </span>
+                          <span className="text-ink-muted">
+                            {timeFormatter.format(new Date(rs.startedAt))} - {rs.endedAt ? timeFormatter.format(new Date(rs.endedAt)) : "..."}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 pl-4">
+                          {rs.client && (
+                            <span className="flex items-center gap-1 rounded-full bg-ink-soft px-2 py-0.5 text-[10px]">
+                              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: rs.client.color ?? "#6B7280" }} />
+                              {rs.client.name}
+                            </span>
+                          )}
+                          {rs.project && (
+                            <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] text-brand">
+                              {rs.project.name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-ink-muted">{formatDuration(getSessionDurationMs(rs))}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingSession(rs);
+                            setEditDialogOpen(true);
+                          }}
+                          className="rounded-lg p-1.5 text-ink-muted transition hover:bg-ink-soft hover:text-ink"
+                          title={t("sessionEdit.title")}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const ok = await confirm({
+                              title: t("sessionEdit.title"),
+                              description: t("sessionEdit.deleteConfirm"),
+                              confirmLabel: tc("delete"),
+                              cancelLabel: tc("cancel"),
+                            });
+                            if (ok) executeDeleteSession({ sessionId: rs.id });
+                          }}
+                          className="rounded-lg p-1.5 text-ink-muted transition hover:bg-red-50 hover:text-red-500"
+                          title={t("sessionEdit.delete")}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Hint */}
+            {session && (
+              <p className="mt-4 text-center text-xs text-ink-muted">
+                {t("timer.hint", { minutes: 6 })}
+              </p>
+            )}
+          </div>
+
+          {/* ========== DESKTOP LAYOUT ========== */}
           <motion.section
             variants={fadeUp}
-            className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+            className="hidden lg:flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
           >
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
@@ -288,7 +752,7 @@ export default function TimeTrackingClient({
             <TimeCard />
           </motion.section>
 
-          <motion.section variants={fadeUp}>
+          <motion.section variants={fadeUp} className="hidden lg:block">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
@@ -335,7 +799,7 @@ export default function TimeTrackingClient({
 
           <motion.section
             variants={fadeUp}
-            className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
+            className="hidden lg:grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
           >
             <div className="space-y-6">
               <div className="rounded-3xl border border-line bg-panel p-6 shadow-[0_30px_60px_-46px_rgba(15,118,110,0.35)]">
@@ -348,11 +812,75 @@ export default function TimeTrackingClient({
                       {formatTimer(sessionMs)}
                     </p>
                   </div>
-                  <span className="rounded-full bg-brand-2/10 px-3 py-1 text-xs font-semibold text-brand-2">
-                    {statusLabel}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-brand-2/10 px-3 py-1 text-xs font-semibold text-brand-2">
+                      {statusLabel}
+                    </span>
+                    {session?.client && (
+                      <span className="flex items-center gap-1.5 rounded-full bg-ink-soft px-3 py-1 text-xs font-medium text-ink">
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: session.client.color ?? "#6B7280" }}
+                        />
+                        {session.client.name}
+                      </span>
+                    )}
+                    {session?.project && (
+                      <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-medium text-brand">
+                        {session.project.name}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+
+                {!session && (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <Select
+                      value={selectedClientId ?? "none"}
+                      onValueChange={(v) => {
+                        setSelectedClientId(v === "none" ? null : v);
+                        setSelectedProjectId(null);
+                      }}
+                    >
+                      <SelectTrigger className="rounded-2xl border-line">
+                        <SelectValue placeholder={t("timer.selectClient")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">{t("timer.noClient")}</SelectItem>
+                        {clients.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            <span className="flex items-center gap-2">
+                              <span
+                                className="inline-block h-2 w-2 rounded-full"
+                                style={{ backgroundColor: c.color ?? "#6B7280" }}
+                              />
+                              {c.name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select
+                      value={selectedProjectId ?? "none"}
+                      onValueChange={(v) => setSelectedProjectId(v === "none" ? null : v)}
+                    >
+                      <SelectTrigger className="rounded-2xl border-line">
+                        <SelectValue placeholder={t("timer.selectProject")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">{t("timer.noProject")}</SelectItem>
+                        {projects.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   <button
                     type="button"
                     onClick={() => handleAction("start")}
@@ -379,9 +907,21 @@ export default function TimeTrackingClient({
             <div className="rounded-3xl border border-line bg-white/80 p-6">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold">{t("timeline.title")}</p>
-                <span className="text-xs text-ink-muted">
-                  {t("timeline.range")}
-                </span>
+                <div className="flex items-center gap-2">
+                  {session && (
+                    <button
+                      type="button"
+                      onClick={() => { setEditingSession(session); setEditDialogOpen(true); }}
+                      className="rounded-lg p-1.5 text-ink-muted transition hover:bg-ink-soft hover:text-ink"
+                      title={t("sessionEdit.title")}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                  <span className="text-xs text-ink-muted">
+                    {t("timeline.range")}
+                  </span>
+                </div>
               </div>
               <motion.div
                 className="mt-6 space-y-4"
@@ -413,6 +953,72 @@ export default function TimeTrackingClient({
             </div>
           </motion.section>
 
+          {/* Recent sessions (desktop) */}
+          {recentSessions.length > 0 && (
+            <motion.section variants={fadeUp} className="hidden lg:block">
+              <p className="mb-3 text-sm font-semibold">{t("recentSessions.title")}</p>
+              <div className="space-y-2">
+                {recentSessions.map((rs) => (
+                  <div
+                    key={rs.id}
+                    className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="h-2.5 w-2.5 rounded-full bg-ink-muted" />
+                      <span className="font-medium">
+                        {new Date(rs.startedAt).toLocaleDateString(locale, { day: "numeric", month: "short" })}
+                      </span>
+                      <span className="text-ink-muted">
+                        {timeFormatter.format(new Date(rs.startedAt))} - {rs.endedAt ? timeFormatter.format(new Date(rs.endedAt)) : "..."}
+                      </span>
+                      {rs.client && (
+                        <span className="flex items-center gap-1 rounded-full bg-ink-soft px-2 py-0.5 text-[10px]">
+                          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: rs.client.color ?? "#6B7280" }} />
+                          {rs.client.name}
+                        </span>
+                      )}
+                      {rs.project && (
+                        <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] text-brand">
+                          {rs.project.name}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-ink-muted">{formatDuration(getSessionDurationMs(rs))}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingSession(rs);
+                          setEditDialogOpen(true);
+                        }}
+                        className="rounded-lg p-1.5 text-ink-muted transition hover:bg-ink-soft hover:text-ink"
+                        title={t("sessionEdit.title")}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const ok = await confirm({
+                            title: t("sessionEdit.title"),
+                            description: t("sessionEdit.deleteConfirm"),
+                            confirmLabel: tc("delete"),
+                            cancelLabel: tc("cancel"),
+                          });
+                          if (ok) executeDeleteSession({ sessionId: rs.id });
+                        }}
+                        className="rounded-lg p-1.5 text-ink-muted transition hover:bg-red-50 hover:text-red-500"
+                        title={t("sessionEdit.delete")}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.section>
+          )}
+
           {isLoading ? (
             <motion.div variants={fadeUp} className="text-sm text-ink-muted">
               {t("loading")}
@@ -420,6 +1026,24 @@ export default function TimeTrackingClient({
           ) : null}
         </motion.div>
       </div>
+
+      {editingSession && (
+        <SessionEditDialog
+          open={editDialogOpen}
+          onOpenChange={(open) => {
+            setEditDialogOpen(open);
+            if (!open) setEditingSession(null);
+          }}
+          onSuccess={fetchStatus}
+          sessionId={editingSession.id}
+          currentClientId={editingSession.client?.id ?? null}
+          currentProjectId={editingSession.project?.id ?? null}
+          currentStartedAt={editingSession.startedAt}
+          currentEndedAt={editingSession.endedAt}
+          currentStatus={editingSession.status}
+        />
+      )}
+      {ConfirmDialogElement}
     </main>
   );
 }

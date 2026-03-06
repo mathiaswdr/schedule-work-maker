@@ -47,6 +47,8 @@ export const settings = action
         name: values.name,
         email: values.email,
         image: values.image,
+        currency: values.currency,
+        hourlyRate: values.hourlyRate,
       },
     });
 
