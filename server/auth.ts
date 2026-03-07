@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/server/prisma"
 import Google from "next-auth/providers/google"
-import { string } from "zod"
+import { UserPlan } from "@prisma/client"
 import { stripe } from "./stripe"
 
 
@@ -65,6 +65,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.email = token.email as string
         session.user.isOAuth = token.isOAuth as boolean
         session.user.image = token.image as string
+        session.user.plan = token.plan as UserPlan
       }
 
       return session
@@ -101,7 +102,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.role = existingUser.role;
           token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
           token.image = existingUser.image;
- 
+          token.plan = existingUser.plan;
 
         return token;
       } catch (error) {

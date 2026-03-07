@@ -20,7 +20,7 @@ export default async function Settings() {
     }),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { currency: true, hourlyRate: true },
+      select: { currency: true, hourlyRate: true, plan: true },
     }),
   ]);
 
@@ -30,6 +30,7 @@ export default async function Settings() {
       businessProfile={businessProfile}
       currency={user?.currency ?? "CHF"}
       hourlyRate={user?.hourlyRate ?? 0}
+      plan={user?.plan ?? "FREE"}
       displayClassName={display.className}
     />
   );

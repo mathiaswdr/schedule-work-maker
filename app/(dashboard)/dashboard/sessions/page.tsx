@@ -6,6 +6,7 @@ import SessionsClient from "@/components/dashboard/sessions-client";
 const display = Fraunces({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
+  display: "swap",
 });
 
 export default async function DashboardSessionsPage() {

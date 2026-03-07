@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import Link from "next/link";
 
 import {
   Form,
@@ -59,6 +60,7 @@ type SettingsCardProps = {
   businessProfile: BusinessProfileData;
   currency: string;
   hourlyRate: number;
+  plan: string;
   displayClassName: string;
 };
 
@@ -67,6 +69,7 @@ export default function SettingsCard({
   businessProfile,
   currency,
   hourlyRate,
+  plan,
   displayClassName,
 }: SettingsCardProps) {
   const t = useTranslations("dashboard");
@@ -332,9 +335,12 @@ export default function SettingsCard({
                       <span className="text-sm text-ink-muted">
                         {t("settingsPage.account.planLabel")}
                       </span>
-                      <span className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
-                        Free
-                      </span>
+                      <Link
+                        href="/dashboard/subscription"
+                        className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand hover:bg-brand/20 transition"
+                      >
+                        {plan}
+                      </Link>
                     </motion.div>
                     <motion.div
                       variants={itemVariants}

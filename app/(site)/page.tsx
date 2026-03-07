@@ -1,15 +1,18 @@
 import Link from "next/link";
 import { Fraunces, Space_Grotesk } from "next/font/google";
 import { getTranslations } from "next-intl/server";
+import { PricingCards } from "./pricing/pricing-cards";
 
 const display = Fraunces({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
+  display: "swap",
 });
 
 const body = Space_Grotesk({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 type DemoEvent = {
@@ -39,11 +42,17 @@ type FeatureCard = {
 
 type PricingPlan = {
   name: string;
+  planId: string;
   price: string;
   suffix?: string;
   desc: string;
   perks: string[];
   highlight?: boolean;
+};
+
+type StepItem = {
+  title: string;
+  description: string;
 };
 
 type FaqItem = {
@@ -58,7 +67,7 @@ export default async function Home() {
   const demoStats = t.raw("demo.stats") as DemoStat[];
   const quickStats = t.raw("quickStats") as QuickStat[];
   const featureCards = t.raw("features.cards") as FeatureCard[];
-  const steps = t.raw("steps.items") as string[];
+  const steps = t.raw("steps.items") as StepItem[];
   const days = t.raw("steps.days") as string[];
   const summaryStats = t.raw("steps.summaryStats") as SummaryStat[];
   const pricingPlans = t.raw("pricing.plans") as PricingPlan[];
@@ -75,8 +84,8 @@ export default async function Home() {
   return (
     <main className={`${body.className} w-full bg-paper text-ink`}>
       <div className="relative w-full overflow-hidden">
-        <div className="pointer-events-none absolute -top-28 right-[-6rem] h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.35),transparent_60%)] blur-2xl motion-safe:animate-[float_10s_ease-in-out_infinite]" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-10rem] h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.3),transparent_60%)] blur-3xl motion-safe:animate-[float_12s_ease-in-out_infinite]" />
+        <div className="pointer-events-none absolute -top-28 right-[-6rem] h-[320px] w-[320px] sm:h-[420px] sm:w-[420px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.35),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_10s_ease-in-out_infinite]" />
+        <div className="pointer-events-none absolute bottom-[-12rem] left-[-10rem] h-[320px] w-[320px] sm:h-[520px] sm:w-[520px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.3),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_12s_ease-in-out_infinite]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.08)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
 
         <section className="relative mx-auto flex w-full maxW flex-col gap-12 px-6 pb-16 pt-32 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -86,7 +95,7 @@ export default async function Home() {
             </span>
             <h1
               className={`${display.className} text-4xl font-semibold leading-tight text-ink motion-safe:opacity-0 motion-safe:animate-[fade-up_0.9s_ease-out_forwards] sm:text-5xl lg:text-6xl`}
-              style={{ animationDelay: "120ms" }}
+              style={{ animationDelay: "120ms", whiteSpace: "pre-line" }}
             >
               {t("hero.title")}
               <span className="block text-brand-2">
@@ -252,13 +261,16 @@ export default async function Home() {
               <div className="mt-6 space-y-4">
                 {steps.map((step, index) => (
                   <div
-                    key={step}
-                    className="flex gap-4 rounded-2xl border border-line bg-white/70 px-4 py-3"
+                    key={step.title}
+                    className="flex gap-4 rounded-2xl border border-line bg-white/70 px-4 py-4"
                   >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-2/10 text-sm font-semibold text-brand-2">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-2/10 text-sm font-semibold text-brand-2">
                       0{index + 1}
                     </span>
-                    <p className="text-sm text-ink-muted">{step}</p>
+                    <div>
+                      <p className="text-sm font-semibold text-ink">{step.title}</p>
+                      <p className="mt-0.5 text-sm text-ink-muted">{step.description}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -311,6 +323,9 @@ export default async function Home() {
         </section>
 
         <section id="pricing" className="mx-auto w-full maxW px-6 py-16">
+          <p className="mb-6 text-center text-sm font-medium text-ink-muted">
+            {t("pricing.socialProof")}
+          </p>
           <div className="flex flex-col gap-4 text-center">
             <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
               {t("pricing.eyebrow")}
@@ -324,54 +339,26 @@ export default async function Home() {
               {t("pricing.subtitle")}
             </p>
           </div>
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            {pricingPlans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-3xl border ${
-                  plan.highlight
-                    ? "border-brand bg-white shadow-[0_26px_70px_-45px_rgba(249,115,22,0.55)]"
-                    : "border-line bg-white/70"
-                } p-6`}
-              >
-                <p className="text-sm uppercase tracking-[0.3em] text-ink-muted">
-                  {plan.name}
-                </p>
-                <p className="mt-3 text-3xl font-semibold text-ink">
-                  {plan.price}
-                  {plan.suffix ? (
-                    <span className="text-sm font-normal text-ink-muted">
-                      {plan.suffix}
-                    </span>
-                  ) : null}
-                </p>
-                <p className="mt-2 text-sm text-ink-muted">
-                  {plan.desc}
-                </p>
-                <div className="mt-5 space-y-2 text-sm text-ink-muted">
-                  {plan.perks.map((perk) => (
-                    <div key={perk} className="flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-brand-2" />
-                      {perk}
-                    </div>
-                  ))}
-                </div>
-                <Link
-                  href="/auth/login"
-                  className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    plan.highlight
-                      ? "bg-brand text-white hover:translate-y-[-1px]"
-                      : "border border-line-strong bg-white/70 text-ink hover:bg-white"
-                  }`}
-                >
-                  {t("pricing.cta", { plan: plan.name })}
-                </Link>
-              </div>
-            ))}
+          <div className="mt-10">
+            <PricingCards
+              plans={pricingPlans}
+              userPlan={null}
+              ctaLabelTemplate={t("pricing.cta", { plan: "{plan}" })}
+              ctaCurrentLabel=""
+              ctaManageLabel=""
+              toggleMonthly={t("pricing.billingToggle.monthly")}
+              toggleYearly={t("pricing.billingToggle.yearly")}
+              toggleBadge={t("pricing.billingToggle.badge")}
+              toggleHint={t("pricing.billingToggle.yearlyHint")}
+              suffixMonthly={t("pricing.billingToggle.suffixMonthly")}
+              suffixYearly={t("pricing.billingToggle.suffixYearly")}
+              monthlyHint={t("pricing.billingToggle.monthlyHint")}
+              yearlyEquivalent={t("pricing.billingToggle.yearlyEquivalent")}
+            />
           </div>
         </section>
 
-        <section className="mx-auto w-full maxW px-6 py-16">
+        <section id="faq" className="mx-auto w-full maxW px-6 py-16">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">

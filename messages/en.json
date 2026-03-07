@@ -5,14 +5,16 @@
     "confirm": "Confirm"
   },
   "nav": {
+    "home": "Home",
     "pricing": "Pricing",
     "about": "About",
+    "faq": "F.A.Q",
     "dashboard": "Dashboard",
     "login": "Sign in",
     "trial": "Free trial"
   },
   "footer": {
-    "tagline": "Time tracking for start, break and resume.",
+    "tagline": "The simplest way to turn your hours into invoices.",
     "linksTitle": "Links",
     "links": {
       "home": "Home",
@@ -21,7 +23,7 @@
       "login": "Sign in"
     },
     "languageLabel": "Language",
-    "copy": "TempoWork. Clear stats, real time."
+    "copy": "TempoWork. Time tracking and freelance invoicing."
   },
   "auth": {
     "title": "Welcome back",
@@ -38,16 +40,16 @@
   },
   "home": {
     "hero": {
-      "badge": "New - real time work tracking",
-      "title": "Track start, break, resume.",
-      "titleAccent": "Your stats update automatically.",
-      "subtitle": "A clear SaaS to track hours without spreadsheets. One click to start, one click to pause, and reports that make time visible by day, week and team.",
-      "ctaPrimary": "Start free trial",
+      "badge": "Time tracking software for freelancers",
+      "title": "Track your hours.\nGenerate your invoices.",
+      "titleAccent": "Get paid.",
+      "subtitle": "TempoWork is a simple time tracking software for freelancers and small teams. Track your hours, manage your projects and generate invoices with Swiss QR invoice in a few clicks.",
+      "ctaPrimary": "Start for free",
       "ctaSecondary": "See the demo",
       "bullets": [
-        "Gentle anti-miss reminders",
-        "CSV and PDF exports",
-        "Multi-team roles"
+        "Simple time tracking",
+        "Invoices with Swiss QR invoice",
+        "CSV and PDF exports"
       ]
     },
     "demo": {
@@ -68,48 +70,57 @@
     },
     "quickStats": [
       {"value": "2 min", "label": "to start the day"},
-      {"value": "100%", "label": "breaks tracked"},
-      {"value": "1 view", "label": "weekly and monthly combined"}
+      {"value": "100%", "label": "hours tracked"},
+      {"value": "1 click", "label": "to generate an invoice"}
     ],
     "features": {
       "eyebrow": "Key features",
-      "title": "Human-first time tracking.",
-      "subtitle": "Combine timer, breaks and projects to see your real hours and energy.",
+      "title": "Simple time tracking for freelancers and teams.",
+      "subtitle": "TempoWork is a time tracking software built for freelancers and small teams who want to track their hours and generate Swiss QR invoices.",
       "cards": [
         {
-          "title": "Punch modes",
-          "copy": "Start, break, resume, end. Nothing more, nothing less."
+          "title": "Simple time tracking",
+          "copy": "Start a timer, pause and resume your session in one click."
         },
         {
-          "title": "Flexible planning",
-          "copy": "Set a weekly target, let the tool adjust."
+          "title": "Clients and projects",
+          "copy": "Link your work sessions to your clients and projects."
         },
         {
-          "title": "Smart alerts",
-          "copy": "Gentle notification if a break runs too long."
+          "title": "Automatic invoicing",
+          "copy": "Turn your work hours into an invoice in seconds."
         },
         {
-          "title": "Team insights",
-          "copy": "Compare load, breaks and focus by team."
-        },
-        {
-          "title": "Time zones",
-          "copy": "Automatic smoothing for remote and shift work."
+          "title": "Swiss QR invoice",
+          "copy": "Generate invoices compatible with Swiss standards."
         },
         {
           "title": "Clean exports",
-          "copy": "CSV, PDF or connect to your payroll tool."
+          "copy": "Export your data as CSV or PDF."
+        },
+        {
+          "title": "Simple statistics",
+          "copy": "View your hours by day, week or month."
         }
       ]
     },
     "steps": {
       "eyebrow": "How it works",
-      "title": "A typical day in 3 moves.",
-      "subtitle": "No more missed punches and manual edits. The data builds itself.",
+      "title": "Turn your time into an invoice in 3 steps.",
+      "subtitle": "From time tracking to freelance invoicing, everything happens in a few clicks.",
       "items": [
-        "Start your timer when the day begins.",
-        "Pause with one click, resume just the same.",
-        "End the day and get instant stats."
+        {
+          "title": "Start the timer",
+          "description": "Track your work sessions in real time."
+        },
+        {
+          "title": "Assign a client or project",
+          "description": "Link your hours to the right project."
+        },
+        {
+          "title": "Generate the invoice",
+          "description": "Turn your hours into an invoice in one click."
+        }
       ],
       "summaryTitle": "Weekly summary",
       "summaryRange": "Mar 18 - 22",
@@ -121,106 +132,197 @@
     },
     "pricing": {
       "eyebrow": "Simple pricing",
-      "title": "A clear plan for every team.",
-      "subtitle": "Start free, then switch to team mode when tracking gets critical.",
+      "socialProof": "Ideal for developers, designers, consultants and freelancers.",
+      "title": "A simple plan for freelancers and small teams.",
+      "subtitle": "Start for free, then upgrade when your business grows.",
       "cta": "Choose {plan}",
+      "billingToggle": {
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "badge": "2 months free",
+        "yearlyHint": "Save with annual billing",
+        "suffixMonthly": " /user/month",
+        "suffixYearly": " /user/year",
+        "monthlyHint": "or __price__ CHF/yr with annual billing",
+        "yearlyEquivalent": "~__price__ CHF/month equivalent"
+      },
       "plans": [
         {
-          "name": "Solo",
-          "price": "0 USD",
-          "desc": "For independents who want clean tracking.",
-          "perks": ["1 space", "Basic exports", "Weekly stats"]
+          "name": "Free",
+          "planId": "FREE",
+          "price": "0 CHF",
+          "desc": "Test the product, no commitment.",
+          "perks": [
+            "✓ 1 user",
+            "✓ Basic time tracking",
+            "✓ Limited clients",
+            "✓ Limited invoices / month",
+            "✗ QR invoice",
+            "✗ Exports",
+            "✗ Advanced analytics",
+            "✗ Expense tracking"
+          ]
         },
         {
-          "name": "Team",
-          "price": "6 USD",
-          "suffix": "/user",
-          "desc": "For 3 to 25 people, alerts and roles included.",
-          "perks": ["Advanced reporting", "Payroll export", "Priority support"],
+          "name": "Starter",
+          "planId": "STARTER",
+          "price": "9.90 CHF",
+          "suffix": "/user/mo",
+          "desc": "For freelancers and small teams who need real tools.",
+          "perks": [
+            "✓ Full time tracking",
+            "✓ Unlimited clients",
+            "✓ Projects",
+            "✓ Invoice generation",
+            "✓ Swiss QR invoice",
+            "✓ Payment reminders",
+            "✓ Session history",
+            "✗ Advanced analytics",
+            "✗ Expense tracking",
+            "✗ CSV exports",
+            "✗ Custom invoice templates"
+          ],
           "highlight": true
         },
         {
-          "name": "Studio",
-          "price": "Custom",
-          "desc": "For larger orgs and specific needs.",
-          "perks": ["Dedicated SLA", "SSO", "Team onboarding"]
+          "name": "Pro",
+          "planId": "PRO",
+          "price": "19 CHF",
+          "suffix": "/user/mo",
+          "desc": "Everything in Starter, plus power features.",
+          "perks": [
+            "✓ Everything in Starter",
+            "✓ Advanced analytics",
+            "✓ Expense tracking",
+            "✓ CSV exports",
+            "✓ Custom invoice templates",
+            "✓ Advanced reporting"
+          ]
         }
       ]
     },
     "faq": {
       "eyebrow": "FAQ",
-      "title": "You lead, we compute.",
-      "subtitle": "No complexity, just clean tracking and useful visibility for teams.",
+      "title": "Everything you need to know.",
+      "subtitle": "Clear answers for freelancers and small teams.",
       "items": [
         {
-          "q": "Can I edit a day?",
-          "a": "Yes, with an audit trail to keep history."
+          "q": "Can I generate a Swiss QR invoice?",
+          "a": "Yes, TempoWork lets you generate invoices compatible with Swiss QR invoice standards."
         },
         {
-          "q": "Are breaks required?",
-          "a": "No, but you can enable an automatic reminder."
+          "q": "Is this a time tracking software for freelancers?",
+          "a": "Yes, TempoWork is built for freelancers and small teams who want to track their hours simply."
         },
         {
-          "q": "Is it remote friendly?",
-          "a": "Yes, each user selects their time zone."
+          "q": "Can I track my hours by client?",
+          "a": "Yes, each session can be linked to a client or project."
+        },
+        {
+          "q": "Can I export my data?",
+          "a": "Yes, you can export your data as CSV or PDF at any time."
         }
       ]
     },
     "closing": {
-      "eyebrow": "Ready for clarity",
-      "title": "Turn time into useful decisions.",
-      "subtitle": "Activate TempoWork, track hours without friction and share simple stats with your team.",
-      "ctaPrimary": "Start free trial",
-      "ctaSecondary": "View the board"
+      "eyebrow": "Ready to start",
+      "title": "Turn your hours into invoices.",
+      "subtitle": "Start for free with TempoWork and simplify your time management.",
+      "ctaPrimary": "Start for free",
+      "ctaSecondary": "See the demo"
     }
   },
   "pricingPage": {
     "hero": {
       "eyebrow": "Pricing",
       "title": "Simple pricing to track your hours without friction.",
-      "subtitle": "Start free, then switch to team mode when stats become critical.",
+      "subtitle": "Start free, then upgrade when your tracking needs grow.",
       "ctaPrimary": "Start free trial",
       "ctaSecondary": "See the demo"
     },
     "cta": "Choose {plan}",
+    "ctaCurrent": "Current plan",
+    "ctaManage": "Manage subscription",
+    "billingToggle": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "badge": "2 months free",
+      "yearlyHint": "Save with annual billing",
+      "suffixMonthly": " /user/month",
+      "suffixYearly": " /user/year",
+      "monthlyHint": "or __price__ CHF/yr with annual billing",
+      "yearlyEquivalent": "~__price__ CHF/month equivalent"
+    },
     "plans": [
       {
-        "name": "Solo",
-        "price": "0 USD",
-        "desc": "For independents who want clean hour tracking.",
-        "perks": ["1 space", "CSV exports", "Weekly stats"]
+        "name": "Free",
+        "planId": "FREE",
+        "price": "0 CHF",
+        "desc": "Test the product, no commitment.",
+        "perks": [
+          "✓ 1 user",
+          "✓ Basic time tracking",
+          "✓ Limited clients",
+          "✓ Limited invoices / month",
+          "✗ QR invoice",
+          "✗ Exports",
+          "✗ Advanced analytics",
+          "✗ Expense tracking"
+        ]
       },
       {
-        "name": "Team",
-        "price": "6 USD",
-        "suffix": "/user",
-        "desc": "For 3 to 25 people, roles and alerts included.",
-        "perks": ["Advanced reporting", "Payroll export", "Priority support"],
+        "name": "Starter",
+        "planId": "STARTER",
+        "price": "9.90 CHF",
+        "suffix": "/user/mo",
+        "desc": "For freelancers and small teams who need real tools.",
+        "perks": [
+          "✓ Full time tracking",
+          "✓ Unlimited clients",
+          "✓ Projects",
+          "✓ Invoice generation",
+          "✓ Swiss QR invoice",
+          "✓ Payment reminders",
+          "✓ Session history",
+          "✗ Advanced analytics",
+          "✗ Expense tracking",
+          "✗ CSV exports",
+          "✗ Custom invoice templates"
+        ],
         "highlight": true
       },
       {
-        "name": "Studio",
-        "price": "Custom",
-        "desc": "For multi-site orgs and specific needs.",
-        "perks": ["Dedicated SLA", "SSO", "Team onboarding"]
+        "name": "Pro",
+        "planId": "PRO",
+        "price": "19 CHF",
+        "suffix": "/user/mo",
+        "desc": "Everything in Starter, plus power features.",
+        "perks": [
+          "✓ Everything in Starter",
+          "✓ Advanced analytics",
+          "✓ Expense tracking",
+          "✓ CSV exports",
+          "✓ Custom invoice templates",
+          "✓ Advanced reporting"
+        ]
       }
     ],
     "included": {
       "eyebrow": "Included in every plan",
       "title": "Everything to track start, break and resume without effort.",
-      "subtitle": "Core features stay available on every plan. The difference is depth of insights and team management.",
+      "subtitle": "Core features stay available on every plan. The difference is depth of insights and client management.",
       "items": [
         "One-click timer",
         "CSV and PDF export",
         "Anti-miss alerts",
         "Weekly board",
-        "Roles and permissions",
+        "Break tracking",
         "Fast support"
       ]
     },
     "example": {
       "title": "Example impact",
-      "subtitle": "An 8-person team saves about 3 hours per month by removing missed punches.",
+      "subtitle": "A freelancer saves about 3 hours per month by removing missed punches and manual edits.",
       "stats": [
         {"label": "Time saved", "value": "3h / month"},
         {"label": "Better breaks", "value": "+18%"},
@@ -235,18 +337,18 @@
         },
         {
           "q": "Is the free plan limited?",
-          "a": "Yes, it is limited to 1 user and 1 space."
+          "a": "Yes, it includes 1 workspace with basic exports."
         },
         {
           "q": "Can I import my old data?",
-          "a": "Yes, a CSV assistant is available from the Team plan."
+          "a": "Yes, a CSV assistant is available from the Starter plan."
         }
       ]
     },
     "closing": {
       "eyebrow": "Ready to start",
       "title": "Launch your tracking today.",
-      "subtitle": "Create your space, add a team and track breaks from day one.",
+      "subtitle": "Create your workspace and track breaks from day one.",
       "ctaPrimary": "Free trial",
       "ctaSecondary": "Learn more"
     }
@@ -317,6 +419,7 @@
       "invoices": "Invoices",
       "stats": "Statistics",
       "expenses": "Expenses",
+      "subscription": "Subscription",
       "settings": "Settings",
       "more": "More",
       "hint": "Demo workspace ready for your first session.",
@@ -766,6 +869,66 @@
     },
     "empty": {
       "subtitle": "Click Start to begin your first session."
+    },
+    "subscriptionPage": {
+      "title": "Subscription",
+      "subtitle": "Manage your plan and billing.",
+      "currentPlan": "Current plan",
+      "upgrade": "Upgrade",
+      "manageBilling": "Manage billing",
+      "successMessage": "Your subscription has been updated!",
+      "billingToggle": {
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "badge": "2 months free",
+        "yearlyHint": "Save with annual billing",
+        "suffixMonthly": " /user/month",
+        "suffixYearly": " /user/year",
+        "monthlyHint": "or {price} CHF/yr with annual billing",
+        "yearlyEquivalent": "~{price} CHF/month equivalent"
+      },
+      "plans": {
+        "free": {
+          "name": "Free",
+          "perks": [
+            "✓ 1 user",
+            "✓ Basic time tracking",
+            "✓ Limited clients",
+            "✓ Limited invoices / month",
+            "✗ QR invoice",
+            "✗ Exports",
+            "✗ Advanced analytics",
+            "✗ Expense tracking"
+          ]
+        },
+        "starter": {
+          "name": "Starter",
+          "perks": [
+            "✓ Full time tracking",
+            "✓ Unlimited clients",
+            "✓ Projects",
+            "✓ Invoice generation",
+            "✓ Swiss QR invoice",
+            "✓ Payment reminders",
+            "✓ Session history",
+            "✗ Advanced analytics",
+            "✗ Expense tracking",
+            "✗ CSV exports",
+            "✗ Custom invoice templates"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "perks": [
+            "✓ Everything in Starter",
+            "✓ Advanced analytics",
+            "✓ Expense tracking",
+            "✓ CSV exports",
+            "✓ Custom invoice templates",
+            "✓ Advanced reporting"
+          ]
+        }
+      }
     },
     "loading": "Loading data...",
     "currentTime": "Current time"

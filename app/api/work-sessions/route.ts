@@ -10,9 +10,11 @@ import {
 
 export async function GET() {
   const userId = await getSessionUserId();
-  const session = await getActiveSession(userId);
-  const summary = await getWorkSummary(userId);
-  const recentSessions = await getRecentSessions(userId);
+  const [session, summary, recentSessions] = await Promise.all([
+    getActiveSession(userId),
+    getWorkSummary(userId),
+    getRecentSessions(userId),
+  ]);
 
   return NextResponse.json({ session, summary, recentSessions });
 }
@@ -31,9 +33,11 @@ export async function POST(request: Request) {
     await pauseOrStopSession(userId);
   }
 
-  const session = await getActiveSession(userId);
-  const summary = await getWorkSummary(userId);
-  const recentSessions = await getRecentSessions(userId);
+  const [session, summary, recentSessions] = await Promise.all([
+    getActiveSession(userId),
+    getWorkSummary(userId),
+    getRecentSessions(userId),
+  ]);
 
   return NextResponse.json({ session, summary, recentSessions });
 }

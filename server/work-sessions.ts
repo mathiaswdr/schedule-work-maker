@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { WorkSessionStatus } from "@prisma/client";
 import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
@@ -12,7 +13,7 @@ export type WorkSummary = {
   weekDays: { date: string; valueMs: number; breakMs: number; breakCount: number }[];
 };
 
-export async function getSessionUserId() {
+export const getSessionUserId = cache(async () => {
   const session = await auth();
 
   if (session?.user?.id) {
@@ -29,7 +30,7 @@ export async function getSessionUserId() {
   });
 
   return demoUser.id;
-}
+});
 
 export async function getActiveSession(userId: string) {
   return prisma.workSession.findFirst({

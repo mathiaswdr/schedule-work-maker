@@ -19,30 +19,30 @@ export const uploadInvoice = action
 
     const userId = user.user.id;
 
-    // Shared invoice number sequence
-    const lastInvoice = await prisma.invoice.findFirst({
-      where: { userId },
-      orderBy: { number: "desc" },
-      select: { number: true },
-    });
+    // Parallel fetch: invoice number + client snapshot
+    const [lastInvoice, client] = await Promise.all([
+      prisma.invoice.findFirst({
+        where: { userId },
+        orderBy: { number: "desc" },
+        select: { number: true },
+      }),
+      prisma.client.findUnique({
+        where: { id: values.clientId },
+        select: {
+          name: true,
+          email: true,
+          address: true,
+          postalCode: true,
+          city: true,
+          country: true,
+        },
+      }),
+    ]);
     const nextNumber = (lastInvoice?.number ?? 0) + 1;
 
     const displayNumber =
       values.displayNumber?.trim() ||
       `UPL-${String(nextNumber).padStart(3, "0")}`;
-
-    // Snapshot client info
-    const client = await prisma.client.findUnique({
-      where: { id: values.clientId },
-      select: {
-        name: true,
-        email: true,
-        address: true,
-        postalCode: true,
-        city: true,
-        country: true,
-      },
-    });
 
     const invoice = await prisma.invoice.create({
       data: {

@@ -17,6 +17,8 @@ export async function POST() {
       select: {
         stripeCustomerId: true,
         plan: true,
+        email: true,
+        name: true,
       }
     });
 
@@ -24,17 +26,30 @@ export async function POST() {
       return NextResponse.json({ message: "No user found", success: false }, { status: 200 });
     }
 
-    const stripeCustomerId = user.stripeCustomerId ?? undefined;
+    let stripeCustomerId = user.stripeCustomerId;
+
     if (!stripeCustomerId) {
-      return NextResponse.json({ message: "No customer ID found on Stripe", success: false }, { status: 200 });
+      stripeCustomerId = await createStripeCustomer(authSession.user.id, user.email, user.name);
     }
 
-    const session = await stripe.billingPortal.sessions.create({
-      customer: stripeCustomerId,
-      return_url: `${process.env.NEXT_PUBLIC_URL!}`,
-    });
+    let session;
+    try {
+      session = await stripe.billingPortal.sessions.create({
+        customer: stripeCustomerId,
+        return_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
+      });
+    } catch (stripeError: any) {
+      if (stripeError?.code === "resource_missing") {
+        stripeCustomerId = await createStripeCustomer(authSession.user.id, user.email, user.name);
 
-    // console.log("session :", session)
+        session = await stripe.billingPortal.sessions.create({
+          customer: stripeCustomerId,
+          return_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
+        });
+      } else {
+        throw stripeError;
+      }
+    }
 
     if (!session.url) {
       return NextResponse.json({ message: "Failed to create Stripe session", success: false }, { status: 200 });
@@ -46,4 +61,18 @@ export async function POST() {
     console.error("Error creating Stripe Billing Portal session:", error);
     return NextResponse.json({ message: "Internal server error", success: false }, { status: 500 });
   }
+}
+
+async function createStripeCustomer(userId: string, email: string, name: string | null): Promise<string> {
+  const stripeCustomer = await stripe.customers.create({
+    email,
+    name: name ?? undefined,
+  });
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { stripeCustomerId: stripeCustomer.id },
+  });
+
+  return stripeCustomer.id;
 }

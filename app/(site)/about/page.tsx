@@ -5,11 +5,13 @@ import { getTranslations } from "next-intl/server";
 const display = Fraunces({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
+  display: "swap",
 });
 
 const body = Space_Grotesk({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 type StatItem = {
@@ -37,8 +39,8 @@ export default async function AboutPage() {
   return (
     <main className={`${body.className} w-full bg-paper text-ink`}>
       <div className="relative w-full overflow-hidden">
-        <div className="pointer-events-none absolute -top-32 right-[-5rem] h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(249,115,22,0.3),transparent_60%)] blur-3xl motion-safe:animate-[float_12s_ease-in-out_infinite]" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-9rem] h-[460px] w-[460px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(15,118,110,0.3),transparent_60%)] blur-2xl motion-safe:animate-[float_10s_ease-in-out_infinite]" />
+        <div className="pointer-events-none absolute -top-32 right-[-5rem] h-[320px] w-[320px] sm:h-[420px] sm:w-[420px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(249,115,22,0.3),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_12s_ease-in-out_infinite]" />
+        <div className="pointer-events-none absolute bottom-[-12rem] left-[-9rem] h-[320px] w-[320px] sm:h-[460px] sm:w-[460px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(15,118,110,0.3),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_10s_ease-in-out_infinite]" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.08)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
 
         <section className="mx-auto w-full maxW px-6 pb-12 pt-32">

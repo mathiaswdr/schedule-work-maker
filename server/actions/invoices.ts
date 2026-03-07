@@ -25,24 +25,22 @@ export const createInvoice = action
 
     const userId = user.user.id;
 
-    // Get next invoice number
-    const lastInvoice = await prisma.invoice.findFirst({
-      where: { userId },
-      orderBy: { number: "desc" },
-      select: { number: true },
-    });
+    // Parallel fetch: invoice number, business profile, client snapshot
+    const [lastInvoice, profile, client] = await Promise.all([
+      prisma.invoice.findFirst({
+        where: { userId },
+        orderBy: { number: "desc" },
+        select: { number: true },
+      }),
+      prisma.businessProfile.findUnique({
+        where: { userId },
+      }),
+      prisma.client.findUnique({
+        where: { id: values.clientId },
+        select: { name: true, email: true, address: true, postalCode: true, city: true, country: true },
+      }),
+    ]);
     const nextNumber = (lastInvoice?.number ?? 0) + 1;
-
-    // Snapshot business profile
-    const profile = await prisma.businessProfile.findUnique({
-      where: { userId },
-    });
-
-    // Snapshot client info
-    const client = await prisma.client.findUnique({
-      where: { id: values.clientId },
-      select: { name: true, email: true, address: true, postalCode: true, city: true, country: true },
-    });
 
     // Compute totals
     const items = values.items.map((item, index) => ({
@@ -115,14 +113,15 @@ export const updateInvoice = action
     const user = await auth();
     if (!user) return { error: "User not found" };
 
-    const profile = await prisma.businessProfile.findUnique({
-      where: { userId: user.user.id },
-    });
-
-    const client = await prisma.client.findUnique({
-      where: { id: values.clientId },
-      select: { name: true, email: true, address: true, postalCode: true, city: true, country: true },
-    });
+    const [profile, client] = await Promise.all([
+      prisma.businessProfile.findUnique({
+        where: { userId: user.user.id },
+      }),
+      prisma.client.findUnique({
+        where: { id: values.clientId },
+        select: { name: true, email: true, address: true, postalCode: true, city: true, country: true },
+      }),
+    ]);
 
     const items = values.items.map((item, index) => ({
       ...item,

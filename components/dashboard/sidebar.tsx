@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { BarChart3, Clock, Ellipsis, FileText, FolderKanban, History, Receipt, Settings2, Users } from "lucide-react";
+import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, Receipt, Settings2, Users } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", icon: Clock, key: "time" },
@@ -15,6 +15,7 @@ const navItems = [
   { href: "/dashboard/invoices", icon: FileText, key: "invoices" },
   { href: "/dashboard/expenses", icon: Receipt, key: "expenses" },
   { href: "/dashboard/stats", icon: BarChart3, key: "stats" },
+  { href: "/dashboard/subscription", icon: CreditCard, key: "subscription" },
   { href: "/dashboard/settings", icon: Settings2, key: "settings" },
 ];
 

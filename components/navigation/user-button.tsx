@@ -60,7 +60,7 @@ export const UserButton = ({user}: Session) => {
 
             <div className="mb-4 p-4 flex flex-col gap-1 items-center bg-primary/25 rounded-lg overflow-hidden">
                 {user?.image && (
-                    <Image src={user.image} alt={user.name!} width={36} height={36} className="rounded-full w-12 h-12 object-cover" quality={100}/>
+                    <Image src={user.image} alt={user.name!} width={36} height={36} className="rounded-full w-12 h-12 object-cover" />
                 )}
                 <p className="font-bold text-xs">{user?.name}</p>
                 <span className="font-medium text-secondary-foreground text-xs">{user?.email}</span>
@@ -83,7 +83,12 @@ export const UserButton = ({user}: Session) => {
             {user.plan === "FREE" ? (
                 <DropdownMenuItem className="py-2 cursor-pointer font-medium transition-all duration-500 group ease-in-out">
                     <Captions size={14} className="mr-3 group-hover:scale-105 transition-all duration-300 ease-in-out" />
-                    <BuyButtonClient />
+                    <BuyButtonClient plan="STARTER" />
+                </DropdownMenuItem>
+            ) : user.plan === "STARTER" ? (
+                <DropdownMenuItem onClick={() => router.push("/dashboard/subscription")} className="py-2 cursor-pointer font-medium transition-all duration-500 group ease-in-out">
+                    <ChartNoAxesGantt size={14} className="mr-3 group-hover:scale-105 transition-all duration-300 ease-in-out" />
+                    Upgrade to Pro
                 </DropdownMenuItem>
             ) : (
                 <DropdownMenuItem className="py-2 cursor-pointer font-medium transition-all duration-500 group ease-in-out">

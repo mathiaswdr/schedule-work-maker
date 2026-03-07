@@ -6,6 +6,7 @@ import ExpensesClient from "@/components/dashboard/expenses-client";
 const display = Fraunces({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
+  display: "swap",
 });
 
 export default async function DashboardExpensesPage() {

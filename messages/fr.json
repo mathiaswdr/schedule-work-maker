@@ -5,14 +5,16 @@
     "confirm": "Confirmer"
   },
   "nav": {
+    "home": "Accueil",
     "pricing": "Tarifs",
     "about": "A propos",
+    "faq": "F.A.Q",
     "dashboard": "Dashboard",
     "login": "Se connecter",
     "trial": "Essai gratuit"
   },
   "footer": {
-    "tagline": "Suivi du temps pour debut, pause et reprise.",
+    "tagline": "Le moyen le plus simple de transformer vos heures en factures.",
     "linksTitle": "Liens",
     "links": {
       "home": "Accueil",
@@ -21,7 +23,7 @@
       "login": "Connexion"
     },
     "languageLabel": "Langue",
-    "copy": "TempoWork. Stats claires, temps reel."
+    "copy": "TempoWork. Suivi du temps et facturation freelance."
   },
   "auth": {
     "title": "Welcome back",
@@ -38,16 +40,16 @@
   },
   "home": {
     "hero": {
-      "badge": "Nouveau - suivi du temps en temps reel",
-      "title": "Notez debut, pause, reprise.",
-      "titleAccent": "Vos stats arrivent toutes seules.",
-      "subtitle": "Un SaaS clair pour suivre vos heures sans tableur. Un clic pour commencer, un clic pour mettre en pause, et des rapports qui rendent le temps visible par jour, semaine et equipe.",
-      "ctaPrimary": "Demarrer l'essai gratuit",
+      "badge": "Logiciel de suivi du temps pour freelances",
+      "title": "Suivez vos heures.\nGenerez vos factures.",
+      "titleAccent": "Soyez paye.",
+      "subtitle": "TempoWork est un logiciel simple de suivi du temps pour freelances et petites equipes. Suivez vos heures, gerez vos projets et generez des factures avec QR facture suisse en quelques clics.",
+      "ctaPrimary": "Commencer gratuitement",
       "ctaSecondary": "Voir la demo",
       "bullets": [
-        "Rappels discrets anti-oubli",
-        "Exports CSV et PDF",
-        "Multi-equipes & roles"
+        "Suivi du temps simple",
+        "Factures avec QR facture suisse",
+        "Exports CSV et PDF"
       ]
     },
     "demo": {
@@ -68,48 +70,57 @@
     },
     "quickStats": [
       {"value": "2 min", "label": "pour demarrer la journee"},
-      {"value": "100%", "label": "des pauses tracees"},
-      {"value": "1 vue", "label": "hebdo & mensuelle combinee"}
+      {"value": "100%", "label": "des heures suivies"},
+      {"value": "1 clic", "label": "pour generer une facture"}
     ],
     "features": {
       "eyebrow": "Fonctions cle",
-      "title": "Un suivi du temps qui reste humain.",
-      "subtitle": "Combinez le chrono, les pauses et les projets pour avoir une vision nette de vos vraies heures et de votre energie.",
+      "title": "Un suivi du temps simple pour freelances et equipes.",
+      "subtitle": "TempoWork est un logiciel de suivi du temps concu pour freelances et petites equipes qui souhaitent suivre leurs heures et generer des factures compatibles QR facture suisse.",
       "cards": [
         {
-          "title": "Modes de pointage",
-          "copy": "Debut, pause, reprise, fin. Rien de plus, rien de moins."
+          "title": "Suivi du temps simple",
+          "copy": "Demarrez un chrono, mettez en pause et reprenez votre session en un clic."
         },
         {
-          "title": "Planning souple",
-          "copy": "Fixez un objectif hebdo, laissez l'outil ajuster."
+          "title": "Clients et projets",
+          "copy": "Associez vos sessions de travail a vos clients et projets."
         },
         {
-          "title": "Alertes intelligentes",
-          "copy": "Notification douce si une pause dure trop longtemps."
+          "title": "Facturation automatique",
+          "copy": "Transformez vos heures de travail en facture en quelques secondes."
         },
         {
-          "title": "Analyse d'equipe",
-          "copy": "Comparez charge, pauses et focus par equipe."
-        },
-        {
-          "title": "Zones de temps",
-          "copy": "Lissages automatiques pour le remote et les shifts."
+          "title": "QR facture suisse",
+          "copy": "Generez des factures compatibles avec les normes suisses."
         },
         {
           "title": "Exports propres",
-          "copy": "CSV, PDF ou connexion a votre outil de paie."
+          "copy": "Exportez vos donnees en CSV ou PDF."
+        },
+        {
+          "title": "Statistiques simples",
+          "copy": "Visualisez vos heures par jour, semaine ou mois."
         }
       ]
     },
     "steps": {
       "eyebrow": "Comment ca marche",
-      "title": "Une journee type en 3 gestes.",
-      "subtitle": "Fini les oublis et les ajustements manuels. Les donnees se construisent toutes seules.",
+      "title": "Transformez votre temps en facture en 3 etapes.",
+      "subtitle": "Du suivi des heures a la facturation freelance, tout se fait en quelques clics.",
       "items": [
-        "Lancez votre chrono des l'ouverture du bureau.",
-        "Activez une pause d'un clic, la reprise se fait idem.",
-        "Fermez la journee et obtenez vos stats instantanement."
+        {
+          "title": "Lancez le chrono",
+          "description": "Suivez vos sessions de travail en temps reel."
+        },
+        {
+          "title": "Assignez un client ou projet",
+          "description": "Associez vos heures au bon projet."
+        },
+        {
+          "title": "Generez la facture",
+          "description": "Transformez vos heures en facture en un clic."
+        }
       ],
       "summaryTitle": "Synthese hebdo",
       "summaryRange": "18 - 22 mars",
@@ -121,106 +132,197 @@
     },
     "pricing": {
       "eyebrow": "Tarifs simples",
-      "title": "Une offre claire pour chaque equipe.",
-      "subtitle": "Commencez gratuitement, puis passez en mode equipe quand votre suivi devient critique.",
+      "socialProof": "Ideal pour developpeurs, designers, consultants et freelances.",
+      "title": "Une offre simple pour freelances et petites equipes.",
+      "subtitle": "Commencez gratuitement, puis passez a un plan superieur lorsque votre activite grandit.",
       "cta": "Choisir {plan}",
+      "billingToggle": {
+        "monthly": "Mensuel",
+        "yearly": "Annuel",
+        "badge": "2 mois offerts",
+        "yearlyHint": "Economisez avec la facturation annuelle",
+        "suffixMonthly": " /utilisateur/mois",
+        "suffixYearly": " /utilisateur/an",
+        "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
+        "yearlyEquivalent": "soit ~__price__ CHF/mois"
+      },
       "plans": [
         {
-          "name": "Solo",
-          "price": "0 EUR",
-          "desc": "Pour les independants qui veulent un suivi net.",
-          "perks": ["1 espace", "Exports basiques", "Stats hebdo"]
+          "name": "Free",
+          "planId": "FREE",
+          "price": "0 CHF",
+          "desc": "Testez le produit, sans engagement.",
+          "perks": [
+            "✓ 1 utilisateur",
+            "✓ Suivi du temps basique",
+            "✓ Clients limites",
+            "✓ Factures limitees / mois",
+            "✗ QR facture",
+            "✗ Exports",
+            "✗ Analytics avancees",
+            "✗ Suivi des depenses"
+          ]
         },
         {
-          "name": "Equipe",
-          "price": "6 EUR",
-          "suffix": "/utilisateur",
-          "desc": "Pour 3 a 25 personnes, alertes et roles inclus.",
-          "perks": ["Reporting avance", "Export paie", "Support prioritaire"],
+          "name": "Starter",
+          "planId": "STARTER",
+          "price": "9.90 CHF",
+          "suffix": "/utilisateur/mois",
+          "desc": "Pour les freelances et petites equipes qui ont besoin de vrais outils.",
+          "perks": [
+            "✓ Time tracking complet",
+            "✓ Clients illimites",
+            "✓ Projets",
+            "✓ Generation de factures",
+            "✓ QR facture suisse",
+            "✓ Rappels de paiement",
+            "✓ Historique des sessions",
+            "✗ Analytics avancees",
+            "✗ Suivi des depenses",
+            "✗ Exports CSV",
+            "✗ Templates de facture personnalises"
+          ],
           "highlight": true
         },
         {
-          "name": "Studio",
-          "price": "Sur devis",
-          "desc": "Pour les grands comptes et besoins specifiques.",
-          "perks": ["SLA dedie", "SSO", "Onboarding equipe"]
+          "name": "Pro",
+          "planId": "PRO",
+          "price": "19 CHF",
+          "suffix": "/utilisateur/mois",
+          "desc": "Tout de Starter, plus les fonctions avancees.",
+          "perks": [
+            "✓ Tout de Starter",
+            "✓ Analytics avancees",
+            "✓ Suivi des depenses",
+            "✓ Exports CSV",
+            "✓ Templates de facture personnalises",
+            "✓ Reporting avance"
+          ]
         }
       ]
     },
     "faq": {
       "eyebrow": "Questions frequentes",
-      "title": "Vous pilotez, nous calculons.",
-      "subtitle": "Pas de complexe, juste un suivi propre et une visibilite utile pour vos equipes.",
+      "title": "Tout ce qu'il faut savoir.",
+      "subtitle": "Des reponses claires pour les freelances et petites equipes.",
       "items": [
         {
-          "q": "Peut-on modifier une journee ?",
-          "a": "Oui, avec un journal d'audit pour garder la trace."
+          "q": "Peut-on generer une QR facture suisse ?",
+          "a": "Oui, TempoWork permet de generer des factures compatibles QR facture suisse."
         },
         {
-          "q": "Les pauses sont-elles obligatoires ?",
-          "a": "Non, mais vous pouvez activer un rappel automatique."
+          "q": "Est-ce un logiciel de suivi du temps pour freelances ?",
+          "a": "Oui, TempoWork est concu pour freelances et petites equipes qui souhaitent suivre leurs heures simplement."
         },
         {
-          "q": "Est-ce compatible remote ?",
-          "a": "Oui, chaque utilisateur choisit son fuseau."
+          "q": "Puis-je suivre mes heures par client ?",
+          "a": "Oui, chaque session peut etre associee a un client ou projet."
+        },
+        {
+          "q": "Puis-je exporter mes donnees ?",
+          "a": "Oui, vous pouvez exporter vos donnees en CSV ou PDF a tout moment."
         }
       ]
     },
     "closing": {
-      "eyebrow": "Pret pour la clarte",
-      "title": "Transformez le temps en decisions utiles.",
-      "subtitle": "Activez TempoWork, suivez vos heures sans friction et partagez des stats simples avec votre equipe.",
-      "ctaPrimary": "Lancer l'essai gratuit",
-      "ctaSecondary": "Voir le tableau"
+      "eyebrow": "Pret a commencer",
+      "title": "Transformez vos heures en factures.",
+      "subtitle": "Commencez gratuitement avec TempoWork et simplifiez votre gestion du temps.",
+      "ctaPrimary": "Commencer gratuitement",
+      "ctaSecondary": "Voir la demo"
     }
   },
   "pricingPage": {
     "hero": {
       "eyebrow": "Tarifs",
       "title": "Pricing simple pour suivre vos heures sans friction.",
-      "subtitle": "Commencez gratuitement, puis passez en mode equipe quand les stats deviennent critiques.",
+      "subtitle": "Commencez gratuitement, puis passez au niveau superieur quand votre suivi grandit.",
       "ctaPrimary": "Demarrer l'essai gratuit",
       "ctaSecondary": "Voir la demo"
     },
     "cta": "Choisir {plan}",
+    "ctaCurrent": "Plan actuel",
+    "ctaManage": "Gerer l'abonnement",
+    "billingToggle": {
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "badge": "2 mois offerts",
+      "yearlyHint": "Economisez avec la facturation annuelle",
+      "suffixMonthly": " /utilisateur/mois",
+      "suffixYearly": " /utilisateur/an",
+      "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
+      "yearlyEquivalent": "soit ~__price__ CHF/mois"
+    },
     "plans": [
       {
-        "name": "Solo",
-        "price": "0 EUR",
-        "desc": "Pour les independants qui veulent suivre leurs heures sans friction.",
-        "perks": ["1 espace", "Exports CSV", "Stats hebdo"]
+        "name": "Free",
+        "planId": "FREE",
+        "price": "0 CHF",
+        "desc": "Testez le produit, sans engagement.",
+        "perks": [
+          "✓ 1 utilisateur",
+          "✓ Suivi du temps basique",
+          "✓ Clients limites",
+          "✓ Factures limitees / mois",
+          "✗ QR facture",
+          "✗ Exports",
+          "✗ Analytics avancees",
+          "✗ Suivi des depenses"
+        ]
       },
       {
-        "name": "Equipe",
-        "price": "6 EUR",
-        "suffix": "/utilisateur",
-        "desc": "Pour 3 a 25 personnes, roles et alertes inclus.",
-        "perks": ["Reporting avance", "Export paie", "Support prioritaire"],
+        "name": "Starter",
+        "planId": "STARTER",
+        "price": "9.90 CHF",
+        "suffix": "/utilisateur/mois",
+        "desc": "Pour les freelances et petites equipes qui ont besoin de vrais outils.",
+        "perks": [
+          "✓ Time tracking complet",
+          "✓ Clients illimites",
+          "✓ Projets",
+          "✓ Generation de factures",
+          "✓ QR facture suisse",
+          "✓ Rappels de paiement",
+          "✓ Historique des sessions",
+          "✗ Analytics avancees",
+          "✗ Suivi des depenses",
+          "✗ Exports CSV",
+          "✗ Templates de facture personnalises"
+        ],
         "highlight": true
       },
       {
-        "name": "Studio",
-        "price": "Sur devis",
-        "desc": "Pour les structures multi-sites et besoins specifiques.",
-        "perks": ["SLA dedie", "SSO", "Onboarding equipe"]
+        "name": "Pro",
+        "planId": "PRO",
+        "price": "19 CHF",
+        "suffix": "/utilisateur/mois",
+        "desc": "Tout de Starter, plus les fonctions avancees.",
+        "perks": [
+          "✓ Tout de Starter",
+          "✓ Analytics avancees",
+          "✓ Suivi des depenses",
+          "✓ Exports CSV",
+          "✓ Templates de facture personnalises",
+          "✓ Reporting avance"
+        ]
       }
     ],
     "included": {
       "eyebrow": "Inclus dans chaque plan",
       "title": "Tout pour suivre debut, pause et reprise sans effort.",
-      "subtitle": "Les fonctions cle restent disponibles quel que soit votre plan. Vous gagnez surtout en profondeur de stats et en gestion d'equipe.",
+      "subtitle": "Les fonctions cle restent disponibles quel que soit votre plan. Vous gagnez surtout en profondeur de stats et en gestion de clients.",
       "items": [
         "Chrono en 1 clic",
         "Export CSV et PDF",
         "Alertes anti-oubli",
         "Tableau hebdo",
-        "Roles et permissions",
+        "Suivi des pauses",
         "Support rapide"
       ]
     },
     "example": {
       "title": "Exemple de gain",
-      "subtitle": "Une equipe de 8 personnes recupere en moyenne 3 heures par mois en eliminant les oublis de pointage.",
+      "subtitle": "Un freelance recupere en moyenne 3 heures par mois en eliminant les oublis de pointage et les ajustements manuels.",
       "stats": [
         {"label": "Temps recupere", "value": "3h / mois"},
         {"label": "Pauses mieux gerees", "value": "+18%"},
@@ -235,18 +337,18 @@
         },
         {
           "q": "Le plan gratuit a-t-il une limite ?",
-          "a": "Oui, il est limite a 1 utilisateur et 1 espace."
+          "a": "Oui, il inclut 1 espace avec des exports basiques."
         },
         {
           "q": "Puis-je importer mes anciennes donnees ?",
-          "a": "Oui, un assistant CSV est disponible des le plan Equipe."
+          "a": "Oui, un assistant CSV est disponible des le plan Starter."
         }
       ]
     },
     "closing": {
       "eyebrow": "Pret a demarrer",
       "title": "Lancez votre suivi aujourd'hui.",
-      "subtitle": "Creez votre espace, ajoutez une equipe et suivez vos pauses des la premiere journee.",
+      "subtitle": "Creez votre espace et suivez vos pauses des la premiere journee.",
       "ctaPrimary": "Essai gratuit",
       "ctaSecondary": "En savoir plus"
     }
@@ -317,6 +419,7 @@
       "invoices": "Factures",
       "stats": "Statistiques",
       "expenses": "Frais pros",
+      "subscription": "Abonnement",
       "settings": "Parametres",
       "more": "Plus",
       "hint": "Espace demo pret pour votre premier suivi.",
@@ -766,6 +869,66 @@
     },
     "empty": {
       "subtitle": "Cliquez sur Start pour lancer votre premier suivi."
+    },
+    "subscriptionPage": {
+      "title": "Abonnement",
+      "subtitle": "Gerez votre plan et votre facturation.",
+      "currentPlan": "Plan actuel",
+      "upgrade": "Upgrade",
+      "manageBilling": "Gerer la facturation",
+      "successMessage": "Votre abonnement a ete mis a jour !",
+      "billingToggle": {
+        "monthly": "Mensuel",
+        "yearly": "Annuel",
+        "badge": "2 mois offerts",
+        "yearlyHint": "Economisez avec la facturation annuelle",
+        "suffixMonthly": " /utilisateur/mois",
+        "suffixYearly": " /utilisateur/an",
+        "monthlyHint": "ou {price} CHF/an avec le plan annuel",
+        "yearlyEquivalent": "soit ~{price} CHF/mois"
+      },
+      "plans": {
+        "free": {
+          "name": "Free",
+          "perks": [
+            "✓ 1 utilisateur",
+            "✓ Suivi du temps basique",
+            "✓ Clients limites",
+            "✓ Factures limitees / mois",
+            "✗ QR facture",
+            "✗ Exports",
+            "✗ Analytics avancees",
+            "✗ Suivi des depenses"
+          ]
+        },
+        "starter": {
+          "name": "Starter",
+          "perks": [
+            "✓ Time tracking complet",
+            "✓ Clients illimites",
+            "✓ Projets",
+            "✓ Generation de factures",
+            "✓ QR facture suisse",
+            "✓ Rappels de paiement",
+            "✓ Historique des sessions",
+            "✗ Analytics avancees",
+            "✗ Suivi des depenses",
+            "✗ Exports CSV",
+            "✗ Templates de facture personnalises"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "perks": [
+            "✓ Tout de Starter",
+            "✓ Analytics avancees",
+            "✓ Suivi des depenses",
+            "✓ Exports CSV",
+            "✓ Templates de facture personnalises",
+            "✓ Reporting avance"
+          ]
+        }
+      }
     },
     "loading": "Chargement des donnees...",
     "currentTime": "Heure actuelle"

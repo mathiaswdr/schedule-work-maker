@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import { redirect } from "next/navigation";
 import { toast } from "sonner";
 
 type RequestDataType = {
@@ -12,38 +10,33 @@ type RequestDataType = {
   url: string;
 }
 
+type BuyButtonClientProps = {
+  plan?: "STARTER" | "PRO";
+};
 
-
-export default function BuyButtonClient() {
+export default function BuyButtonClient({ plan = "STARTER" }: BuyButtonClientProps) {
   const [loading, setLoading] = useState(false);
   const [requestData, setRequestData] = useState<RequestDataType>();
 
-
   useEffect(() => {
-
+    if (!requestData) return;
 
     if(requestData?.success){
       toast.success(requestData?.message)
-
     } else{
       toast.error(requestData?.message)
     }
-
-    if(requestData?.redirect) redirect(requestData.redirect)
-
-
   }, [requestData])
 
   const handleBuy = async () => {
     setLoading(true);
 
     try {
-      // Appel à l'API pour créer la session Stripe
       const response = await fetch("/api/checkout", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
       });
-
-
 
       if (!response.ok) {
         throw new Error("Failed to create Stripe session");
@@ -59,10 +52,8 @@ export default function BuyButtonClient() {
         throw new Error("No URL found in response");
       }
 
-
     } catch (error) {
       console.error("Error during payment:", error);
-      // Gérer les erreurs de manière appropriée
     } finally {
       setLoading(false);
     }
@@ -70,7 +61,7 @@ export default function BuyButtonClient() {
 
   return (
     <button onClick={handleBuy} disabled={loading}>
-      {"Upgrade to master plan"}
+      {"Upgrade to " + plan.toLowerCase()}
     </button>
   );
 }

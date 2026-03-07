@@ -185,23 +185,31 @@ export default function TimeTrackingClient({
     };
   }, [data?.session?.status, fetchStatus]);
 
+  // Only tick the timer when a session is active (RUNNING or PAUSED)
+  const sessionStatus = data?.session?.status;
   useEffect(() => {
+    if (sessionStatus !== "RUNNING" && sessionStatus !== "PAUSED") return;
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [sessionStatus]);
 
+  // Fetch clients and projects in parallel on mount
   useEffect(() => {
-    fetch("/api/clients", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => setClients(d.clients))
+    Promise.all([
+      fetch("/api/clients", { cache: "no-store" }).then((r) => r.json()),
+      fetch("/api/projects", { cache: "no-store" }).then((r) => r.json()),
+    ])
+      .then(([clientsData, projectsData]) => {
+        setClients(clientsData.clients);
+        setProjects(projectsData.projects);
+      })
       .catch(() => null);
   }, []);
 
+  // Refetch projects when client filter changes
   useEffect(() => {
-    const url = selectedClientId
-      ? `/api/projects?clientId=${selectedClientId}`
-      : "/api/projects";
-    fetch(url, { cache: "no-store" })
+    if (selectedClientId === null) return;
+    fetch(`/api/projects?clientId=${selectedClientId}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => setProjects(d.projects))
       .catch(() => null);

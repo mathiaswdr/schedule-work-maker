@@ -5,6 +5,7 @@ import BusinessProfilePrompt from "@/components/dashboard/business-profile-promp
 const body = Space_Grotesk({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export default function DashboardLayout({

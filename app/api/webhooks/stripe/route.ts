@@ -1,5 +1,6 @@
 import { prisma } from "@/server/prisma";
-import { ok } from "assert";
+import { getPlanByStripePrice } from "@/lib/plans";
+import type { PlanId } from "@/lib/plans";
 import { NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
 
@@ -12,12 +13,14 @@ export const POST = async (req:NextRequest) => {
             const session = body.data.object as Stripe.Checkout.Session;
             const stripeCustomerId = session.customer;
             const user = await findUserFromCustomerId(stripeCustomerId);
-            
-            if(!user?.id) break; 
+
+            if(!user?.id) break;
+
+            const planId = (session.metadata?.planId as PlanId) || "PRO";
 
             await prisma.user.update({
                 where: {id: user?.id},
-                data: {plan: "PRO"}
+                data: {plan: planId}
             })
             console.log("Checkout session completed", session)
             break;
@@ -27,12 +30,19 @@ export const POST = async (req:NextRequest) => {
 
             const stripeCustomerId = invoice.customer;
             const user = await findUserFromCustomerId(stripeCustomerId);
-            
-            if(!user?.id) break; 
+
+            if(!user?.id) break;
+
+            // Determine plan from the subscription's price ID
+            let planId: PlanId = "PRO";
+            const lineItem = invoice.lines?.data?.[0];
+            if (lineItem?.price?.id) {
+                planId = getPlanByStripePrice(lineItem.price.id);
+            }
 
             await prisma.user.update({
                 where: {id: user?.id},
-                data: {plan: "PRO"}
+                data: {plan: planId}
             })
             console.log("Invoice paid", body.type, invoice)
 
@@ -44,8 +54,8 @@ export const POST = async (req:NextRequest) => {
 
             const stripeCustomerId = invoice.customer;
             const user = await findUserFromCustomerId(stripeCustomerId);
-            
-            if(!user?.id) break; 
+
+            if(!user?.id) break;
 
             await prisma.user.update({
                 where: {id: user?.id},
@@ -60,8 +70,8 @@ export const POST = async (req:NextRequest) => {
             const subcription = body.data.object as Stripe.Subscription
             const stripeCustomerId = subcription.customer;
             const user = await findUserFromCustomerId(stripeCustomerId);
-            
-            if(!user?.id) break; 
+
+            if(!user?.id) break;
 
             await prisma.user.update({
                 where: {id: user?.id},
