@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
+import { pickVariants } from "@/lib/motion-variants";
 import {
   ArrowLeft,
   Download,
@@ -213,59 +214,25 @@ export default function InvoicesClient({
     return groups;
   }, [selected]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.12,
-        delayChildren: shouldReduceMotion ? 0 : 0.04,
-      },
-    },
-  };
-
-  const fadeUp = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 18 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  const listVariants = {
-    hidden: {},
-    show: {
-      transition: { staggerChildren: shouldReduceMotion ? 0 : 0.08 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
+  const v = pickVariants(shouldReduceMotion);
 
   return (
     <main className="w-full">
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
+        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
+        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
 
         <motion.div
           className="relative z-10 space-y-8"
-          variants={containerVariants}
+          variants={v.container}
           initial="hidden"
           animate="show"
         >
           {/* ===== DETAIL VIEW ===== */}
           {selected ? (
             <>
-              <motion.section variants={fadeUp}>
+              <motion.section variants={v.fadeUp}>
                 <button
                   type="button"
                   onClick={() => setSelectedId(null)}
@@ -277,7 +244,7 @@ export default function InvoicesClient({
               </motion.section>
 
               <motion.section
-                variants={fadeUp}
+                variants={v.fadeUp}
                 className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex items-center gap-4">
@@ -348,7 +315,7 @@ export default function InvoicesClient({
 
               {/* Summary cards */}
               <motion.section
-                variants={fadeUp}
+                variants={v.fadeUp}
                 className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
               >
                 {[
@@ -373,7 +340,7 @@ export default function InvoicesClient({
                 ].map((card) => (
                   <motion.div
                     key={card.label}
-                    variants={itemVariants}
+                    variants={v.item}
                     className="rounded-2xl border border-line bg-white/80 px-5 py-4"
                   >
                     <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
@@ -387,7 +354,7 @@ export default function InvoicesClient({
               {/* Content: conditional on source */}
               {selected.source === "UPLOADED" ? (
                 /* Uploaded invoice: file + notes */
-                <motion.section variants={fadeUp} className="space-y-6">
+                <motion.section variants={v.fadeUp} className="space-y-6">
                   <div className="rounded-3xl border border-line bg-white/80 p-6">
                     <p className="text-sm font-semibold">
                       {t("invoices.detail.uploadedFile")}
@@ -421,7 +388,7 @@ export default function InvoicesClient({
               ) : (
                 /* Generated invoice: line items + downloads */
                 <motion.section
-                  variants={fadeUp}
+                  variants={v.fadeUp}
                   className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
                 >
                   <div className="rounded-3xl border border-line bg-white/80 p-6">
@@ -430,7 +397,7 @@ export default function InvoicesClient({
                     </p>
                     <motion.div
                       className="mt-4 space-y-4"
-                      variants={listVariants}
+                      variants={v.list}
                     >
                       {groupedItems.map((group) => (
                         <div key={group.category}>
@@ -442,7 +409,7 @@ export default function InvoicesClient({
                           {group.items.map((item) => (
                             <motion.div
                               key={item.id}
-                              variants={itemVariants}
+                              variants={v.item}
                               className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 mb-2"
                             >
                               <div>
@@ -555,7 +522,7 @@ export default function InvoicesClient({
             /* ===== LIST VIEW ===== */
             <>
               <motion.section
-                variants={fadeUp}
+                variants={v.fadeUp}
                 className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="space-y-2">
@@ -598,7 +565,7 @@ export default function InvoicesClient({
               </motion.section>
 
               {/* Status filters */}
-              <motion.section variants={fadeUp}>
+              <motion.section variants={v.fadeUp}>
                 <div className="flex gap-2">
                   {["all", "draft", "sent", "paid"].map((f) => (
                     <button
@@ -618,7 +585,7 @@ export default function InvoicesClient({
               </motion.section>
 
               {/* Invoice grid */}
-              <motion.section variants={fadeUp}>
+              <motion.section variants={v.fadeUp}>
                 {filtered.length === 0 && !isLoading ? (
                   <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-line bg-white/60 py-16">
                     <FileText className="mb-3 h-10 w-10 text-ink-muted opacity-40" />
@@ -632,12 +599,12 @@ export default function InvoicesClient({
                 ) : (
                   <motion.div
                     className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-                    variants={listVariants}
+                    variants={v.list}
                   >
                     {filtered.map((inv) => (
                       <motion.div
                         key={inv.id}
-                        variants={itemVariants}
+                        variants={v.item}
                         onClick={() => setSelectedId(inv.id)}
                         className="group cursor-pointer rounded-2xl border border-line bg-white/80 p-5 transition hover:border-line-strong hover:shadow-[0_20px_40px_-32px_rgba(15,118,110,0.45)]"
                       >
@@ -718,11 +685,10 @@ export default function InvoicesClient({
               </motion.section>
 
               {isLoading && (
-                <motion.div
-                  variants={fadeUp}
-                  className="text-sm text-ink-muted"
-                >
-                  {t("loading")}
+                <motion.div variants={v.fadeUp} className="space-y-3">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-16 w-full animate-pulse rounded-2xl bg-ink-soft" />
+                  ))}
                 </motion.div>
               )}
             </>

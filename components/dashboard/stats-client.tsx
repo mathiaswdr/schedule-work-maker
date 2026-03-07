@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
+import { pickVariants } from "@/lib/motion-variants";
 
 type SummaryDay = {
   date: string;
@@ -245,64 +246,23 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
     URL.revokeObjectURL(url);
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.12,
-        delayChildren: shouldReduceMotion ? 0 : 0.04,
-      },
-    },
-  };
-
-  const fadeUp = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 18 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  const listVariants = {
-    hidden: {},
-    show: {
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.08,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  const barTransition = {
-    duration: shouldReduceMotion ? 0 : 0.6,
-    ease: [0.16, 1, 0.3, 1],
-  };
+  const v = pickVariants(shouldReduceMotion);
 
   return (
     <main className="w-full">
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
+        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
+        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
 
         <motion.div
           className="relative z-10 space-y-8"
-          variants={containerVariants}
+          variants={v.container}
           initial="hidden"
           animate="show"
         >
           <motion.section
-            variants={fadeUp}
+            variants={v.fadeUp}
             className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
           >
             <div className="space-y-2">
@@ -322,7 +282,7 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
           </motion.section>
 
           <motion.section
-            variants={fadeUp}
+            variants={v.fadeUp}
             className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
           >
             {[
@@ -361,7 +321,7 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
             ].map((card) => (
               <motion.div
                 key={card.label}
-                variants={itemVariants}
+                variants={v.item}
                 className="rounded-2xl border border-line bg-white/80 px-5 py-4"
               >
                 <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
@@ -374,7 +334,7 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
           </motion.section>
 
           <motion.section
-            variants={fadeUp}
+            variants={v.fadeUp}
             className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
           >
             <div className="rounded-3xl border border-line bg-white/80 p-6 shadow-[0_28px_60px_-48px_rgba(249,115,22,0.35)]">
@@ -384,14 +344,14 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
                   {t("stats.week", { week: weekNumber })}
                 </span>
               </div>
-              <motion.div className="mt-6 space-y-4" variants={listVariants}>
+              <motion.div className="mt-6 space-y-4" variants={v.list}>
                 {weekDays.map((item) => {
                   const dateLabel = dayFormatter.format(new Date(item.date));
                   const width = (item.valueMs / maxWeekMs) * 100;
                   return (
                     <motion.div
                       key={item.date}
-                      variants={itemVariants}
+                      variants={v.item}
                       className="flex items-center gap-4"
                     >
                       <span className="w-10 text-xs text-ink-muted">
@@ -402,7 +362,7 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
                           className="h-2 rounded-full bg-brand"
                           initial={{ width: 0 }}
                           animate={{ width: `${width}%` }}
-                          transition={barTransition}
+                          transition={v.bar}
                         />
                       </div>
                       <span className="text-xs text-ink-muted">
@@ -416,7 +376,7 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
 
             <div className="rounded-3xl border border-line bg-panel p-6">
               <p className="text-sm font-semibold">{t("statsPage.highlights.title")}</p>
-              <motion.div className="mt-4 space-y-3" variants={listVariants}>
+              <motion.div className="mt-4 space-y-3" variants={v.list}>
                 {[
                   {
                     label: t("statsPage.highlights.activeDays"),
@@ -435,7 +395,7 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
                 ].map((item) => (
                   <motion.div
                     key={item.label}
-                    variants={itemVariants}
+                    variants={v.item}
                     className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3"
                   >
                     <span className="text-sm text-ink-muted">
@@ -457,7 +417,7 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
           </motion.section>
 
           <motion.section
-            variants={fadeUp}
+            variants={v.fadeUp}
             className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
           >
             <div className="rounded-3xl border border-line bg-white/80 p-6">
@@ -487,11 +447,11 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
                   </button>
                 </div>
               </div>
-              <motion.div className="mt-5 grid gap-3 sm:grid-cols-2" variants={listVariants}>
+              <motion.div className="mt-5 grid gap-3 sm:grid-cols-2" variants={v.list}>
                 {exportFields.map((field) => (
                   <motion.label
                     key={field.key}
-                    variants={itemVariants}
+                    variants={v.item}
                     className={`flex items-center gap-3 rounded-2xl border px-3 py-2 text-sm transition ${
                       selectedFields[field.key]
                         ? "border-line-strong bg-white text-ink"
@@ -530,7 +490,7 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
               <p className="mt-2 text-sm text-ink-muted">
                 {t("statsPage.context.subtitle")}
               </p>
-              <motion.div className="mt-4 space-y-3" variants={listVariants}>
+              <motion.div className="mt-4 space-y-3" variants={v.list}>
                 {[
                   {
                     label: t("statsPage.context.timezone"),
@@ -551,7 +511,7 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
                 ].map((item) => (
                   <motion.div
                     key={item.label}
-                    variants={itemVariants}
+                    variants={v.item}
                     className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3"
                   >
                     <span className="text-sm text-ink-muted">{item.label}</span>
@@ -562,11 +522,12 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
             </div>
           </motion.section>
 
-          {isLoading ? (
-            <motion.div variants={fadeUp} className="text-sm text-ink-muted">
-              {t("loading")}
+          {isLoading && (
+            <motion.div variants={v.fadeUp} className="space-y-3">
+              <div className="h-10 w-full animate-pulse rounded-2xl bg-ink-soft" />
+              <div className="h-10 w-3/4 animate-pulse rounded-2xl bg-ink-soft" />
             </motion.div>
-          ) : null}
+          )}
         </motion.div>
       </div>
     </main>

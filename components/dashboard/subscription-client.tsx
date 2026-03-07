@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
+import { pickVariants } from "@/lib/motion-variants";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { PLANS, canUpgrade, type PlanId, type BillingPeriod } from "@/lib/plans";
@@ -68,50 +69,23 @@ export default function SubscriptionClient({
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.12,
-        delayChildren: shouldReduceMotion ? 0 : 0.04,
-      },
-    },
-  };
-
-  const fadeUp = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 18 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
+  const v = pickVariants(shouldReduceMotion);
 
   return (
     <main className="w-full">
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
+        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
+        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
 
         <motion.div
           className="relative z-10 space-y-8"
-          variants={containerVariants}
+          variants={v.container}
           initial="hidden"
           animate="show"
         >
           {/* Header */}
-          <motion.section variants={fadeUp} className="space-y-2">
+          <motion.section variants={v.fadeUp} className="space-y-2">
             <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
               {t("eyebrow")}
             </p>
@@ -126,7 +100,7 @@ export default function SubscriptionClient({
           </motion.section>
 
           {/* Billing toggle */}
-          <motion.section variants={fadeUp} className="flex flex-col items-center gap-3">
+          <motion.section variants={v.fadeUp} className="flex flex-col items-center gap-3">
             <div className="relative flex items-center overflow-hidden rounded-full border border-line bg-white/70 p-1">
               <button
                 onClick={() => setBilling("monthly")}
@@ -168,7 +142,7 @@ export default function SubscriptionClient({
           </motion.section>
 
           {/* Plan cards grid */}
-          <motion.section variants={fadeUp}>
+          <motion.section variants={v.fadeUp}>
             <div className="grid gap-6 lg:grid-cols-3">
               {PLANS.map((planDef) => {
                 const isCurrent = plan === planDef.id;
@@ -188,7 +162,7 @@ export default function SubscriptionClient({
                 return (
                   <motion.div
                     key={planDef.id}
-                    variants={itemVariants}
+                    variants={v.item}
                     className={`relative rounded-3xl border p-6 ${
                       planDef.highlight
                         ? "border-brand bg-white shadow-[0_26px_70px_-45px_rgba(249,115,22,0.55)]"

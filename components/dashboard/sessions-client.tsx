@@ -1,14 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { pickVariants } from "@/lib/motion-variants";
 import { useAction } from "next-safe-action/hooks";
 import { Clock, Pause, Pencil, Play, Trash2 } from "lucide-react";
 import { deleteWorkSession } from "@/server/actions/work-session-update";
 import SessionEditDialog from "@/components/dashboard/session-edit-dialog";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
+import LiveTimer from "@/components/dashboard/live-timer";
 
 // ── Types ──
 
@@ -55,24 +57,6 @@ const formatDuration = (ms: number) => {
   return `${hours}h ${String(minutes).padStart(2, "0")}m`;
 };
 
-const formatLiveTimer = (ms: number) => {
-  if (ms <= 0) return "00:00:00";
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-};
-
-const getLiveDurationMs = (s: SessionItem, now: Date) => {
-  const start = new Date(s.startedAt);
-  const breakMs = s.breaks.reduce((total, b) => {
-    const bEnd = b.endedAt ? new Date(b.endedAt) : now;
-    return total + (bEnd.getTime() - new Date(b.startedAt).getTime());
-  }, 0);
-  return Math.max(now.getTime() - start.getTime() - breakMs, 0);
-};
-
 // ── Component ──
 
 export default function SessionsClient({
@@ -89,7 +73,6 @@ export default function SessionsClient({
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [activeSession, setActiveSession] = useState<SessionItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [now, setNow] = useState(new Date());
   const [editingSession, setEditingSession] = useState<SessionItem | null>(
     null
   );
@@ -124,13 +107,6 @@ export default function SessionsClient({
       isMounted = false;
     };
   }, [fetchSessions]);
-
-  // Live timer tick for active session
-  useEffect(() => {
-    if (!activeSession) return;
-    const interval = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, [activeSession]);
 
   // ── Handlers ──
 
@@ -199,50 +175,23 @@ export default function SessionsClient({
 
   // ── Animation variants ──
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.12,
-        delayChildren: shouldReduceMotion ? 0 : 0.04,
-      },
-    },
-  };
-
-  const fadeUp = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 18 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
+  const v = pickVariants(shouldReduceMotion);
 
   return (
     <main className="w-full">
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
+        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
+        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
 
         <motion.div
           className="relative z-10 space-y-8"
-          variants={containerVariants}
+          variants={v.container}
           initial="hidden"
           animate="show"
         >
           {/* Header */}
-          <motion.section variants={fadeUp} className="space-y-2">
+          <motion.section variants={v.fadeUp} className="space-y-2">
             <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
               {t("eyebrow")}
             </p>
@@ -260,7 +209,7 @@ export default function SessionsClient({
           <AnimatePresence>
             {activeSession && (
               <motion.section
-                variants={fadeUp}
+                variants={v.fadeUp}
                 initial="hidden"
                 animate="show"
                 exit={{ opacity: 0, y: -10 }}
@@ -319,16 +268,24 @@ export default function SessionsClient({
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-mono text-2xl font-bold tabular-nums">
-                        {formatLiveTimer(getLiveDurationMs(activeSession, now))}
-                      </p>
+                      <LiveTimer
+                        startedAt={activeSession.startedAt}
+                        endedAt={activeSession.endedAt}
+                        breaks={activeSession.breaks}
+                        className="font-mono text-2xl font-bold"
+                      />
                       {hourlyRate > 0 && (
-                        <p className="text-xs text-ink-muted">
-                          {currencyFormatter.format(
-                            hourlyRate *
-                              (getLiveDurationMs(activeSession, now) / 3600000)
+                        <LiveTimer
+                          startedAt={activeSession.startedAt}
+                          endedAt={activeSession.endedAt}
+                          breaks={activeSession.breaks}
+                        >
+                          {(ms) => (
+                            <p className="text-xs text-ink-muted">
+                              {currencyFormatter.format(hourlyRate * (ms / 3600000))}
+                            </p>
                           )}
-                        </p>
+                        </LiveTimer>
                       )}
                     </div>
                   </div>
@@ -340,7 +297,7 @@ export default function SessionsClient({
           {/* Summary cards */}
           {!isLoading && sessions.length > 0 && (
             <motion.section
-              variants={fadeUp}
+              variants={v.fadeUp}
               className="grid gap-4 sm:grid-cols-3"
             >
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
@@ -379,12 +336,14 @@ export default function SessionsClient({
 
           {/* Session list */}
           {isLoading ? (
-            <motion.div variants={fadeUp} className="text-sm text-ink-muted">
-              {t("loading")}
+            <motion.div variants={v.fadeUp} className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-16 w-full animate-pulse rounded-2xl bg-ink-soft" />
+              ))}
             </motion.div>
           ) : sessions.length === 0 ? (
             <motion.section
-              variants={fadeUp}
+              variants={v.fadeUp}
               className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-line bg-white/50 py-16"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-soft">
@@ -398,14 +357,14 @@ export default function SessionsClient({
               </div>
             </motion.section>
           ) : (
-            <motion.section variants={fadeUp} className="space-y-3">
+            <motion.section variants={v.fadeUp} className="space-y-3">
               {sessions.map((session) => {
                 const durationMs = getSessionDurationMs(session);
                 const revenue = hourlyRate * (durationMs / 3600000);
                 return (
                   <motion.div
                     key={session.id}
-                    variants={itemVariants}
+                    variants={v.item}
                     onClick={() => handleEdit(session)}
                     className="group flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 transition hover:shadow-md"
                   >

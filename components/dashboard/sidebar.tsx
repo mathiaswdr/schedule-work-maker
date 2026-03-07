@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, Receipt, Settings2, Users } from "lucide-react";
+import { pickVariants } from "@/lib/motion-variants";
 
 const navItems = [
   { href: "/dashboard", icon: Clock, key: "time" },
@@ -34,28 +35,7 @@ export default function DashboardSidebar() {
       : pathname.startsWith(item.href)
   );
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 16 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.45,
-        ease: [0.16, 1, 0.3, 1],
-        staggerChildren: shouldReduceMotion ? 0 : 0.08,
-        delayChildren: shouldReduceMotion ? 0 : 0.04,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: shouldReduceMotion ? 0 : -10 },
-    show: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
+  const v = pickVariants(shouldReduceMotion);
 
   const isActive = (href: string) =>
     href === "/dashboard"
@@ -68,7 +48,7 @@ export default function DashboardSidebar() {
       <aside className="hidden w-64 lg:block">
         <motion.div
           className="sticky top-6 rounded-3xl border border-line bg-white/70 p-4 shadow-[0_24px_60px_-42px_rgba(15,118,110,0.35)]"
-          variants={containerVariants}
+          variants={v.sidebarContainer}
           initial="hidden"
           animate="show"
         >
@@ -98,7 +78,7 @@ export default function DashboardSidebar() {
                   className="block"
                 >
                   <motion.div
-                    variants={itemVariants}
+                    variants={v.sidebarItem}
                     className={`flex items-center gap-3 rounded-2xl border px-3 py-2 text-sm font-medium transition ${
                       active
                         ? "border-line-strong bg-white text-ink shadow-[0_20px_40px_-32px_rgba(15,118,110,0.45)]"
@@ -148,7 +128,7 @@ export default function DashboardSidebar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 12, scale: 0.95 }}
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute bottom-full right-4 z-50 mb-2 min-w-[180px] overflow-hidden rounded-2xl border border-white/40 bg-white/70 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.15),0_0_0_0.5px_rgba(255,255,255,0.6)_inset] backdrop-blur-2xl backdrop-saturate-[1.8]"
+                className="absolute bottom-full right-4 z-50 mb-2 min-w-[180px] overflow-hidden rounded-2xl border border-white/40 bg-white/80 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.15),0_0_0_0.5px_rgba(255,255,255,0.6)_inset] backdrop-blur-lg"
               >
                 {mobileMoreItems.map((item) => {
                   const Icon = item.icon;
@@ -181,7 +161,7 @@ export default function DashboardSidebar() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="flex items-center justify-around rounded-full border border-white/40 bg-white/55 px-1 py-1 shadow-[0_8px_40px_-8px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(255,255,255,0.6)_inset] backdrop-blur-2xl backdrop-saturate-[1.8]"
+          className="flex items-center justify-around rounded-full border border-white/40 bg-white/70 px-1 py-1 shadow-[0_8px_40px_-8px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(255,255,255,0.6)_inset] backdrop-blur-lg"
         >
           {mobileMainItems.map((item) => {
             const Icon = item.icon;

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
+import { pickVariants } from "@/lib/motion-variants";
 import { useAction } from "next-safe-action/hooks";
 import { ArrowLeft, FileText, FolderKanban, Mail, Pencil, Plus, Trash2, Users } from "lucide-react";
 import { deleteClient } from "@/server/actions/clients";
@@ -335,65 +336,26 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
     );
   }, [selectedClient]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.12,
-        delayChildren: shouldReduceMotion ? 0 : 0.04,
-      },
-    },
-  };
-
-  const fadeUp = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 18 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  const listVariants = {
-    hidden: {},
-    show: {
-      transition: { staggerChildren: shouldReduceMotion ? 0 : 0.06 },
-    },
-  };
-
-  const barTransition = {
-    duration: shouldReduceMotion ? 0 : 0.6,
-    ease: [0.16, 1, 0.3, 1] as const,
-  };
+  const v = pickVariants(shouldReduceMotion);
 
   // ─── Detail View ───
   if (selectedClient) {
     return (
       <main className="w-full">
         <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-          <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl" />
-          <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
+          <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
+          <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
 
           <motion.div
             className="relative z-10 space-y-8"
-            variants={containerVariants}
+            variants={v.container}
             initial="hidden"
             animate="show"
             key={selectedClient.id}
           >
             {/* Header */}
-            <motion.section variants={fadeUp} className="space-y-4">
+            <motion.section variants={v.fadeUp} className="space-y-4">
               <button
                 type="button"
                 onClick={handleBack}
@@ -444,7 +406,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
             </motion.section>
 
             {/* Summary cards */}
-            <motion.section variants={fadeUp} className="grid gap-4 sm:grid-cols-3">
+            <motion.section variants={v.fadeUp} className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
                   {t("clients.detailProjects")}
@@ -467,7 +429,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
 
             {/* Info + Notes */}
             {selectedClient.notes && (
-              <motion.section variants={fadeUp}>
+              <motion.section variants={v.fadeUp}>
                 <div className="rounded-3xl border border-line bg-white/80 p-6">
                   <p className="text-sm font-semibold">{t("clients.detailInfo")}</p>
                   <p className="mt-3 text-sm text-ink-muted whitespace-pre-wrap">
@@ -482,7 +444,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
               <>
                 {/* Daily activity bar chart */}
                 <motion.section
-                  variants={fadeUp}
+                  variants={v.fadeUp}
                   className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
                 >
                   <div className="rounded-3xl border border-line bg-white/80 p-6 shadow-[0_28px_60px_-48px_rgba(249,115,22,0.35)]">
@@ -497,7 +459,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                     <motion.div
                       className="mt-6 flex items-end gap-1.5"
                       style={{ height: 120 }}
-                      variants={listVariants}
+                      variants={v.list}
                     >
                       {dailyActivity.map((day) => {
                         const height =
@@ -509,7 +471,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                             key={day.date.toISOString()}
                             className="group relative flex flex-1 flex-col items-center"
                             style={{ height: "100%" }}
-                            variants={itemVariants}
+                            variants={v.item}
                           >
                             <div className="flex flex-1 w-full items-end">
                               <motion.div
@@ -518,7 +480,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                                 }`}
                                 initial={{ height: 0 }}
                                 animate={{ height: `${height}%` }}
-                                transition={barTransition}
+                                transition={v.bar}
                               />
                             </div>
                             <span className="mt-1.5 text-[9px] text-ink-muted">
@@ -543,7 +505,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                     </p>
                     <motion.div
                       className="mt-4 space-y-3"
-                      variants={listVariants}
+                      variants={v.list}
                     >
                       {[
                         {
@@ -573,7 +535,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                       ].map((item) => (
                         <motion.div
                           key={item.label}
-                          variants={itemVariants}
+                          variants={v.item}
                           className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3"
                         >
                           <span className="text-sm text-ink-muted">
@@ -590,14 +552,14 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
 
                 {/* Time by project */}
                 {timeByProject.length > 0 && (
-                  <motion.section variants={fadeUp}>
+                  <motion.section variants={v.fadeUp}>
                     <div className="rounded-3xl border border-line bg-white/80 p-6">
                       <p className="text-sm font-semibold">
                         {t("clients.timeByProject")}
                       </p>
                       <motion.div
                         className="mt-5 space-y-4"
-                        variants={listVariants}
+                        variants={v.list}
                       >
                         {timeByProject.map((p) => {
                           const width = (p.ms / maxProjectMs) * 100;
@@ -608,7 +570,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                           return (
                             <motion.div
                               key={p.name}
-                              variants={itemVariants}
+                              variants={v.item}
                               className="flex items-center gap-4"
                             >
                               <span className="w-28 shrink-0 truncate text-xs text-ink-muted">
@@ -620,7 +582,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                                   style={{ backgroundColor: p.color }}
                                   initial={{ width: 0 }}
                                   animate={{ width: `${width}%` }}
-                                  transition={barTransition}
+                                  transition={v.bar}
                                 />
                               </div>
                               <span className="w-20 shrink-0 text-right text-xs text-ink-muted">
@@ -638,14 +600,14 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
             )}
 
             {/* Projects */}
-            <motion.section variants={fadeUp}>
+            <motion.section variants={v.fadeUp}>
               <p className="mb-4 text-sm font-semibold">{t("clients.detailProjects")}</p>
               {selectedClient.projects.length > 0 ? (
                 <div className="grid gap-3 sm:grid-cols-2">
                   {selectedClient.projects.map((project) => (
                     <motion.div
                       key={project.id}
-                      variants={itemVariants}
+                      variants={v.item}
                       className="rounded-2xl border border-line bg-white/80 px-5 py-4"
                     >
                       <div className="flex items-center gap-2">
@@ -677,7 +639,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
             </motion.section>
 
             {/* Recent sessions */}
-            <motion.section variants={fadeUp}>
+            <motion.section variants={v.fadeUp}>
               <p className="mb-4 text-sm font-semibold">{t("clients.detailSessions")}</p>
               {selectedClient.workSessions.length > 0 ? (
                 <div className="space-y-3">
@@ -686,7 +648,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                     return (
                       <motion.div
                         key={ws.id}
-                        variants={itemVariants}
+                        variants={v.item}
                         className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
                       >
                         <div className="flex items-center gap-3">
@@ -721,7 +683,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
             </motion.section>
 
             {/* Invoices */}
-            <motion.section variants={fadeUp}>
+            <motion.section variants={v.fadeUp}>
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-sm font-semibold">{t("clients.invoices")}</p>
                 {selectedClient.invoices.length > 0 && (
@@ -746,7 +708,7 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                   {selectedClient.invoices.map((inv) => (
                     <motion.div
                       key={inv.id}
-                      variants={itemVariants}
+                      variants={v.item}
                       onClick={() => router.push(`/dashboard/invoices?id=${inv.id}`)}
                       className="flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm transition hover:shadow-md"
                     >
@@ -794,8 +756,9 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
             </motion.section>
 
             {isDetailLoading && (
-              <motion.div variants={fadeUp} className="text-sm text-ink-muted">
-                {t("loading")}
+              <motion.div variants={v.fadeUp} className="space-y-3">
+                <div className="h-10 w-full animate-pulse rounded-2xl bg-ink-soft" />
+                <div className="h-10 w-2/3 animate-pulse rounded-2xl bg-ink-soft" />
               </motion.div>
             )}
           </motion.div>
@@ -815,18 +778,18 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
   return (
     <main className="w-full">
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
+        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
+        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
 
         <motion.div
           className="relative z-10 space-y-8"
-          variants={containerVariants}
+          variants={v.container}
           initial="hidden"
           animate="show"
         >
           <motion.section
-            variants={fadeUp}
+            variants={v.fadeUp}
             className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="space-y-2">
@@ -851,12 +814,14 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
           </motion.section>
 
           {isLoading ? (
-            <motion.div variants={fadeUp} className="text-sm text-ink-muted">
-              {t("loading")}
+            <motion.div variants={v.fadeUp} className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-16 w-full animate-pulse rounded-2xl bg-ink-soft" />
+              ))}
             </motion.div>
           ) : clients.length === 0 ? (
             <motion.section
-              variants={fadeUp}
+              variants={v.fadeUp}
               className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-line bg-white/50 py-16"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-soft">
@@ -870,11 +835,11 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
               </div>
             </motion.section>
           ) : (
-            <motion.section variants={fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <motion.section variants={v.fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {clients.map((client) => (
                 <motion.div
                   key={client.id}
-                  variants={itemVariants}
+                  variants={v.item}
                   onClick={() => fetchClientDetail(client.id)}
                   className="group relative cursor-pointer rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md"
                 >

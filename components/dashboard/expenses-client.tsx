@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { pickVariants } from "@/lib/motion-variants";
 import { useAction } from "next-safe-action/hooks";
 import {
   ArrowLeft,
@@ -345,36 +346,7 @@ export default function ExpensesClient({
     });
   }, [expenses, monthlyTotal]);
 
-  // ── Animation variants ──
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.12,
-        delayChildren: shouldReduceMotion ? 0 : 0.04,
-      },
-    },
-  };
-
-  const fadeUp = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 18 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
+  const v = pickVariants(shouldReduceMotion);
 
   // ══════════════════════════════════════
   // ─── DETAIL VIEW ───
@@ -384,19 +356,19 @@ export default function ExpensesClient({
     return (
       <main className="w-full">
         <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-          <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl" />
-          <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
+          <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
+          <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
 
           <motion.div
             className="relative z-10 space-y-8"
-            variants={containerVariants}
+            variants={v.container}
             initial="hidden"
             animate="show"
             key={selectedExpense.id}
           >
             {/* Header */}
-            <motion.section variants={fadeUp} className="space-y-4">
+            <motion.section variants={v.fadeUp} className="space-y-4">
               <button
                 type="button"
                 onClick={handleBack}
@@ -446,7 +418,7 @@ export default function ExpensesClient({
 
             {/* Info cards */}
             <motion.section
-              variants={fadeUp}
+              variants={v.fadeUp}
               className="grid gap-4 sm:grid-cols-3"
             >
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
@@ -484,7 +456,7 @@ export default function ExpensesClient({
 
             {/* Notes */}
             {selectedExpense.notes && (
-              <motion.section variants={fadeUp}>
+              <motion.section variants={v.fadeUp}>
                 <div className="rounded-3xl border border-line bg-white/80 p-6">
                   <p className="text-sm font-semibold">
                     {t("expenses.notes")}
@@ -497,7 +469,7 @@ export default function ExpensesClient({
             )}
 
             {/* Receipts */}
-            <motion.section variants={fadeUp} className="space-y-4">
+            <motion.section variants={v.fadeUp} className="space-y-4">
               <p className="text-sm font-semibold">
                 {t("expenses.receipts")}
               </p>
@@ -603,7 +575,7 @@ export default function ExpensesClient({
                   {selectedExpense.receipts.map((receipt) => (
                     <motion.div
                       key={receipt.id}
-                      variants={itemVariants}
+                      variants={v.item}
                       className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
                     >
                       <div className="flex items-center gap-3">
@@ -657,11 +629,9 @@ export default function ExpensesClient({
             </motion.section>
 
             {isDetailLoading && (
-              <motion.div
-                variants={fadeUp}
-                className="text-sm text-ink-muted"
-              >
-                {t("loading")}
+              <motion.div variants={v.fadeUp} className="space-y-3">
+                <div className="h-10 w-full animate-pulse rounded-2xl bg-ink-soft" />
+                <div className="h-10 w-2/3 animate-pulse rounded-2xl bg-ink-soft" />
               </motion.div>
             )}
           </motion.div>
@@ -684,19 +654,19 @@ export default function ExpensesClient({
   return (
     <main className="w-full">
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
+        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
+        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
 
         <motion.div
           className="relative z-10 space-y-8"
-          variants={containerVariants}
+          variants={v.container}
           initial="hidden"
           animate="show"
         >
           {/* Header */}
           <motion.section
-            variants={fadeUp}
+            variants={v.fadeUp}
             className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="space-y-2">
@@ -725,7 +695,7 @@ export default function ExpensesClient({
           {/* Summary cards */}
           {!isLoading && expenses.length > 0 && (
             <motion.section
-              variants={fadeUp}
+              variants={v.fadeUp}
               className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
             >
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
@@ -766,12 +736,14 @@ export default function ExpensesClient({
 
           {/* Expense list */}
           {isLoading ? (
-            <motion.div variants={fadeUp} className="text-sm text-ink-muted">
-              {t("loading")}
+            <motion.div variants={v.fadeUp} className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-16 w-full animate-pulse rounded-2xl bg-ink-soft" />
+              ))}
             </motion.div>
           ) : expenses.length === 0 ? (
             <motion.section
-              variants={fadeUp}
+              variants={v.fadeUp}
               className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-line bg-white/50 py-16"
             >
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-ink-soft">
@@ -785,11 +757,11 @@ export default function ExpensesClient({
               </div>
             </motion.section>
           ) : (
-            <motion.section variants={fadeUp} className="space-y-3">
+            <motion.section variants={v.fadeUp} className="space-y-3">
               {expenses.map((expense) => (
                 <motion.div
                   key={expense.id}
-                  variants={itemVariants}
+                  variants={v.item}
                   onClick={() => fetchExpenseDetail(expense.id)}
                   className="group flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 transition hover:shadow-md"
                 >
@@ -856,7 +828,7 @@ export default function ExpensesClient({
 
           {/* Donut chart — category breakdown */}
           {donutSegments.length > 0 && (
-            <motion.section variants={fadeUp}>
+            <motion.section variants={v.fadeUp}>
               <div className="rounded-3xl border border-line bg-white/80 p-6">
                 <p className="mb-6 text-sm font-semibold">
                   {t("expenses.byCategory")}

@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { pickVariants } from "@/lib/motion-variants";
 import { ChevronDown, Pause, Pencil, Play, Square, Trash2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { deleteWorkSession } from "@/server/actions/work-session-update";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import TimeCard from "@/components/dashboard/time-card";
+import LiveTimer from "@/components/dashboard/live-timer";
 import SessionEditDialog from "@/components/dashboard/session-edit-dialog";
 import {
   Select,
@@ -90,17 +92,6 @@ const formatDuration = (ms: number) => {
   return `${hours}h ${String(minutes).padStart(2, "0")}m`;
 };
 
-const formatTimer = (ms: number) => {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-    2,
-    "0"
-  )}:${String(seconds).padStart(2, "0")}`;
-};
-
 const getSessionDurationMs = (s: { startedAt: string; endedAt: string | null; breaks: { startedAt: string; endedAt: string | null }[] }) => {
   const start = new Date(s.startedAt);
   const end = s.endedAt ? new Date(s.endedAt) : new Date();
@@ -123,7 +114,6 @@ export default function TimeTrackingClient({
   const [data, setData] = useState<ApiResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
-  const [now, setNow] = useState(() => new Date());
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [clients, setClients] = useState<ClientOption[]>([]);
@@ -185,14 +175,6 @@ export default function TimeTrackingClient({
     };
   }, [data?.session?.status, fetchStatus]);
 
-  // Only tick the timer when a session is active (RUNNING or PAUSED)
-  const sessionStatus = data?.session?.status;
-  useEffect(() => {
-    if (sessionStatus !== "RUNNING" && sessionStatus !== "PAUSED") return;
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, [sessionStatus]);
-
   // Fetch clients and projects in parallel on mount
   useEffect(() => {
     Promise.all([
@@ -238,18 +220,6 @@ export default function TimeTrackingClient({
   const summary = data?.summary ?? emptySummary;
   const recentSessions = data?.recentSessions ?? [];
   const breaks = session?.breaks ?? [];
-
-  const sessionMs = useMemo(() => {
-    if (!session) return 0;
-    const start = new Date(session.startedAt);
-    const end = session.endedAt ? new Date(session.endedAt) : now;
-    const breakMs = breaks.reduce((total, pause) => {
-      const pauseStart = new Date(pause.startedAt);
-      const pauseEnd = pause.endedAt ? new Date(pause.endedAt) : now;
-      return total + (pauseEnd.getTime() - pauseStart.getTime());
-    }, 0);
-    return Math.max(end.getTime() - start.getTime() - breakMs, 0);
-  }, [breaks, now, session]);
 
   const breakAverage = summary.breakCount > 0
     ? Math.round(summary.breakMs / summary.breakCount / 60000)
@@ -365,61 +335,25 @@ export default function TimeTrackingClient({
     return null;
   }, [session, isActionLoading, t]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.12,
-        delayChildren: shouldReduceMotion ? 0 : 0.04,
-      },
-    },
-  };
-
-  const fadeUp = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 18 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
-
-  const listVariants = {
-    hidden: {},
-    show: {
-      transition: {
-        staggerChildren: shouldReduceMotion ? 0 : 0.08,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
-    },
-  };
+  const v = pickVariants(shouldReduceMotion);
 
   return (
     <main className="w-full">
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.25),transparent_60%)] blur-2xl" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.25),transparent_60%)] blur-3xl" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
+        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.25),transparent_60%)] blur-2xl will-change-transform" />
+        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.25),transparent_60%)] blur-3xl will-change-transform" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
 
         <motion.div
           className="relative z-10 space-y-8"
-          variants={containerVariants}
+          variants={v.container}
           initial="hidden"
           animate="show"
         >
           {/* ========== MOBILE LAYOUT ========== */}
           <div className="lg:hidden">
             {/* Header compact */}
-            <motion.div variants={fadeUp} className="flex items-center justify-between">
+            <motion.div variants={v.fadeUp} className="flex items-center justify-between">
               <p className="text-[10px] uppercase tracking-[0.3em] text-ink-muted">
                 {t("timer.eyebrow")}
               </p>
@@ -427,7 +361,7 @@ export default function TimeTrackingClient({
             </motion.div>
 
             {/* Status badge */}
-            <motion.div variants={fadeUp} className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <motion.div variants={v.fadeUp} className="mt-4 flex flex-wrap items-center justify-center gap-2">
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
                   session?.status === "RUNNING"
@@ -462,17 +396,17 @@ export default function TimeTrackingClient({
             </motion.div>
 
             {/* Large timer */}
-            <motion.div variants={fadeUp} className="mt-8 text-center">
-              <p
+            <motion.div variants={v.fadeUp} className="mt-8 text-center">
+              <LiveTimer
+                startedAt={session?.startedAt ?? new Date().toISOString()}
+                endedAt={session?.endedAt ?? null}
+                breaks={breaks}
                 className="text-6xl font-semibold tracking-tight text-ink"
-                style={{ fontVariantNumeric: "tabular-nums" }}
-              >
-                {formatTimer(sessionMs)}
-              </p>
+              />
             </motion.div>
 
             {/* Primary action button */}
-            <motion.div variants={fadeUp} className="mt-8 flex flex-col items-center gap-4">
+            <motion.div variants={v.fadeUp} className="mt-8 flex flex-col items-center gap-4">
               <motion.button
                 type="button"
                 onClick={() => handleAction(primaryAction.action)}
@@ -564,7 +498,7 @@ export default function TimeTrackingClient({
             </AnimatePresence>
 
             {/* Summary stats (horizontal scroll) */}
-            <motion.div variants={fadeUp} className="mt-8">
+            <motion.div variants={v.fadeUp} className="mt-8">
               <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-ink-muted">
                 {t("summary.eyebrow")}
               </p>
@@ -588,7 +522,7 @@ export default function TimeTrackingClient({
             </motion.div>
 
             {/* Collapsible timeline */}
-            <motion.div variants={fadeUp} className="mt-6">
+            <motion.div variants={v.fadeUp} className="mt-6">
               <button
                 type="button"
                 onClick={() => setTimelineExpanded((prev) => !prev)}
@@ -665,7 +599,7 @@ export default function TimeTrackingClient({
 
             {/* Recent sessions */}
             {recentSessions.length > 0 && (
-              <motion.div variants={fadeUp} className="mt-6">
+              <motion.div variants={v.fadeUp} className="mt-6">
                 <p className="mb-3 text-sm font-semibold">{t("recentSessions.title")}</p>
                 <div className="space-y-2">
                   {recentSessions.map((rs) => (
@@ -743,7 +677,7 @@ export default function TimeTrackingClient({
 
           {/* ========== DESKTOP LAYOUT ========== */}
           <motion.section
-            variants={fadeUp}
+            variants={v.fadeUp}
             className="hidden lg:flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
           >
             <div className="space-y-2">
@@ -760,7 +694,7 @@ export default function TimeTrackingClient({
             <TimeCard />
           </motion.section>
 
-          <motion.section variants={fadeUp} className="hidden lg:block">
+          <motion.section variants={v.fadeUp} className="hidden lg:block">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
@@ -771,7 +705,7 @@ export default function TimeTrackingClient({
             </div>
             <motion.div
               className="grid gap-4 sm:grid-cols-3"
-              variants={listVariants}
+              variants={v.list}
             >
               {[
                 {
@@ -792,7 +726,7 @@ export default function TimeTrackingClient({
               ].map((card) => (
                 <motion.div
                   key={card.label}
-                  variants={itemVariants}
+                  variants={v.item}
                   className="rounded-2xl border border-line bg-white/80 px-5 py-4"
                 >
                   <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
@@ -806,7 +740,7 @@ export default function TimeTrackingClient({
           </motion.section>
 
           <motion.section
-            variants={fadeUp}
+            variants={v.fadeUp}
             className="hidden lg:grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
           >
             <div className="space-y-6">
@@ -816,9 +750,12 @@ export default function TimeTrackingClient({
                     <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
                       {t("timer.eyebrow")}
                     </p>
-                    <p className="mt-2 text-4xl font-semibold">
-                      {formatTimer(sessionMs)}
-                    </p>
+                    <LiveTimer
+                      startedAt={session?.startedAt ?? new Date().toISOString()}
+                      endedAt={session?.endedAt ?? null}
+                      breaks={breaks}
+                      className="mt-2 text-4xl font-semibold"
+                    />
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-brand-2/10 px-3 py-1 text-xs font-semibold text-brand-2">
@@ -933,13 +870,13 @@ export default function TimeTrackingClient({
               </div>
               <motion.div
                 className="mt-6 space-y-4"
-                variants={listVariants}
+                variants={v.list}
               >
                 {timeline.length ? (
                   timeline.map((item) => (
                     <motion.div
                       key={`${item.label}-${item.time}`}
-                      variants={itemVariants}
+                      variants={v.item}
                       className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
                     >
                       <div className="flex items-center gap-3">
@@ -951,7 +888,7 @@ export default function TimeTrackingClient({
                   ))
                 ) : (
                   <motion.div
-                    variants={itemVariants}
+                    variants={v.item}
                     className="rounded-2xl border border-line bg-white/70 px-4 py-6 text-center text-sm text-ink-muted"
                   >
                     {t("empty.subtitle")}
@@ -963,7 +900,7 @@ export default function TimeTrackingClient({
 
           {/* Recent sessions (desktop) */}
           {recentSessions.length > 0 && (
-            <motion.section variants={fadeUp} className="hidden lg:block">
+            <motion.section variants={v.fadeUp} className="hidden lg:block">
               <p className="mb-3 text-sm font-semibold">{t("recentSessions.title")}</p>
               <div className="space-y-2">
                 {recentSessions.map((rs) => (
@@ -1027,11 +964,12 @@ export default function TimeTrackingClient({
             </motion.section>
           )}
 
-          {isLoading ? (
-            <motion.div variants={fadeUp} className="text-sm text-ink-muted">
-              {t("loading")}
+          {isLoading && (
+            <motion.div variants={v.fadeUp} className="space-y-3">
+              <div className="h-10 w-full animate-pulse rounded-2xl bg-ink-soft" />
+              <div className="h-10 w-3/4 animate-pulse rounded-2xl bg-ink-soft" />
             </motion.div>
-          ) : null}
+          )}
         </motion.div>
       </div>
 

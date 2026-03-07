@@ -6,15 +6,15 @@ export default function DashboardLoading() {
       {/* Decorative blobs — matches real pages */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.25),transparent_60%)] blur-2xl"
+        className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.25),transparent_60%)] blur-2xl will-change-transform"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.25),transparent_60%)] blur-3xl"
+        className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.25),transparent_60%)] blur-3xl will-change-transform"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform"
       />
 
       <div className="relative space-y-8">
