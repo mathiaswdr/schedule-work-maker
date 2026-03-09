@@ -11,6 +11,7 @@ import {
   FileText,
   Pencil,
   Plus,
+  QrCode,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import { deleteInvoice, updateInvoiceStatus } from "@/server/actions/invoices";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import InvoiceFormDialog from "@/components/dashboard/invoice-form-dialog";
 import UploadInvoiceDialog from "@/components/dashboard/upload-invoice-dialog";
+import QrBillDialog from "@/components/dashboard/qr-bill-dialog";
 
 type InvoiceItem = {
   id: string;
@@ -44,6 +46,10 @@ type InvoiceListItem = {
   customTemplateId: string | null;
   clientName: string | null;
   clientEmail: string | null;
+  clientAddress: string | null;
+  clientPostalCode: string | null;
+  clientCity: string | null;
+  clientCountry: string | null;
   senderName: string | null;
   senderAddress: string | null;
   senderSiret: string | null;
@@ -72,6 +78,8 @@ type InvoiceListItem = {
 
 type InvoicesClientProps = {
   displayClassName: string;
+  userPlan?: string;
+  invoiceLimit?: { allowed: boolean; current: number; max: number | null };
 };
 
 const statusColors: Record<string, string> = {
@@ -82,6 +90,8 @@ const statusColors: Record<string, string> = {
 
 export default function InvoicesClient({
   displayClassName,
+  userPlan,
+  invoiceLimit,
 }: InvoicesClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
@@ -104,6 +114,7 @@ export default function InvoicesClient({
   const [uploadFormOpen, setUploadFormOpen] = useState(false);
   const [editingUploadedInvoice, setEditingUploadedInvoice] =
     useState<InvoiceListItem | null>(null);
+  const [qrBillDialogOpen, setQrBillDialogOpen] = useState(false);
 
   const dateFormatter = useMemo(
     () =>
@@ -359,7 +370,7 @@ export default function InvoicesClient({
                     <p className="text-sm font-semibold">
                       {t("invoices.detail.uploadedFile")}
                     </p>
-                    <div className="mt-4">
+                    <div className="mt-4 flex flex-wrap gap-3">
                       <button
                         type="button"
                         onClick={() => handleDownload(selected.id, "pdf")}
@@ -370,6 +381,14 @@ export default function InvoicesClient({
                         {downloading
                           ? t("invoices.download.generating")
                           : t("invoices.detail.downloadFile")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setQrBillDialogOpen(true)}
+                        className="flex items-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-5 py-3 text-sm font-semibold text-ink transition hover:bg-white"
+                      >
+                        <QrCode className="h-4 w-4" />
+                        {t("invoices.detail.generateQrBill")}
                       </button>
                     </div>
                   </div>
@@ -538,14 +557,20 @@ export default function InvoicesClient({
                     {t("invoices.subtitle")}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
+                  {invoiceLimit?.max !== null && invoiceLimit?.max !== undefined && (
+                    <span className="rounded-full bg-ink-soft px-3 py-1 text-xs font-semibold text-ink-muted">
+                      {invoiceLimit.current}/{invoiceLimit.max}
+                    </span>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
                       setEditingInvoice(null);
                       setFormOpen(true);
                     }}
-                    className="flex items-center gap-2 rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
+                    disabled={invoiceLimit ? !invoiceLimit.allowed : false}
+                    className="flex items-center gap-2 rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Plus className="h-4 w-4" />
                     {t("invoices.addInvoice")}
@@ -556,7 +581,8 @@ export default function InvoicesClient({
                       setEditingUploadedInvoice(null);
                       setUploadFormOpen(true);
                     }}
-                    className="flex items-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white"
+                    disabled={invoiceLimit ? !invoiceLimit.allowed : false}
+                    className="flex items-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Upload className="h-4 w-4" />
                     {t("invoices.uploadInvoice")}
@@ -751,6 +777,20 @@ export default function InvoicesClient({
         }
         onSuccess={fetchInvoices}
       />
+      {selected && (
+        <QrBillDialog
+          open={qrBillDialogOpen}
+          onOpenChange={setQrBillDialogOpen}
+          invoiceId={selected.id}
+          invoiceTotal={selected.total}
+          invoiceNumber={selected.displayNumber}
+          clientName={selected.clientName}
+          clientAddress={selected.clientAddress}
+          clientPostalCode={selected.clientPostalCode}
+          clientCity={selected.clientCity}
+          clientCountry={selected.clientCountry}
+        />
+      )}
       {ConfirmDialogElement}
     </main>
   );

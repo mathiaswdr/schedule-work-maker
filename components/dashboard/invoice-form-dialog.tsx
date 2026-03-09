@@ -31,6 +31,7 @@ import { toast } from "sonner";
 
 type ClientOption = { id: string; name: string; color: string | null };
 type ProjectOption = { id: string; name: string; clientId: string | null };
+type BankAccountOption = { id: string; label: string; bankName: string | null; iban: string; bic: string | null; isDefault: boolean };
 // type CustomTemplate = { id: string; name: string; fileUrl: string };
 
 type InvoiceData = {
@@ -102,6 +103,8 @@ export default function InvoiceFormDialog({
   // Data
   const [clients, setClients] = useState<ClientOption[]>([]);
   const [projects, setProjects] = useState<ProjectOption[]>([]);
+  const [bankAccounts, setBankAccounts] = useState<BankAccountOption[]>([]);
+  const [selectedBankAccountId, setSelectedBankAccountId] = useState("");
   // const [customTemplates, setCustomTemplates] = useState<CustomTemplate[]>([]);
 
   // const fetchCustomTemplates = () => {
@@ -120,6 +123,10 @@ export default function InvoiceFormDialog({
     fetch("/api/projects")
       .then((r) => r.json())
       .then((d) => setProjects(d.projects || []))
+      .catch(() => null);
+    fetch("/api/bank-accounts")
+      .then((r) => r.json())
+      .then((d) => setBankAccounts(d.bankAccounts || []))
       .catch(() => null);
     // fetchCustomTemplates();
   }, [open]);
@@ -142,6 +149,7 @@ export default function InvoiceFormDialog({
       setIban(invoice.iban || "");
       setBic(invoice.bic || "");
       setPaymentTerms(invoice.paymentTerms || "");
+      setSelectedBankAccountId("manual");
       setItems(
         invoice.items.map((i) => ({
           category: i.category || "",
@@ -166,6 +174,7 @@ export default function InvoiceFormDialog({
       setIban("");
       setBic("");
       setPaymentTerms("");
+      setSelectedBankAccountId("");
       setItems([{ category: "", description: "", quantity: 1, unitPrice: 0 }]);
       setTaxRate(0);
       setNotes("");
@@ -173,6 +182,19 @@ export default function InvoiceFormDialog({
       // setCustomTemplateId(null);
     }
   }, [open, invoice]);
+
+  // Pre-select default bank account for new invoices
+  useEffect(() => {
+    if (!open || invoice || bankAccounts.length === 0) return;
+    if (selectedBankAccountId) return; // already selected
+    const defaultAccount = bankAccounts.find((a) => a.isDefault);
+    if (defaultAccount) {
+      setSelectedBankAccountId(defaultAccount.id);
+      setBankName(defaultAccount.bankName || "");
+      setIban(defaultAccount.iban);
+      setBic(defaultAccount.bic || "");
+    }
+  }, [open, invoice, bankAccounts, selectedBankAccountId]);
 
   const { execute: execCreate, status: createStatus } = useAction(
     createInvoice,
@@ -477,6 +499,37 @@ export default function InvoiceFormDialog({
               <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
                 {t("form.bankingInfo")}
               </label>
+              {bankAccounts.length > 0 && (
+                <Select
+                  value={selectedBankAccountId}
+                  onValueChange={(value) => {
+                    setSelectedBankAccountId(value);
+                    if (value !== "manual") {
+                      const account = bankAccounts.find((a) => a.id === value);
+                      if (account) {
+                        setBankName(account.bankName || "");
+                        setIban(account.iban);
+                        setBic(account.bic || "");
+                      }
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("form.selectBankAccount")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="manual">
+                      {t("form.manualEntry")}
+                    </SelectItem>
+                    {bankAccounts.map((a) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.label}
+                        {a.isDefault ? ` (${t("form.defaultLabel")})` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <div className="grid gap-3 sm:grid-cols-3">
                 <Input
                   value={bankName}

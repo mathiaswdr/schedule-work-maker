@@ -33,7 +33,7 @@ export function PricingCta({
     return (
       <Link
         href="/auth/login"
-        className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
+        className={`mt-auto flex w-full items-center justify-center text-center rounded-full px-4 py-3 text-sm leading-tight font-semibold transition ${
           highlight
             ? "bg-brand text-white hover:translate-y-[-1px]"
             : "border border-line-strong bg-white/70 text-ink hover:bg-white"
@@ -61,7 +61,7 @@ export function PricingCta({
             toast.error("An error occurred");
           }
         }}
-        className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-line-strong bg-white/70 px-4 py-2 text-sm font-semibold text-ink transition hover:bg-white"
+        className="mt-auto flex w-full items-center justify-center text-center rounded-full border border-line-strong bg-white/70 px-4 py-3 text-sm leading-tight font-semibold text-ink transition hover:bg-white"
       >
         {ctaManageLabel}
       </button>
@@ -71,7 +71,7 @@ export function PricingCta({
   // Current plan (free) or lower → disabled
   if (isCurrent || !isUpgrade) {
     return (
-      <div className="mt-6 inline-flex w-full items-center justify-center rounded-full border border-line bg-panel px-4 py-2 text-sm font-medium text-ink-muted">
+      <div className="mt-auto flex w-full items-center justify-center text-center rounded-full border border-line bg-panel px-4 py-3 text-sm leading-tight font-medium text-ink-muted">
         {ctaCurrentLabel}
       </div>
     );
@@ -94,7 +94,7 @@ export function PricingCta({
           toast.error("An error occurred");
         }
       }}
-      className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
+      className={`mt-auto flex w-full items-center justify-center text-center rounded-full px-4 py-3 text-sm leading-tight font-semibold transition ${
         highlight
           ? "bg-brand text-white hover:translate-y-[-1px]"
           : "border border-line-strong bg-white/70 text-ink hover:bg-white"

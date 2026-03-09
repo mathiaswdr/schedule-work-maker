@@ -14,13 +14,17 @@ export default async function Settings() {
 
   if (!session) redirect("/");
 
-  const [businessProfile, user] = await Promise.all([
+  const [businessProfile, user, bankAccounts] = await Promise.all([
     prisma.businessProfile.findUnique({
       where: { userId: session.user.id },
     }),
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { currency: true, hourlyRate: true, plan: true },
+      select: { currency: true, hourlyRate: true, plan: true, stripeCustomerId: true },
+    }),
+    prisma.bankAccount.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "asc" },
     }),
   ]);
 
@@ -28,9 +32,11 @@ export default async function Settings() {
     <SettingsCard
       session={session}
       businessProfile={businessProfile}
+      bankAccounts={bankAccounts}
       currency={user?.currency ?? "CHF"}
       hourlyRate={user?.hourlyRate ?? 0}
       plan={user?.plan ?? "FREE"}
+      hasStripeCustomer={!!user?.stripeCustomerId}
       displayClassName={display.className}
     />
   );

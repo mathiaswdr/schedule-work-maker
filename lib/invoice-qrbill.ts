@@ -61,6 +61,8 @@ function toCountryCode(value: string): string | null {
 export async function generateQrBillPdf(
   data: QrBillData
 ): Promise<Buffer> {
+  const creditorIso = toCountryCode(data.creditorCountry) ?? data.creditorCountry;
+
   const qrData: Data = {
     creditor: {
       account: data.iban.replace(/\s/g, ""),
@@ -68,7 +70,7 @@ export async function generateQrBillPdf(
       address: data.creditorAddress,
       zip: data.creditorZip,
       city: data.creditorCity,
-      country: data.creditorCountry,
+      country: creditorIso,
     },
     currency: "CHF",
     amount: data.amount,
@@ -82,16 +84,14 @@ export async function generateQrBillPdf(
     data.debtorCity &&
     data.debtorCountry
   ) {
-    const debtorIso = toCountryCode(data.debtorCountry);
-    if (debtorIso) {
-      qrData.debtor = {
-        name: data.debtorName,
-        address: data.debtorAddress,
-        zip: data.debtorZip,
-        city: data.debtorCity,
-        country: debtorIso,
-      };
-    }
+    const debtorIso = toCountryCode(data.debtorCountry) ?? data.debtorCountry;
+    qrData.debtor = {
+      name: data.debtorName,
+      address: data.debtorAddress,
+      zip: data.debtorZip,
+      city: data.debtorCity,
+      country: debtorIso,
+    };
   }
 
   const qrBill = new SwissQRBill(qrData, {

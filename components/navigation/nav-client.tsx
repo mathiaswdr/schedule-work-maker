@@ -86,7 +86,7 @@ export default function NavClient({ user }: NavClientProps) {
       <nav className="fixed top-0 z-50 w-full">
         <div className="mx-auto flex w-full maxW items-center justify-between px-6 py-4">
           {/* Pill nav bar */}
-          <div className="flex w-full items-center justify-between rounded-full border border-white/50 bg-white/70 px-5 py-2.5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(255,255,255,0.7)_inset] backdrop-blur-lg">
+          <div className="flex w-full items-center justify-between rounded-full border border-line bg-panel px-5 py-2.5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)]">
             {/* Logo */}
             <Link
               href="/"
@@ -204,7 +204,7 @@ export default function NavClient({ user }: NavClientProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-black/20"
               onClick={() => setMobileOpen(false)}
             />
 
@@ -215,7 +215,7 @@ export default function NavClient({ user }: NavClientProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed left-4 right-4 top-[88px] z-50 overflow-hidden rounded-3xl border border-white/50 bg-white/85 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(255,255,255,0.7)_inset] backdrop-blur-lg"
+              className="fixed left-4 right-4 top-[88px] z-50 overflow-hidden rounded-3xl border border-line bg-panel shadow-[0_12px_40px_-8px_rgba(0,0,0,0.1)]"
             >
               <div className="p-2">
                 {/* Nav links */}

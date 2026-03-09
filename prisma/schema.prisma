@@ -63,6 +63,7 @@ model User {
   invoices           Invoice[]
   invoiceTemplates   InvoiceTemplate[]
   expenses           Expense[]
+  bankAccounts       BankAccount[]
 }
 
 model Account {
@@ -349,4 +350,45 @@ model ExpenseReceipt {
   expense   Expense  @relation(fields: [expenseId], references: [id], onDelete: Cascade)
 
   @@index([expenseId])
+}
+
+model BankAccount {
+  id        String   @id @default(cuid())
+  userId    String
+  label     String
+  bankName  String?
+  iban      String
+  bic       String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AccessCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  plan      UserPlan
+  maxUses   Int?
+  usedCount Int      @default(0)
+  expiresAt DateTime?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  redemptions AccessCodeRedemption[]
+}
+
+model AccessCodeRedemption {
+  id           String     @id @default(cuid())
+  accessCodeId String
+  userId       String
+  previousPlan UserPlan
+  newPlan      UserPlan
+  redeemedAt   DateTime   @default(now())
+  accessCode   AccessCode @relation(fields: [accessCodeId], references: [id], onDelete: Cascade)
+
+  @@unique([accessCodeId, userId])
+  @@index([userId])
 }

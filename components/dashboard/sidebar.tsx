@@ -7,8 +7,9 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, Receipt, Settings2, Users } from "lucide-react";
 import { pickVariants } from "@/lib/motion-variants";
+import { type PlanId, type FeatureKey, FEATURE_PLAN_MAP, isPlanSufficient } from "@/lib/plans";
 
-const navItems = [
+const navItems: { href: string; icon: typeof Clock; key: FeatureKey }[] = [
   { href: "/dashboard", icon: Clock, key: "time" },
   { href: "/dashboard/sessions", icon: History, key: "sessions" },
   { href: "/dashboard/clients", icon: Users, key: "clients" },
@@ -23,7 +24,15 @@ const navItems = [
 const mobileMainItems = navItems.slice(0, 4);
 const mobileMoreItems = navItems.slice(4);
 
-export default function DashboardSidebar() {
+function PlanBadge({ requiredPlan }: { requiredPlan: PlanId }) {
+  return (
+    <span className="ml-auto rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-brand">
+      {requiredPlan === "PRO" ? "Pro" : "Starter"}
+    </span>
+  );
+}
+
+export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
   const pathname = usePathname();
   const t = useTranslations("dashboard");
   const shouldReduceMotion = useReducedMotion();
@@ -41,6 +50,11 @@ export default function DashboardSidebar() {
     href === "/dashboard"
       ? pathname === "/dashboard"
       : pathname.startsWith(href);
+
+  const isLocked = (key: FeatureKey) => {
+    const required = FEATURE_PLAN_MAP[key];
+    return !isPlanSufficient(userPlan, required);
+  };
 
   return (
     <>
@@ -70,6 +84,7 @@ export default function DashboardSidebar() {
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
+              const locked = isLocked(item.key);
 
               return (
                 <Link
@@ -93,6 +108,7 @@ export default function DashboardSidebar() {
                       <Icon className="h-4 w-4" />
                     </span>
                     <span>{t(`sidebar.${item.key}`)}</span>
+                    {locked && <PlanBadge requiredPlan={FEATURE_PLAN_MAP[item.key]} />}
                   </motion.div>
                 </Link>
               );
@@ -128,11 +144,12 @@ export default function DashboardSidebar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 12, scale: 0.95 }}
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute bottom-full right-4 z-50 mb-2 min-w-[180px] overflow-hidden rounded-2xl border border-white/40 bg-white/80 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.15),0_0_0_0.5px_rgba(255,255,255,0.6)_inset] backdrop-blur-lg"
+                className="absolute bottom-full right-4 z-50 mb-2 min-w-[180px] overflow-hidden rounded-2xl border border-line bg-panel shadow-[0_12px_40px_-8px_rgba(0,0,0,0.12)]"
               >
                 {mobileMoreItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
+                  const locked = isLocked(item.key);
                   return (
                     <Link
                       key={item.href}
@@ -140,14 +157,15 @@ export default function DashboardSidebar() {
                       onClick={() => setMoreOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
                         active
-                          ? "bg-white/60 text-ink"
-                          : "text-ink-muted hover:bg-white/40 hover:text-ink"
+                          ? "bg-brand/10 text-brand"
+                          : "text-ink-muted hover:bg-brand/5 hover:text-ink"
                       }`}
                     >
                       <Icon
                         className={`h-4 w-4 ${active ? "text-brand" : ""}`}
                       />
                       <span>{t(`sidebar.${item.key}`)}</span>
+                      {locked && <PlanBadge requiredPlan={FEATURE_PLAN_MAP[item.key]} />}
                     </Link>
                   );
                 })}
@@ -161,7 +179,7 @@ export default function DashboardSidebar() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="flex items-center justify-around rounded-full border border-white/40 bg-white/70 px-1 py-1 shadow-[0_8px_40px_-8px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(255,255,255,0.6)_inset] backdrop-blur-lg"
+          className="flex items-center justify-around rounded-full border border-line bg-panel px-1 py-1 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.1)]"
         >
           {mobileMainItems.map((item) => {
             const Icon = item.icon;
@@ -176,7 +194,7 @@ export default function DashboardSidebar() {
                 {active && (
                   <motion.div
                     layoutId="mobile-nav-active"
-                    className="absolute inset-0 m-0.5 rounded-full bg-white/80 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.08)]"
+                    className="absolute inset-0 m-0.5 rounded-full bg-brand/10 shadow-[0_2px_12px_-4px_rgba(249,115,22,0.25)]"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -188,7 +206,7 @@ export default function DashboardSidebar() {
                   />
                   <span
                     className={`text-[9px] font-semibold leading-none tracking-wide transition-colors ${
-                      active ? "text-ink" : "text-ink-muted/60"
+                      active ? "text-brand" : "text-ink-muted/60"
                     }`}
                   >
                     {t(`sidebar.${item.key}`)}
@@ -207,7 +225,7 @@ export default function DashboardSidebar() {
             {(isMoreActive && !moreOpen) && (
               <motion.div
                 layoutId="mobile-nav-active"
-                className="absolute inset-0 m-0.5 rounded-full bg-white/80 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.08)]"
+                className="absolute inset-0 m-0.5 rounded-full bg-brand/10 shadow-[0_2px_12px_-4px_rgba(249,115,22,0.25)]"
                 transition={{ type: "spring", stiffness: 380, damping: 30 }}
               />
             )}
@@ -219,7 +237,7 @@ export default function DashboardSidebar() {
               />
               <span
                 className={`text-[9px] font-semibold leading-none tracking-wide transition-colors ${
-                  isMoreActive || moreOpen ? "text-ink" : "text-ink-muted/60"
+                  isMoreActive || moreOpen ? "text-brand" : "text-ink-muted/60"
                 }`}
               >
                 {t("sidebar.more")}

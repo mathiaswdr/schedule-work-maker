@@ -539,6 +539,7 @@
         "title": "Compte",
         "emailLabel": "Email",
         "planLabel": "Plan actuel",
+        "manageBilling": "Gerer la facturation",
         "planHint": "Gerez votre abonnement dans le portail de facturation.",
         "currencyLabel": "Devise",
         "currencyHint": "Devise utilisee dans l'application.",
@@ -548,6 +549,40 @@
       "submit": "Enregistrer",
       "success": "Parametres mis a jour",
       "error": "Une erreur est survenue",
+      "bankAccounts": {
+        "title": "Comptes bancaires",
+        "subtitle": "Gerez vos comptes bancaires pour la facturation.",
+        "addAccount": "Ajouter un compte",
+        "editAccount": "Modifier le compte",
+        "empty": "Aucun compte bancaire. Ajoutez-en un pour accelerer la facturation.",
+        "default": "Par defaut",
+        "label": "Libelle",
+        "labelPlaceholder": "Compte principal, PostFinance...",
+        "bankName": "Nom de la banque",
+        "bankNamePlaceholder": "Nom de la banque",
+        "iban": "IBAN",
+        "ibanPlaceholder": "CH00 0000 0000 0000 0000 0",
+        "bic": "BIC / SWIFT",
+        "bicPlaceholder": "POFICHBEXXX",
+        "defaultAccount": "Compte par defaut",
+        "cancel": "Annuler",
+        "create": "Ajouter le compte",
+        "update": "Enregistrer",
+        "created": "Compte bancaire cree",
+        "updated": "Compte bancaire modifie",
+        "deleted": "Compte bancaire supprime",
+        "error": "Une erreur est survenue"
+      },
+      "accessCode": {
+        "title": "Code d'acces",
+        "placeholder": "Entrez votre code",
+        "redeem": "Activer",
+        "redeeming": "Activation...",
+        "success": "Code active ! Votre plan est maintenant {plan}.",
+        "errorInvalid": "Code invalide ou expire.",
+        "errorAlreadyRedeemed": "Vous avez deja utilise ce code.",
+        "errorNoUpgrade": "Votre plan actuel est deja egal ou superieur."
+      },
       "businessProfile": {
         "title": "Profil entreprise",
         "subtitle": "Vos informations d'entreprise pour les factures.",
@@ -707,6 +742,9 @@
         "subject": "Objet",
         "subjectPlaceholder": "Creation de site web, consulting...",
         "bankingInfo": "Informations bancaires",
+        "selectBankAccount": "Choisir un compte bancaire",
+        "manualEntry": "Saisie manuelle",
+        "defaultLabel": "par defaut",
         "bankNamePlaceholder": "Nom de la banque",
         "ibanPlaceholder": "IBAN",
         "bicPlaceholder": "BIC / SWIFT",
@@ -768,7 +806,23 @@
         "markAsSent": "Marquer comme envoyee",
         "markAsPaid": "Marquer comme payee",
         "uploadedFile": "Fichier importe",
-        "downloadFile": "Telecharger le fichier"
+        "downloadFile": "Telecharger le fichier",
+        "generateQrBill": "Generer QR-facture"
+      },
+      "qrBillDialog": {
+        "title": "Generer une QR-facture",
+        "creditor": "Creancier",
+        "debtor": "Debiteur",
+        "iban": "IBAN",
+        "name": "Nom / Entreprise",
+        "address": "Adresse",
+        "postalCode": "Code postal",
+        "city": "Ville",
+        "country": "Pays",
+        "amount": "Montant",
+        "reference": "Reference",
+        "generate": "Generer la QR-facture",
+        "generating": "Generation en cours..."
       },
       "uploadInvoice": "Importer une facture",
       "uploaded": "Importee",
@@ -884,8 +938,8 @@
         "yearlyHint": "Economisez avec la facturation annuelle",
         "suffixMonthly": " /utilisateur/mois",
         "suffixYearly": " /utilisateur/an",
-        "monthlyHint": "ou {price} CHF/an avec le plan annuel",
-        "yearlyEquivalent": "soit ~{price} CHF/mois"
+        "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
+        "yearlyEquivalent": "soit ~__price__ CHF/mois"
       },
       "plans": {
         "free": {
@@ -932,5 +986,24 @@
     },
     "loading": "Chargement des donnees...",
     "currentTime": "Heure actuelle"
+  },
+  "planGate": {
+    "upgrade": "Passer au plan {plan}",
+    "sessions": {
+      "title": "Historique des sessions",
+      "description": "Passez au plan Starter pour acceder a l'historique complet de vos sessions."
+    },
+    "projects": {
+      "title": "Projets",
+      "description": "Passez au plan Starter pour organiser vos sessions par projet."
+    },
+    "stats": {
+      "title": "Analytics avancees",
+      "description": "Passez au plan Pro pour acceder aux statistiques detaillees, insights et exports CSV."
+    },
+    "expenses": {
+      "title": "Suivi des depenses",
+      "description": "Passez au plan Pro pour suivre vos abonnements, outils et depenses recurrentes."
+    }
   }
 }

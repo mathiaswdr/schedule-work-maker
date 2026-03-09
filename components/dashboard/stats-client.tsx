@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import { pickVariants } from "@/lib/motion-variants";
@@ -12,40 +12,29 @@ type SummaryDay = {
   breakCount: number;
 };
 
-type Summary = {
-  todayMs: number;
-  weekMs: number;
-  breakMs: number;
-  breakCount: number;
-  weekDays: SummaryDay[];
-};
-
-type SessionItem = {
-  timezone?: string | null;
-} | null;
-
-type ApiResponse = {
-  session: SessionItem;
-  summary: Summary;
-};
-
 type StatsClientProps = {
   displayClassName: string;
   currency: string;
   hourlyRate: number;
+  invoiceRevenue: number;
+  summary: {
+    todayMs: number;
+    weekMs: number;
+    breakMs: number;
+    breakCount: number;
+  };
+  weekDays: SummaryDay[];
+  maxWeekMs: number;
+  weekNumber: number;
+  productivity: number;
+  breakAverage: number;
+  daysActive: number;
+  timezone: string;
 };
 
 type ExportField = {
   key: string;
   label: string;
-};
-
-const emptySummary: Summary = {
-  todayMs: 0,
-  weekMs: 0,
-  breakMs: 0,
-  breakCount: 0,
-  weekDays: [],
 };
 
 const formatDuration = (ms: number) => {
@@ -56,14 +45,6 @@ const formatDuration = (ms: number) => {
   return `${hours}h ${String(minutes).padStart(2, "0")}m`;
 };
 
-const getWeekNumber = (date: Date) => {
-  const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNumber = target.getUTCDay() || 7;
-  target.setUTCDate(target.getUTCDate() + 4 - dayNumber);
-  const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
-  return Math.ceil(((target.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-};
-
 const escapeCsv = (value: string | number) => {
   const text = String(value ?? "");
   if (/[",\n]/.test(text)) {
@@ -72,13 +53,23 @@ const escapeCsv = (value: string | number) => {
   return text;
 };
 
-export default function StatsClient({ displayClassName, currency, hourlyRate }: StatsClientProps) {
+export default function StatsClient({
+  displayClassName,
+  currency,
+  hourlyRate,
+  invoiceRevenue,
+  summary,
+  weekDays,
+  maxWeekMs,
+  weekNumber,
+  productivity,
+  breakAverage,
+  daysActive,
+  timezone,
+}: StatsClientProps) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion();
-  const [data, setData] = useState<ApiResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [invoiceRevenue, setInvoiceRevenue] = useState(0);
   const [selectedFields, setSelectedFields] = useState<Record<string, boolean>>({
     date: true,
     workHours: true,
@@ -125,60 +116,6 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
       weekday: "short",
     });
   }, [locale]);
-
-  const fetchStats = async () => {
-    const response = await fetch("/api/work-sessions", { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error("Failed to load work summary");
-    }
-    const payload = (await response.json()) as ApiResponse;
-    setData(payload);
-  };
-
-  useEffect(() => {
-    let isMounted = true;
-    fetchStats()
-      .catch(() => null)
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
-    fetch("/api/invoices/revenue", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => {
-        if (isMounted) setInvoiceRevenue(d.monthTotal ?? 0);
-      })
-      .catch(() => null);
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const summary = data?.summary ?? emptySummary;
-  const timezone =
-    data?.session?.timezone ??
-    Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-  const weekDays = summary.weekDays.length
-    ? summary.weekDays
-    : Array.from({ length: 5 }, (_, index) => {
-        const base = new Date();
-        const day = new Date(base);
-        day.setDate(base.getDate() - ((base.getDay() + 6) % 7) + index);
-        return { date: day.toISOString(), valueMs: 0, breakMs: 0, breakCount: 0 };
-      });
-
-  const maxWeekMs = Math.max(...weekDays.map((day) => day.valueMs), 1);
-  const weekNumber = getWeekNumber(new Date());
-
-  const productivity = summary.todayMs + summary.breakMs > 0
-    ? Math.round((summary.todayMs / (summary.todayMs + summary.breakMs)) * 100)
-    : 0;
-
-  const breakAverage = summary.breakCount > 0
-    ? Math.round(summary.breakMs / summary.breakCount / 60000)
-    : 0;
-
-  const daysActive = summary.weekDays.filter((day) => day.valueMs > 0).length;
 
   const handleToggleField = (key: string) => {
     setSelectedFields((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -522,12 +459,6 @@ export default function StatsClient({ displayClassName, currency, hourlyRate }: 
             </div>
           </motion.section>
 
-          {isLoading && (
-            <motion.div variants={v.fadeUp} className="space-y-3">
-              <div className="h-10 w-full animate-pulse rounded-2xl bg-ink-soft" />
-              <div className="h-10 w-3/4 animate-pulse rounded-2xl bg-ink-soft" />
-            </motion.div>
-          )}
         </motion.div>
       </div>
     </main>

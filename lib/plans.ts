@@ -67,3 +67,49 @@ export function canUpgrade(current: string, target: PlanId): boolean {
   if (!currentPlan || !targetPlan) return false;
   return targetPlan.sortOrder > currentPlan.sortOrder;
 }
+
+// ── Feature gating ──────────────────────────────────────────────
+
+export type FeatureKey =
+  | "time"
+  | "sessions"
+  | "clients"
+  | "projects"
+  | "invoices"
+  | "expenses"
+  | "stats"
+  | "subscription"
+  | "settings";
+
+/** Minimum plan required to access a feature (for sidebar badge + PlanGate). */
+export const FEATURE_PLAN_MAP: Record<FeatureKey, PlanId> = {
+  time: "FREE",
+  clients: "FREE",
+  invoices: "FREE",
+  subscription: "FREE",
+  settings: "FREE",
+  sessions: "STARTER",
+  projects: "STARTER",
+  stats: "PRO",
+  expenses: "PRO",
+};
+
+/** Quantitative limits per plan. `null` means unlimited. */
+export const PLAN_LIMITS: Record<PlanId, { clients: number | null; invoicesPerMonth: number | null }> = {
+  FREE: { clients: 2, invoicesPerMonth: 5 },
+  STARTER: { clients: null, invoicesPerMonth: null },
+  PRO: { clients: null, invoicesPerMonth: null },
+};
+
+/** Returns true if `userPlan` is equal or higher than `requiredPlan`. */
+export function isPlanSufficient(userPlan: PlanId, requiredPlan: PlanId): boolean {
+  const user = PLANS.find((p) => p.id === userPlan);
+  const required = PLANS.find((p) => p.id === requiredPlan);
+  if (!user || !required) return false;
+  return user.sortOrder >= required.sortOrder;
+}
+
+/** Returns the limits for a given plan. */
+export function getPlanLimits(plan: PlanId) {
+  return PLAN_LIMITS[plan];
+}

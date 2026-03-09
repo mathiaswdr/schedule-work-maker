@@ -16,7 +16,10 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { format } = (await request.json()) as { format: "pdf" | "docx" | "qrbill" };
+  const { format, qrData: bodyQrData } = (await request.json()) as {
+    format: "pdf" | "docx" | "qrbill";
+    qrData?: QrBillData;
+  };
 
   const invoice = await prisma.invoice.findFirst({
     where: { id: params.id, userId: session.user.id },
@@ -28,6 +31,25 @@ export async function POST(
 
   if (!invoice) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Uploaded invoices: QR-bill generation with client-provided data
+  if (invoice.source === "UPLOADED" && format === "qrbill" && bodyQrData) {
+    try {
+      const qrBuffer = await generateQrBillPdf(bodyQrData);
+      return new Response(qrBuffer, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="${invoice.displayNumber}-qr.pdf"`,
+        },
+      });
+    } catch (err) {
+      console.error("QR-bill generation failed:", err);
+      return NextResponse.json(
+        { error: "QR-bill generation failed" },
+        { status: 500 }
+      );
+    }
   }
 
   // Uploaded invoices: proxy the stored file directly

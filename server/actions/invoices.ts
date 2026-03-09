@@ -14,6 +14,8 @@ import {
   formatInvoiceNumber,
   computeInvoiceTotals,
 } from "@/lib/invoice-helpers";
+import { type PlanId } from "@/lib/plans";
+import { checkInvoiceMonthlyLimit } from "@/lib/plan-limits";
 
 const action = createSafeActionClient();
 
@@ -22,6 +24,10 @@ export const createInvoice = action
   .action(async ({ parsedInput: values }) => {
     const user = await auth();
     if (!user) return { error: "User not found" };
+
+    const plan = (user.user.plan ?? "FREE") as PlanId;
+    const limit = await checkInvoiceMonthlyLimit(user.user.id, plan);
+    if (!limit.allowed) return { error: "limit" };
 
     const userId = user.user.id;
 

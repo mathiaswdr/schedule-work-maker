@@ -539,6 +539,7 @@
         "title": "Account",
         "emailLabel": "Email",
         "planLabel": "Current plan",
+        "manageBilling": "Manage billing",
         "planHint": "Manage your subscription in the billing portal.",
         "currencyLabel": "Currency",
         "currencyHint": "Currency used across the app.",
@@ -548,6 +549,40 @@
       "submit": "Save changes",
       "success": "Settings updated",
       "error": "Something went wrong",
+      "bankAccounts": {
+        "title": "Bank accounts",
+        "subtitle": "Manage your bank accounts for invoicing.",
+        "addAccount": "Add account",
+        "editAccount": "Edit account",
+        "empty": "No bank accounts yet. Add one to speed up invoicing.",
+        "default": "Default",
+        "label": "Label",
+        "labelPlaceholder": "Main account, PostFinance...",
+        "bankName": "Bank name",
+        "bankNamePlaceholder": "Bank name",
+        "iban": "IBAN",
+        "ibanPlaceholder": "CH00 0000 0000 0000 0000 0",
+        "bic": "BIC / SWIFT",
+        "bicPlaceholder": "POFICHBEXXX",
+        "defaultAccount": "Default account",
+        "cancel": "Cancel",
+        "create": "Add account",
+        "update": "Save changes",
+        "created": "Bank account created",
+        "updated": "Bank account updated",
+        "deleted": "Bank account deleted",
+        "error": "Something went wrong"
+      },
+      "accessCode": {
+        "title": "Access code",
+        "placeholder": "Enter your code",
+        "redeem": "Redeem",
+        "redeeming": "Redeeming...",
+        "success": "Code redeemed! Your plan is now {plan}.",
+        "errorInvalid": "Invalid or expired code.",
+        "errorAlreadyRedeemed": "You have already used this code.",
+        "errorNoUpgrade": "Your current plan is already equal or higher."
+      },
       "businessProfile": {
         "title": "Business profile",
         "subtitle": "Your company information for invoices.",
@@ -707,6 +742,9 @@
         "subject": "Subject",
         "subjectPlaceholder": "Website creation, consulting...",
         "bankingInfo": "Banking information",
+        "selectBankAccount": "Select a bank account",
+        "manualEntry": "Enter manually",
+        "defaultLabel": "default",
         "bankNamePlaceholder": "Bank name",
         "ibanPlaceholder": "IBAN",
         "bicPlaceholder": "BIC / SWIFT",
@@ -768,7 +806,23 @@
         "markAsSent": "Mark as sent",
         "markAsPaid": "Mark as paid",
         "uploadedFile": "Uploaded file",
-        "downloadFile": "Download file"
+        "downloadFile": "Download file",
+        "generateQrBill": "Generate QR-bill"
+      },
+      "qrBillDialog": {
+        "title": "Generate a QR-bill",
+        "creditor": "Creditor",
+        "debtor": "Debtor",
+        "iban": "IBAN",
+        "name": "Name / Company",
+        "address": "Address",
+        "postalCode": "Postal code",
+        "city": "City",
+        "country": "Country",
+        "amount": "Amount",
+        "reference": "Reference",
+        "generate": "Generate QR-bill",
+        "generating": "Generating..."
       },
       "uploadInvoice": "Upload invoice",
       "uploaded": "Uploaded",
@@ -884,8 +938,8 @@
         "yearlyHint": "Save with annual billing",
         "suffixMonthly": " /user/month",
         "suffixYearly": " /user/year",
-        "monthlyHint": "or {price} CHF/yr with annual billing",
-        "yearlyEquivalent": "~{price} CHF/month equivalent"
+        "monthlyHint": "or __price__ CHF/yr with annual billing",
+        "yearlyEquivalent": "~__price__ CHF/month equivalent"
       },
       "plans": {
         "free": {
@@ -932,5 +986,24 @@
     },
     "loading": "Loading data...",
     "currentTime": "Current time"
+  },
+  "planGate": {
+    "upgrade": "Upgrade to {plan}",
+    "sessions": {
+      "title": "Session history",
+      "description": "Upgrade to Starter to access your full session history and detailed logs."
+    },
+    "projects": {
+      "title": "Projects",
+      "description": "Upgrade to Starter to organize your work sessions by project."
+    },
+    "stats": {
+      "title": "Advanced analytics",
+      "description": "Upgrade to Pro to access detailed statistics, productivity insights and CSV exports."
+    },
+    "expenses": {
+      "title": "Expense tracking",
+      "description": "Upgrade to Pro to track your subscriptions, tools and recurring costs."
+    }
   }
 }

@@ -61,6 +61,8 @@ type ClientDetail = ClientItem & {
 type ClientsClientProps = {
   displayClassName: string;
   currency: string;
+  userPlan?: string;
+  clientLimit?: { allowed: boolean; current: number; max: number | null };
 };
 
 const formatDuration = (ms: number) => {
@@ -86,7 +88,7 @@ const getSessionMs = (
   return Math.max(end.getTime() - start.getTime() - breakMs, 0);
 };
 
-export default function ClientsClient({ displayClassName, currency }: ClientsClientProps) {
+export default function ClientsClient({ displayClassName, currency, userPlan, clientLimit }: ClientsClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
   const locale = useLocale();
@@ -803,14 +805,22 @@ export default function ClientsClient({ displayClassName, currency }: ClientsCli
                 {t("clients.subtitle")}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="flex items-center gap-2 self-start rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
-            >
-              <Plus className="h-4 w-4" />
-              {t("clients.addClient")}
-            </button>
+            <div className="flex items-center gap-3 self-start">
+              {clientLimit?.max !== null && clientLimit?.max !== undefined && (
+                <span className="rounded-full bg-ink-soft px-3 py-1 text-xs font-semibold text-ink-muted">
+                  {clientLimit.current}/{clientLimit.max}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleAdd}
+                disabled={clientLimit ? !clientLimit.allowed : false}
+                className="flex items-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Plus className="h-4 w-4" />
+                {t("clients.addClient")}
+              </button>
+            </div>
           </motion.section>
 
           {isLoading ? (

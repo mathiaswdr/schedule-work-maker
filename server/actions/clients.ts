@@ -5,6 +5,8 @@ import { ClientSchema, ClientUpdateSchema, ClientDeleteSchema } from '@/types/cl
 import { auth } from '@/server/auth'
 import { prisma } from '@/server/prisma'
 import { revalidatePath } from 'next/cache'
+import { type PlanId } from '@/lib/plans'
+import { checkClientLimit } from '@/lib/plan-limits'
 
 const action = createSafeActionClient()
 
@@ -13,6 +15,10 @@ export const createClient = action
   .action(async ({ parsedInput: values }) => {
     const user = await auth()
     if (!user) return { error: "User not found" }
+
+    const plan = (user.user.plan ?? "FREE") as PlanId
+    const limit = await checkClientLimit(user.user.id, plan)
+    if (!limit.allowed) return { error: "limit" }
 
     const client = await prisma.client.create({
       data: {

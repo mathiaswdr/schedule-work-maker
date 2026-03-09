@@ -103,7 +103,7 @@ export default function SubscriptionClient({
           <motion.section variants={v.fadeUp} className="flex flex-col items-center gap-3">
             <div className="relative flex items-center overflow-hidden rounded-full border border-line bg-white/70 p-1">
               <button
-                onClick={() => setBilling("monthly")}
+                onClick={() => setBilling(isYearly ? "monthly" : "yearly")}
                 className={`relative z-10 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
                   !isYearly ? "text-white" : "text-ink-muted hover:text-ink"
                 }`}
@@ -118,7 +118,7 @@ export default function SubscriptionClient({
                 <span className="relative z-10">{t("subscriptionPage.billingToggle.monthly")}</span>
               </button>
               <button
-                onClick={() => setBilling("yearly")}
+                onClick={() => setBilling(isYearly ? "monthly" : "yearly")}
                 className={`relative z-10 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
                   isYearly ? "text-white" : "text-ink-muted hover:text-ink"
                 }`}
@@ -133,12 +133,12 @@ export default function SubscriptionClient({
                 <span className="relative z-10">{t("subscriptionPage.billingToggle.yearly")}</span>
               </button>
             </div>
-            <p className="flex items-center gap-2 text-sm text-ink-muted">
+            <div className="flex flex-col items-center gap-1 text-sm text-ink-muted lg:flex-row lg:gap-2">
               <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">
                 {t("subscriptionPage.billingToggle.badge")}
               </span>
-              {t("subscriptionPage.billingToggle.yearlyHint")}
-            </p>
+              <span className="text-center">{t("subscriptionPage.billingToggle.yearlyHint")}</span>
+            </div>
           </motion.section>
 
           {/* Plan cards grid */}
@@ -163,9 +163,9 @@ export default function SubscriptionClient({
                   <motion.div
                     key={planDef.id}
                     variants={v.item}
-                    className={`relative rounded-3xl border p-6 ${
+                    className={`relative flex min-h-[600px] flex-col rounded-3xl border p-6 ${
                       planDef.highlight
-                        ? "border-brand bg-white shadow-[0_26px_70px_-45px_rgba(249,115,22,0.55)]"
+                        ? "border-brand bg-white shadow-[0_26px_70px_-45px_rgba(249,115,22,0.55)] order-first lg:order-none"
                         : "border-line bg-white/70"
                     }`}
                   >
@@ -199,12 +199,12 @@ export default function SubscriptionClient({
                     <div className="mt-3 h-10 overflow-hidden">
                       <AnimatePresence mode="wait">
                         <motion.p
-                          key={`${planDef.id}-${billing}`}
+                          key={isPaid ? `${planDef.id}-${billing}` : planDef.id}
                           initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -12 }}
                           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                          className="text-3xl font-semibold text-ink"
+                          className="whitespace-nowrap text-3xl font-semibold text-ink"
                         >
                           {displayPrice === 0 ? "0" : displayPrice} CHF
                           {suffix && (
@@ -217,7 +217,7 @@ export default function SubscriptionClient({
                     </div>
 
                     {/* Monthly equivalent hint — fixed height to avoid layout shift */}
-                    <div className="mt-1 h-4">
+                    <div className="mt-1 min-h-4">
                       {isPaid && (
                         <AnimatePresence mode="wait">
                           <motion.p
@@ -262,18 +262,18 @@ export default function SubscriptionClient({
                       })}
                     </div>
 
-                    <div className="mt-6">
+                    <div className="mt-auto pt-6">
                       {isCurrent && hasStripeCustomer && planDef.priceAmount > 0 ? (
                         <button
                           onClick={handleManageBilling}
-                          className="inline-flex w-full items-center justify-center rounded-full border border-line-strong bg-white/70 px-4 py-2 text-sm font-semibold text-ink transition hover:bg-white"
+                          className="flex w-full items-center justify-center text-center rounded-full border border-line-strong bg-white/70 px-4 py-3 text-sm leading-tight font-semibold text-ink transition hover:bg-white"
                         >
                           {t("subscriptionPage.manageBilling")}
                         </button>
                       ) : isUpgrade ? (
                         <button
                           onClick={() => handleUpgrade(planDef.id)}
-                          className={`inline-flex w-full items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
+                          className={`flex w-full items-center justify-center text-center rounded-full px-4 py-3 text-sm leading-tight font-semibold transition ${
                             planDef.highlight
                               ? "bg-brand text-white hover:translate-y-[-1px]"
                               : "border border-line-strong bg-white/70 text-ink hover:bg-white"
@@ -282,7 +282,7 @@ export default function SubscriptionClient({
                           {t("subscriptionPage.upgrade")}
                         </button>
                       ) : (
-                        <div className="inline-flex w-full items-center justify-center rounded-full border border-line bg-panel px-4 py-2 text-sm font-medium text-ink-muted">
+                        <div className="flex w-full items-center justify-center text-center rounded-full border border-line bg-panel px-4 py-3 text-sm leading-tight font-medium text-ink-muted">
                           {t("subscriptionPage.currentPlan")}
                         </div>
                       )}

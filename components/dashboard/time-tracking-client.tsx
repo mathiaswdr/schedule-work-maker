@@ -398,8 +398,8 @@ export default function TimeTrackingClient({
             {/* Large timer */}
             <motion.div variants={v.fadeUp} className="mt-8 text-center">
               <LiveTimer
-                startedAt={session?.startedAt ?? new Date().toISOString()}
-                endedAt={session?.endedAt ?? null}
+                startedAt={session?.startedAt ?? "1970-01-01T00:00:00.000Z"}
+                endedAt={session ? session.endedAt : "1970-01-01T00:00:00.000Z"}
                 breaks={breaks}
                 className="text-6xl font-semibold tracking-tight text-ink"
               />
@@ -751,8 +751,8 @@ export default function TimeTrackingClient({
                       {t("timer.eyebrow")}
                     </p>
                     <LiveTimer
-                      startedAt={session?.startedAt ?? new Date().toISOString()}
-                      endedAt={session?.endedAt ?? null}
+                      startedAt={session?.startedAt ?? "1970-01-01T00:00:00.000Z"}
+                      endedAt={session ? session.endedAt : "1970-01-01T00:00:00.000Z"}
                       breaks={breaks}
                       className="mt-2 text-4xl font-semibold"
                     />

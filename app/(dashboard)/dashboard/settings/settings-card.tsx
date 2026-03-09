@@ -22,6 +22,7 @@ import { SettingsSchema } from "@/types/settings-schema";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { settings } from "@/server/actions/settings";
+import { redeemAccessCode } from "@/server/actions/redeem-code";
 import { CloudinaryUploadButton } from "@/components/ui/cloudinary-upload-button";
 import {
   Select,
@@ -32,6 +33,9 @@ import {
 } from "@/components/ui/select";
 import BusinessProfileForm from "@/components/dashboard/business-profile-form";
 import type { BusinessProfileFormHandle } from "@/components/dashboard/business-profile-form";
+import BankAccountFormDialog from "@/components/dashboard/bank-account-form-dialog";
+import { deleteBankAccount } from "@/server/actions/bank-accounts";
+import { Pencil, Trash2 } from "lucide-react";
 
 const CURRENCIES = [
   { code: "CHF", label: "CHF – Franc suisse" },
@@ -55,28 +59,64 @@ type BusinessProfileData = {
   vatMention: string | null;
 } | null;
 
+type BankAccountData = {
+  id: string;
+  label: string;
+  bankName: string | null;
+  iban: string;
+  bic: string | null;
+  isDefault: boolean;
+};
+
 type SettingsCardProps = {
   session: Session;
   businessProfile: BusinessProfileData;
+  bankAccounts: BankAccountData[];
   currency: string;
   hourlyRate: number;
   plan: string;
+  hasStripeCustomer: boolean;
   displayClassName: string;
 };
 
 export default function SettingsCard({
   session,
   businessProfile,
+  bankAccounts: initialBankAccounts,
   currency,
   hourlyRate,
   plan,
+  hasStripeCustomer,
   displayClassName,
 }: SettingsCardProps) {
   const t = useTranslations("dashboard");
   const shouldReduceMotion = useReducedMotion();
 
   const [imageUploading, setImageUploading] = useState(false);
+  const [billingLoading, setBillingLoading] = useState(false);
   const businessProfileRef = useRef<BusinessProfileFormHandle>(null);
+
+  // Bank accounts state
+  const [bankAccounts, setBankAccounts] = useState(initialBankAccounts);
+  const [bankDialogOpen, setBankDialogOpen] = useState(false);
+  const [editingBankAccount, setEditingBankAccount] = useState<BankAccountData | null>(null);
+
+  const refreshBankAccounts = () => {
+    fetch("/api/bank-accounts")
+      .then((r) => r.json())
+      .then((d) => setBankAccounts(d.bankAccounts || []))
+      .catch(() => null);
+  };
+
+  const { execute: execDeleteBank } = useAction(deleteBankAccount, {
+    onSuccess: () => {
+      toast.success(t("settingsPage.bankAccounts.deleted"));
+      refreshBankAccounts();
+    },
+    onError: () => {
+      toast.error(t("settingsPage.error"));
+    },
+  });
 
   const form = useForm<z.infer<typeof SettingsSchema>>({
     defaultValues: {
@@ -99,6 +139,31 @@ export default function SettingsCard({
       toast.error(t("settingsPage.error"));
     },
   });
+
+  const [accessCode, setAccessCode] = useState("");
+  const { execute: executeRedeem, status: redeemStatus } = useAction(
+    redeemAccessCode,
+    {
+      onSuccess: (data) => {
+        const result = data.data;
+        if (result?.success) {
+          toast.success(
+            t("settingsPage.accessCode.success", { plan: result.success })
+          );
+          setAccessCode("");
+        } else if (result?.error === "already_redeemed") {
+          toast.error(t("settingsPage.accessCode.errorAlreadyRedeemed"));
+        } else if (result?.error === "no_upgrade") {
+          toast.error(t("settingsPage.accessCode.errorNoUpgrade"));
+        } else {
+          toast.error(t("settingsPage.accessCode.errorInvalid"));
+        }
+      },
+      onError: () => {
+        toast.error(t("settingsPage.accessCode.errorInvalid"));
+      },
+    }
+  );
 
   const onSubmit = (values: z.infer<typeof SettingsSchema>) => {
     execute(values);
@@ -412,10 +477,158 @@ export default function SettingsCard({
                       {t("settingsPage.account.planHint")}
                     </p>
                   </div>
+
+                  {hasStripeCustomer && plan !== "FREE" && (
+                    <button
+                      type="button"
+                      disabled={billingLoading}
+                      onClick={async () => {
+                        setBillingLoading(true);
+                        try {
+                          const res = await fetch("/api/payment-dashboard", { method: "POST" });
+                          const data = await res.json();
+                          if (data.url) window.location.href = data.url;
+                          else toast.error(data.message);
+                        } catch {
+                          toast.error(t("settingsPage.error"));
+                        } finally {
+                          setBillingLoading(false);
+                        }
+                      }}
+                      className="mt-4 w-full rounded-2xl border border-line-strong bg-white/80 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white disabled:opacity-50"
+                    >
+                      {billingLoading
+                        ? "..."
+                        : t("settingsPage.account.manageBilling")}
+                    </button>
+                  )}
                 </div>
               </motion.section>
             </div>
           </Form>
+
+          {/* Access Code section */}
+          <motion.section variants={fadeUp}>
+            <div className="rounded-3xl border border-line bg-white/80 p-6">
+              <p className="text-sm font-semibold">
+                {t("settingsPage.accessCode.title")}
+              </p>
+              <div className="mt-4 flex gap-3">
+                <Input
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  placeholder={t("settingsPage.accessCode.placeholder")}
+                  disabled={redeemStatus === "executing"}
+                  className="border-line bg-white/60 focus:bg-white"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && accessCode.trim()) {
+                      executeRedeem({ code: accessCode.trim() });
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => executeRedeem({ code: accessCode.trim() })}
+                  disabled={
+                    redeemStatus === "executing" || !accessCode.trim()
+                  }
+                  className="shrink-0 rounded-2xl bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {redeemStatus === "executing"
+                    ? t("settingsPage.accessCode.redeeming")
+                    : t("settingsPage.accessCode.redeem")}
+                </button>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Bank Accounts section */}
+          <motion.section variants={fadeUp}>
+            <div className="rounded-3xl border border-line bg-white/80 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold">
+                    {t("settingsPage.bankAccounts.title")}
+                  </p>
+                  <p className="mt-1 text-xs text-ink-muted">
+                    {t("settingsPage.bankAccounts.subtitle")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingBankAccount(null);
+                    setBankDialogOpen(true);
+                  }}
+                  className="shrink-0 rounded-2xl bg-brand px-4 py-2 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
+                >
+                  {t("settingsPage.bankAccounts.addAccount")}
+                </button>
+              </div>
+
+              {bankAccounts.length === 0 ? (
+                <p className="mt-4 text-sm text-ink-muted">
+                  {t("settingsPage.bankAccounts.empty")}
+                </p>
+              ) : (
+                <motion.div
+                  className="mt-4 space-y-3"
+                  variants={listVariants}
+                >
+                  {bankAccounts.map((account) => (
+                    <motion.div
+                      key={account.id}
+                      variants={itemVariants}
+                      className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold truncate">
+                            {account.label}
+                          </span>
+                          {account.isDefault && (
+                            <span className="shrink-0 rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-semibold text-brand">
+                              {t("settingsPage.bankAccounts.default")}
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-0.5 text-xs text-ink-muted truncate">
+                          {account.iban}
+                          {account.bankName ? ` — ${account.bankName}` : ""}
+                        </p>
+                      </div>
+                      <div className="ml-3 flex shrink-0 gap-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingBankAccount(account);
+                            setBankDialogOpen(true);
+                          }}
+                          className="rounded-xl p-2 text-ink-muted transition hover:bg-ink-soft hover:text-ink"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => execDeleteBank({ id: account.id })}
+                          className="rounded-xl p-2 text-ink-muted transition hover:bg-red-50 hover:text-red-500"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </div>
+
+            <BankAccountFormDialog
+              open={bankDialogOpen}
+              onOpenChange={setBankDialogOpen}
+              account={editingBankAccount}
+              onSuccess={refreshBankAccounts}
+            />
+          </motion.section>
 
           {/* Business Profile section */}
           <motion.section variants={fadeUp}>

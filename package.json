@@ -46,7 +46,7 @@
     "react-hook-form": "^7.53.0",
     "react-icons": "^5.3.0",
     "sonner": "^1.5.0",
-    "stripe": "^16.10.0",
+    "stripe": "^20.4.1",
     "swissqrbill": "^4.3.0",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
