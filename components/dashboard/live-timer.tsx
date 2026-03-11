@@ -14,6 +14,8 @@ type LiveTimerProps = {
   endedAt: string | null;
   /** Session breaks */
   breaks: BreakData[];
+  /** When true, stops the interval (used for PAUSED sessions) */
+  paused?: boolean;
   /** CSS class for the wrapper element */
   className?: string;
   /** Optional render function for custom formatting. Receives elapsed ms. */
@@ -52,17 +54,19 @@ export default function LiveTimer({
   startedAt,
   endedAt,
   breaks,
+  paused,
   className,
   children,
 }: LiveTimerProps) {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    // If the session has ended, no need to tick
-    if (endedAt) return;
+    if (endedAt || paused) return;
+    // Refresh now immediately so the first render after resume is accurate
+    setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
-  }, [endedAt]);
+  }, [endedAt, paused]);
 
   const elapsedMs = computeElapsedMs(startedAt, endedAt, breaks, now);
 

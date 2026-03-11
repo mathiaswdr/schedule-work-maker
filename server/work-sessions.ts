@@ -13,6 +13,16 @@ export type WorkSummary = {
   weekDays: { date: string; valueMs: number; breakMs: number; breakCount: number }[];
 };
 
+export class WorkSessionTransitionError extends Error {
+  statusCode: number;
+
+  constructor(message: string, statusCode = 409) {
+    super(message);
+    this.name = "WorkSessionTransitionError";
+    this.statusCode = statusCode;
+  }
+}
+
 export const getSessionUserId = cache(async () => {
   const session = await auth();
 
@@ -202,7 +212,7 @@ export async function getRecentSessions(userId: string, limit = 5) {
   });
 }
 
-export async function startOrResumeSession(
+export async function startSession(
   userId: string,
   timezone?: string,
   clientId?: string,
@@ -211,88 +221,114 @@ export async function startOrResumeSession(
   const now = new Date();
   const session = await getActiveSession(userId);
 
-  if (!session) {
-    return prisma.workSession.create({
-      data: {
-        userId,
-        status: WorkSessionStatus.RUNNING,
-        startedAt: now,
-        timezone,
-        clientId: clientId ?? null,
-        projectId: projectId ?? null,
-      },
-      include: {
-        breaks: true,
-        client: { select: { id: true, name: true, color: true } },
-        project: { select: { id: true, name: true } },
-      },
-    });
+  if (session) {
+    throw new WorkSessionTransitionError("An active session already exists");
   }
 
-  if (session.status === WorkSessionStatus.PAUSED) {
-    const openBreak = session.breaks.find((pause) => !pause.endedAt);
-
-    await prisma.$transaction([
-      ...(openBreak
-        ? [
-            prisma.workBreak.update({
-              where: { id: openBreak.id },
-              data: { endedAt: now },
-            }),
-          ]
-        : []),
-      prisma.workSession.update({
-        where: { id: session.id },
-        data: { status: WorkSessionStatus.RUNNING },
-      }),
-    ]);
-  }
-
-  return getActiveSession(userId);
+  return prisma.workSession.create({
+    data: {
+      userId,
+      status: WorkSessionStatus.RUNNING,
+      startedAt: now,
+      timezone,
+      clientId: clientId ?? null,
+      projectId: projectId ?? null,
+    },
+    include: {
+      breaks: true,
+      client: { select: { id: true, name: true, color: true } },
+      project: { select: { id: true, name: true } },
+    },
+  });
 }
 
-export async function pauseOrStopSession(userId: string) {
+export async function pauseSession(userId: string) {
   const now = new Date();
   const session = await getActiveSession(userId);
 
   if (!session) {
-    return null;
+    throw new WorkSessionTransitionError("No active session to pause");
   }
 
-  if (session.status === WorkSessionStatus.RUNNING) {
-    await prisma.$transaction([
-      prisma.workBreak.create({
-        data: {
-          sessionId: session.id,
-          startedAt: now,
-        },
-      }),
-      prisma.workSession.update({
-        where: { id: session.id },
-        data: { status: WorkSessionStatus.PAUSED },
-      }),
-    ]);
-  } else if (session.status === WorkSessionStatus.PAUSED) {
-    const openBreak = session.breaks.find((pause) => !pause.endedAt);
-
-    await prisma.$transaction([
-      ...(openBreak
-        ? [
-            prisma.workBreak.update({
-              where: { id: openBreak.id },
-              data: { endedAt: now },
-            }),
-          ]
-        : []),
-      prisma.workSession.update({
-        where: { id: session.id },
-        data: {
-          status: WorkSessionStatus.ENDED,
-          endedAt: now,
-        },
-      }),
-    ]);
+  if (session.status !== WorkSessionStatus.RUNNING) {
+    throw new WorkSessionTransitionError("Only a running session can be paused");
   }
+
+  await prisma.$transaction([
+    prisma.workBreak.create({
+      data: {
+        sessionId: session.id,
+        startedAt: now,
+      },
+    }),
+    prisma.workSession.update({
+      where: { id: session.id },
+      data: { status: WorkSessionStatus.PAUSED },
+    }),
+  ]);
+
+  return getActiveSession(userId);
+}
+
+export async function resumeSession(userId: string) {
+  const now = new Date();
+  const session = await getActiveSession(userId);
+
+  if (!session) {
+    throw new WorkSessionTransitionError("No paused session to resume");
+  }
+
+  if (session.status !== WorkSessionStatus.PAUSED) {
+    throw new WorkSessionTransitionError("Only a paused session can be resumed");
+  }
+
+  const openBreak = session.breaks.find((pause) => !pause.endedAt);
+
+  await prisma.$transaction([
+    ...(openBreak
+      ? [
+          prisma.workBreak.update({
+            where: { id: openBreak.id },
+            data: { endedAt: now },
+          }),
+        ]
+      : []),
+    prisma.workSession.update({
+      where: { id: session.id },
+      data: { status: WorkSessionStatus.RUNNING },
+    }),
+  ]);
+
+  return getActiveSession(userId);
+}
+
+export async function endSession(userId: string) {
+  const now = new Date();
+  const session = await getActiveSession(userId);
+
+  if (!session) {
+    throw new WorkSessionTransitionError("No active session to end");
+  }
+
+  const openBreak = session.breaks.find((pause) => !pause.endedAt);
+
+  await prisma.$transaction([
+    ...(openBreak
+      ? [
+          prisma.workBreak.update({
+            where: { id: openBreak.id },
+            data: { endedAt: now },
+          }),
+        ]
+      : []),
+    prisma.workSession.update({
+      where: { id: session.id },
+      data: {
+        status: WorkSessionStatus.ENDED,
+        endedAt: now,
+      },
+    }),
+  ]);
 
   return getActiveSession(userId);
 }

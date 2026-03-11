@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import {
+  endSession,
   getActiveSession,
   getRecentSessions,
   getSessionUserId,
   getWorkSummary,
-  pauseOrStopSession,
-  startOrResumeSession,
+  pauseSession,
+  resumeSession,
+  startSession,
+  WorkSessionTransitionError,
 } from "@/server/work-sessions";
 
 export async function GET() {
@@ -27,10 +30,24 @@ export async function POST(request: Request) {
   const clientId = typeof payload?.clientId === "string" ? payload.clientId : undefined;
   const projectId = typeof payload?.projectId === "string" ? payload.projectId : undefined;
 
-  if (action === "start") {
-    await startOrResumeSession(userId, timezone, clientId, projectId);
-  } else if (action === "stop") {
-    await pauseOrStopSession(userId);
+  try {
+    if (action === "start") {
+      await startSession(userId, timezone, clientId, projectId);
+    } else if (action === "pause") {
+      await pauseSession(userId);
+    } else if (action === "resume") {
+      await resumeSession(userId);
+    } else if (action === "end") {
+      await endSession(userId);
+    } else {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    }
+  } catch (error) {
+    if (error instanceof WorkSessionTransitionError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
+
+    throw error;
   }
 
   const [session, summary, recentSessions] = await Promise.all([

@@ -12,37 +12,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const REQUIRED_FIELDS = [
-  "companyName",
-  "address",
-  "city",
-  "postalCode",
-  "country",
-  "email",
-] as const;
-
 const DISMISS_KEY = "business-profile-prompt-dismissed";
 
-export default function BusinessProfilePrompt() {
+export default function BusinessProfilePrompt({
+  shouldPrompt,
+}: {
+  shouldPrompt: boolean;
+}) {
   const t = useTranslations("dashboard");
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const dismissed = sessionStorage.getItem(DISMISS_KEY);
-    if (dismissed) return;
-
-    fetch("/api/business-profile", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => {
-        const profile = data.profile;
-        const missing = REQUIRED_FIELDS.some(
-          (field) => !profile?.[field]
-        );
-        if (missing) setOpen(true);
-      })
-      .catch(() => null);
-  }, []);
+    if (dismissed || !shouldPrompt) return;
+    setOpen(true);
+  }, [shouldPrompt]);
 
   const handleDismiss = () => {
     sessionStorage.setItem(DISMISS_KEY, "1");

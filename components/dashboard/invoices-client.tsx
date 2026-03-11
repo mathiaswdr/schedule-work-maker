@@ -80,6 +80,7 @@ type InvoicesClientProps = {
   displayClassName: string;
   userPlan?: string;
   invoiceLimit?: { allowed: boolean; current: number; max: number | null };
+  initialInvoices?: InvoiceListItem[];
 };
 
 const statusColors: Record<string, string> = {
@@ -92,6 +93,7 @@ export default function InvoicesClient({
   displayClassName,
   userPlan,
   invoiceLimit,
+  initialInvoices,
 }: InvoicesClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
@@ -100,8 +102,9 @@ export default function InvoicesClient({
   const { confirm, ConfirmDialogElement } = useConfirm();
   const searchParams = useSearchParams();
 
-  const [invoices, setInvoices] = useState<InvoiceListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const hasInitialInvoices = initialInvoices !== undefined;
+  const [invoices, setInvoices] = useState<InvoiceListItem[]>(initialInvoices ?? []);
+  const [isLoading, setIsLoading] = useState(!hasInitialInvoices);
   const [selectedId, setSelectedId] = useState<string | null>(
     searchParams.get("id")
   );
@@ -144,10 +147,12 @@ export default function InvoicesClient({
   };
 
   useEffect(() => {
+    if (hasInitialInvoices) return;
+
     fetchInvoices()
       .catch(() => null)
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [hasInitialInvoices]);
 
   const { execute: execDelete } = useAction(deleteInvoice, {
     onSuccess: () => {
@@ -557,9 +562,9 @@ export default function InvoicesClient({
                     {t("invoices.subtitle")}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   {invoiceLimit?.max !== null && invoiceLimit?.max !== undefined && (
-                    <span className="rounded-full bg-ink-soft px-3 py-1 text-xs font-semibold text-ink-muted">
+                    <span className="self-start rounded-full bg-ink-soft px-3 py-1 text-xs font-semibold text-ink-muted sm:self-auto">
                       {invoiceLimit.current}/{invoiceLimit.max}
                     </span>
                   )}
@@ -570,7 +575,7 @@ export default function InvoicesClient({
                       setFormOpen(true);
                     }}
                     disabled={invoiceLimit ? !invoiceLimit.allowed : false}
-                    className="flex items-center gap-2 rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start"
                   >
                     <Plus className="h-4 w-4" />
                     {t("invoices.addInvoice")}
@@ -582,7 +587,7 @@ export default function InvoicesClient({
                       setUploadFormOpen(true);
                     }}
                     disabled={invoiceLimit ? !invoiceLimit.allowed : false}
-                    className="flex items-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start"
                   >
                     <Upload className="h-4 w-4" />
                     {t("invoices.uploadInvoice")}
@@ -628,81 +633,81 @@ export default function InvoicesClient({
                     variants={v.list}
                   >
                     {filtered.map((inv) => (
-                      <motion.div
-                        key={inv.id}
-                        variants={v.item}
-                        onClick={() => setSelectedId(inv.id)}
-                        className="group cursor-pointer rounded-2xl border border-line bg-white/80 p-5 transition hover:border-line-strong hover:shadow-[0_20px_40px_-32px_rgba(15,118,110,0.45)]"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold">
-                              {inv.displayNumber}
-                            </p>
-                            {inv.source === "UPLOADED" && (
-                              <span className="rounded-full bg-ink-soft px-2 py-0.5 text-[10px] text-ink-muted">
-                                {t("invoices.uploaded")}
-                              </span>
-                            )}
-                          </div>
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${statusColors[inv.status]}`}
-                          >
-                            {t(`invoices.status.${inv.status}`)}
-                          </span>
-                        </div>
-                        <div className="mt-3 flex items-center gap-2">
-                          {inv.client?.color && (
+                      <motion.div key={inv.id} variants={v.item}>
+                        <div
+                          onClick={() => setSelectedId(inv.id)}
+                          className="group cursor-pointer rounded-2xl border border-line bg-white/80 p-5 transition hover:border-line-strong hover:shadow-[0_20px_40px_-32px_rgba(15,118,110,0.45)]"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold">
+                                {inv.displayNumber}
+                              </p>
+                              {inv.source === "UPLOADED" && (
+                                <span className="rounded-full bg-ink-soft px-2 py-0.5 text-[10px] text-ink-muted">
+                                  {t("invoices.uploaded")}
+                                </span>
+                              )}
+                            </div>
                             <span
-                              className="h-2.5 w-2.5 rounded-full"
-                              style={{
-                                backgroundColor: inv.client.color,
-                              }}
-                            />
-                          )}
-                          <span className="text-sm text-ink-muted">
-                            {inv.clientName || "—"}
-                          </span>
-                        </div>
-                        <div className="mt-2 flex items-center justify-between">
-                          <span className="text-xs text-ink-muted">
-                            {dateFormatter.format(
-                              new Date(inv.issueDate)
+                              className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${statusColors[inv.status]}`}
+                            >
+                              {t(`invoices.status.${inv.status}`)}
+                            </span>
+                          </div>
+                          <div className="mt-3 flex items-center gap-2">
+                            {inv.client?.color && (
+                              <span
+                                className="h-2.5 w-2.5 rounded-full"
+                                style={{
+                                  backgroundColor: inv.client.color,
+                                }}
+                              />
                             )}
-                          </span>
-                          <span className="text-sm font-semibold">
-                            {currencyFormatter.format(inv.total)}
-                          </span>
-                        </div>
+                            <span className="text-sm text-ink-muted">
+                              {inv.clientName || "—"}
+                            </span>
+                          </div>
+                          <div className="mt-2 flex items-center justify-between">
+                            <span className="text-xs text-ink-muted">
+                              {dateFormatter.format(
+                                new Date(inv.issueDate)
+                              )}
+                            </span>
+                            <span className="text-sm font-semibold">
+                              {currencyFormatter.format(inv.total)}
+                            </span>
+                          </div>
 
-                        {/* Hover actions */}
-                        <div className="mt-3 flex gap-2 opacity-0 transition group-hover:opacity-100">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (inv.source === "UPLOADED") {
-                                setEditingUploadedInvoice(inv);
-                                setUploadFormOpen(true);
-                              } else {
-                                setEditingInvoice(inv);
-                                setFormOpen(true);
-                              }
-                            }}
-                            className="rounded-xl border border-line bg-white px-2 py-1 text-xs text-ink-muted hover:bg-white/80"
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(inv.id);
-                            }}
-                            className="rounded-xl border border-line bg-white px-2 py-1 text-xs text-red-500 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
+                          {/* Hover actions */}
+                          <div className="mt-3 flex gap-2 opacity-0 transition group-hover:opacity-100">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (inv.source === "UPLOADED") {
+                                  setEditingUploadedInvoice(inv);
+                                  setUploadFormOpen(true);
+                                } else {
+                                  setEditingInvoice(inv);
+                                  setFormOpen(true);
+                                }
+                              }}
+                              className="rounded-xl border border-line bg-white px-2 py-1 text-xs text-ink-muted hover:bg-white/80"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(inv.id);
+                              }}
+                              className="rounded-xl border border-line bg-white px-2 py-1 text-xs text-red-500 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
                         </div>
                       </motion.div>
                     ))}

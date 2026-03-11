@@ -219,7 +219,7 @@ export default function SettingsCard({
 
   return (
     <main className="w-full">
-      <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
+      <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-4 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
         <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
         <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
@@ -266,7 +266,7 @@ export default function SettingsCard({
                 className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
               >
                 {/* Name + Avatar form */}
-                <div className="rounded-3xl border border-line bg-white/80 p-6 shadow-[0_28px_60px_-48px_rgba(249,115,22,0.35)]">
+                <div className="overflow-hidden rounded-3xl border border-line bg-white/80 p-4 shadow-[0_28px_60px_-48px_rgba(249,115,22,0.35)] sm:p-6">
                   <p className="text-sm font-semibold">
                     {t("settingsPage.profile.title")}
                   </p>
@@ -373,7 +373,7 @@ export default function SettingsCard({
                 </div>
 
                 {/* Account info panel */}
-                <div className="rounded-3xl border border-line bg-panel p-6">
+                <div className="overflow-hidden rounded-3xl border border-line bg-panel p-4 sm:p-6">
                   <p className="text-sm font-semibold">
                     {t("settingsPage.account.title")}
                   </p>
@@ -383,12 +383,12 @@ export default function SettingsCard({
                   >
                     <motion.div
                       variants={itemVariants}
-                      className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3"
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-white/70 px-4 py-3"
                     >
-                      <span className="text-sm text-ink-muted">
+                      <span className="shrink-0 text-sm text-ink-muted">
                         {t("settingsPage.account.emailLabel")}
                       </span>
-                      <span className="text-sm font-semibold">
+                      <span className="min-w-0 truncate text-sm font-semibold">
                         {session.user?.email ?? "\u2014"}
                       </span>
                     </motion.div>
@@ -509,7 +509,7 @@ export default function SettingsCard({
 
           {/* Access Code section */}
           <motion.section variants={fadeUp}>
-            <div className="rounded-3xl border border-line bg-white/80 p-6">
+            <div className="overflow-hidden rounded-3xl border border-line bg-white/80 p-4 sm:p-6">
               <p className="text-sm font-semibold">
                 {t("settingsPage.accessCode.title")}
               </p>
@@ -544,7 +544,7 @@ export default function SettingsCard({
 
           {/* Bank Accounts section */}
           <motion.section variants={fadeUp}>
-            <div className="rounded-3xl border border-line bg-white/80 p-6">
+            <div className="overflow-hidden rounded-3xl border border-line bg-white/80 p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold">

@@ -63,6 +63,7 @@ type ClientsClientProps = {
   currency: string;
   userPlan?: string;
   clientLimit?: { allowed: boolean; current: number; max: number | null };
+  initialClients?: ClientItem[];
 };
 
 const formatDuration = (ms: number) => {
@@ -88,15 +89,16 @@ const getSessionMs = (
   return Math.max(end.getTime() - start.getTime() - breakMs, 0);
 };
 
-export default function ClientsClient({ displayClassName, currency, userPlan, clientLimit }: ClientsClientProps) {
+export default function ClientsClient({ displayClassName, currency, userPlan, clientLimit, initialClients }: ClientsClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const { confirm, ConfirmDialogElement } = useConfirm();
-  const [clients, setClients] = useState<ClientItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const hasInitialClients = initialClients !== undefined;
+  const [clients, setClients] = useState<ClientItem[]>(initialClients ?? []);
+  const [isLoading, setIsLoading] = useState(!hasInitialClients);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientItem | null>(null);
 
@@ -131,6 +133,8 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
   };
 
   useEffect(() => {
+    if (hasInitialClients) return;
+
     let isMounted = true;
     fetchClients()
       .catch(() => null)
@@ -140,7 +144,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [hasInitialClients]);
 
   const handleEdit = (client: ClientItem, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -708,44 +712,44 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
               {selectedClient.invoices.length > 0 ? (
                 <div className="space-y-3">
                   {selectedClient.invoices.map((inv) => (
-                    <motion.div
-                      key={inv.id}
-                      variants={v.item}
-                      onClick={() => router.push(`/dashboard/invoices?id=${inv.id}`)}
-                      className="flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm transition hover:shadow-md"
-                    >
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-4 w-4 text-ink-muted/60" />
-                        <span className="font-medium">{inv.displayNumber}</span>
-                        {inv.source === "UPLOADED" && (
-                          <span className="rounded-full bg-ink-soft px-2 py-0.5 text-[10px] font-medium text-ink-muted">
-                            {t("clients.invoiceUploaded")}
+                    <motion.div key={inv.id} variants={v.item}>
+                      <div
+                        onClick={() => router.push(`/dashboard/invoices?id=${inv.id}`)}
+                        className="flex cursor-pointer flex-col gap-2 rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between sm:gap-0"
+                      >
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <FileText className="h-4 w-4 shrink-0 text-ink-muted/60" />
+                          <span className="shrink-0 font-medium">{inv.displayNumber}</span>
+                          {inv.source === "UPLOADED" && (
+                            <span className="shrink-0 rounded-full bg-ink-soft px-2 py-0.5 text-[10px] font-medium text-ink-muted">
+                              {t("clients.invoiceUploaded")}
+                            </span>
+                          )}
+                          {inv.project && (
+                            <span className="truncate rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">
+                              {inv.project.name}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 pl-6 sm:gap-4 sm:pl-0">
+                          <span className="text-xs text-ink-muted">
+                            {invoiceDateFormatter.format(new Date(inv.issueDate))}
                           </span>
-                        )}
-                        {inv.project && (
-                          <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">
-                            {inv.project.name}
+                          <span className="font-medium">
+                            {currencyFormatter.format(inv.total)}
                           </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs text-ink-muted">
-                          {invoiceDateFormatter.format(new Date(inv.issueDate))}
-                        </span>
-                        <span className="font-medium">
-                          {currencyFormatter.format(inv.total)}
-                        </span>
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                            inv.status === "PAID"
-                              ? "bg-green-100 text-green-700"
-                              : inv.status === "SENT"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-ink-soft text-ink-muted"
-                          }`}
-                        >
-                          {t(`clients.invoiceStatus.${inv.status}`)}
-                        </span>
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                              inv.status === "PAID"
+                                ? "bg-green-100 text-green-700"
+                                : inv.status === "SENT"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-ink-soft text-ink-muted"
+                            }`}
+                          >
+                            {t(`clients.invoiceStatus.${inv.status}`)}
+                          </span>
+                        </div>
                       </div>
                     </motion.div>
                   ))}
@@ -847,50 +851,50 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
           ) : (
             <motion.section variants={v.fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {clients.map((client) => (
-                <motion.div
-                  key={client.id}
-                  variants={v.item}
-                  onClick={() => fetchClientDetail(client.id)}
-                  className="group relative cursor-pointer rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: client.color ?? "#6B7280" }}
-                      />
-                      <div>
-                        <p className="font-semibold">{client.name}</p>
-                        {client.email && (
-                          <p className="text-xs text-ink-muted">{client.email}</p>
-                        )}
+                <motion.div key={client.id} variants={v.item}>
+                  <div
+                    onClick={() => fetchClientDetail(client.id)}
+                    className="group relative cursor-pointer rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="h-3 w-3 rounded-full"
+                          style={{ backgroundColor: client.color ?? "#6B7280" }}
+                        />
+                        <div>
+                          <p className="font-semibold">{client.name}</p>
+                          {client.email && (
+                            <p className="text-xs text-ink-muted">{client.email}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-1 opacity-0 pointer-events-none transition group-hover:opacity-100 group-hover:pointer-events-auto">
+                        <button
+                          type="button"
+                          onClick={(e) => handleEdit(client, e)}
+                          className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleDelete(client.id, e)}
+                          className="rounded-lg p-1.5 text-ink-muted hover:bg-red-50 hover:text-red-600"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex gap-1 opacity-0 transition group-hover:opacity-100">
-                      <button
-                        type="button"
-                        onClick={(e) => handleEdit(client, e)}
-                        className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => handleDelete(client.id, e)}
-                        className="rounded-lg p-1.5 text-ink-muted hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                    {client.notes && (
+                      <p className="mt-2 line-clamp-2 text-xs text-ink-muted">
+                        {client.notes}
+                      </p>
+                    )}
+                    <div className="mt-3 flex gap-3 text-xs text-ink-muted">
+                      <span>{t("clients.projects", { count: client._count.projects })}</span>
+                      <span>{t("clients.sessions", { count: client._count.workSessions })}</span>
                     </div>
-                  </div>
-                  {client.notes && (
-                    <p className="mt-2 line-clamp-2 text-xs text-ink-muted">
-                      {client.notes}
-                    </p>
-                  )}
-                  <div className="mt-3 flex gap-3 text-xs text-ink-muted">
-                    <span>{t("clients.projects", { count: client._count.projects })}</span>
-                    <span>{t("clients.sessions", { count: client._count.workSessions })}</span>
                   </div>
                 </motion.div>
               ))}

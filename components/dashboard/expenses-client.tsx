@@ -53,6 +53,7 @@ type ExpenseDetail = ExpenseItem & {
 type ExpensesClientProps = {
   displayClassName: string;
   currency: string;
+  initialExpenses?: ExpenseItem[];
 };
 
 // ── Donut colors ──
@@ -73,14 +74,16 @@ const DONUT_COLORS = [
 export default function ExpensesClient({
   displayClassName,
   currency,
+  initialExpenses,
 }: ExpensesClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
   const locale = useLocale();
   const shouldReduceMotion = useReducedMotion();
   const { confirm, ConfirmDialogElement } = useConfirm();
-  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const hasInitialExpenses = initialExpenses !== undefined;
+  const [expenses, setExpenses] = useState<ExpenseItem[]>(initialExpenses ?? []);
+  const [isLoading, setIsLoading] = useState(!hasInitialExpenses);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(
     null
@@ -147,6 +150,8 @@ export default function ExpensesClient({
   };
 
   useEffect(() => {
+    if (hasInitialExpenses) return;
+
     let isMounted = true;
     fetchExpenses()
       .catch(() => null)
@@ -156,7 +161,7 @@ export default function ExpensesClient({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [hasInitialExpenses]);
 
   // ── Handlers ──
 
@@ -759,9 +764,8 @@ export default function ExpensesClient({
           ) : (
             <motion.section variants={v.fadeUp} className="space-y-3">
               {expenses.map((expense) => (
-                <motion.div
-                  key={expense.id}
-                  variants={v.item}
+                <motion.div key={expense.id} variants={v.item}>
+                <div
                   onClick={() => fetchExpenseDetail(expense.id)}
                   className="group flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 transition hover:shadow-md"
                 >
@@ -821,6 +825,7 @@ export default function ExpensesClient({
                       </button>
                     </div>
                   </div>
+                </div>
                 </motion.div>
               ))}
             </motion.section>

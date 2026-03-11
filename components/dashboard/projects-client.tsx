@@ -25,15 +25,17 @@ type ProjectItem = {
 
 type ProjectsClientProps = {
   displayClassName: string;
+  initialProjects?: ProjectItem[];
 };
 
-export default function ProjectsClient({ displayClassName }: ProjectsClientProps) {
+export default function ProjectsClient({ displayClassName, initialProjects }: ProjectsClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
   const shouldReduceMotion = useReducedMotion();
   const { confirm, ConfirmDialogElement } = useConfirm();
-  const [projects, setProjects] = useState<ProjectItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const hasInitialProjects = initialProjects !== undefined;
+  const [projects, setProjects] = useState<ProjectItem[]>(initialProjects ?? []);
+  const [isLoading, setIsLoading] = useState(!hasInitialProjects);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [serviceTypeDialogOpen, setServiceTypeDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
@@ -52,6 +54,8 @@ export default function ProjectsClient({ displayClassName }: ProjectsClientProps
   };
 
   useEffect(() => {
+    if (hasInitialProjects) return;
+
     let isMounted = true;
     fetchProjects()
       .catch(() => null)
@@ -61,7 +65,7 @@ export default function ProjectsClient({ displayClassName }: ProjectsClientProps
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [hasInitialProjects]);
 
   const handleEdit = (project: ProjectItem) => {
     setEditingProject(project);
@@ -113,11 +117,11 @@ export default function ProjectsClient({ displayClassName }: ProjectsClientProps
                 {t("projects.subtitle")}
               </p>
             </div>
-            <div className="flex gap-2 self-start">
+            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
               <button
                 type="button"
                 onClick={() => setServiceTypeDialogOpen(true)}
-                className="flex items-center gap-2 whitespace-nowrap rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink"
+                className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink sm:flex-none"
               >
                 <Settings2 className="h-4 w-4" />
                 {t("projects.manageServiceTypes")}
@@ -125,7 +129,7 @@ export default function ProjectsClient({ displayClassName }: ProjectsClientProps
               <button
                 type="button"
                 onClick={handleAdd}
-                className="flex items-center gap-2 whitespace-nowrap rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
+                className="flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90 sm:flex-none"
               >
                 <Plus className="h-4 w-4" />
                 {t("projects.addProject")}
@@ -155,11 +159,8 @@ export default function ProjectsClient({ displayClassName }: ProjectsClientProps
           ) : (
             <motion.section variants={v.fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {projects.map((project) => (
-                <motion.div
-                  key={project.id}
-                  variants={v.item}
-                  className="group relative rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md"
-                >
+                <motion.div key={project.id} variants={v.item}>
+                <div className="group relative rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-semibold">{project.name}</p>
@@ -169,7 +170,7 @@ export default function ProjectsClient({ displayClassName }: ProjectsClientProps
                         </p>
                       )}
                     </div>
-                    <div className="flex gap-1 opacity-0 transition group-hover:opacity-100">
+                    <div className="flex gap-1 transition sm:opacity-0 sm:group-hover:opacity-100">
                       <button
                         type="button"
                         onClick={() => handleEdit(project)}
@@ -211,6 +212,7 @@ export default function ProjectsClient({ displayClassName }: ProjectsClientProps
                   <div className="mt-3 text-xs text-ink-muted">
                     {t("projects.sessions", { count: project._count.workSessions })}
                   </div>
+                </div>
                 </motion.div>
               ))}
             </motion.section>

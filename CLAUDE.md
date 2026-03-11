@@ -32,7 +32,7 @@ Note: `db:generate`, `db:push`, and `push` scripts in package.json reference Dri
 - `auth.ts` — NextAuth v5 (beta) config. Google OAuth provider, JWT strategy, PrismaAdapter. Creates Stripe customer on user signup. Access session via `auth()`.
 - `prisma.ts` — Prisma client singleton.
 - `stripe.ts` — Stripe client instance.
-- `work-sessions.ts` — Core business logic: `startOrResumeSession()`, `pauseOrStopSession()`, `getWorkSummary()`, time calculation helpers (`getSessionMs`, `getBreakMs`).
+- `work-sessions.ts` — Core business logic: `startSession()`, `pauseSession()`, `resumeSession()`, `endSession()`, `getWorkSummary()`, time calculation helpers (`getSessionMs`, `getBreakMs`).
 - `actions/` — Server actions using `next-safe-action` with Zod schemas for type-safe mutations.
 
 ### Components

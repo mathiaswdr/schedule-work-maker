@@ -35,6 +35,8 @@ type SessionsClientProps = {
   displayClassName: string;
   currency: string;
   hourlyRate: number;
+  initialSessions?: SessionItem[];
+  initialActiveSession?: SessionItem | null;
 };
 
 // ── Helpers ──
@@ -63,6 +65,8 @@ export default function SessionsClient({
   displayClassName,
   currency,
   hourlyRate,
+  initialSessions,
+  initialActiveSession,
 }: SessionsClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
@@ -70,9 +74,11 @@ export default function SessionsClient({
   const shouldReduceMotion = useReducedMotion();
   const { confirm, ConfirmDialogElement } = useConfirm();
 
-  const [sessions, setSessions] = useState<SessionItem[]>([]);
-  const [activeSession, setActiveSession] = useState<SessionItem | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const hasInitialSessions = initialSessions !== undefined;
+  const hasInitialActiveSession = initialActiveSession !== undefined;
+  const [sessions, setSessions] = useState<SessionItem[]>(initialSessions ?? []);
+  const [activeSession, setActiveSession] = useState<SessionItem | null>(initialActiveSession ?? null);
+  const [isLoading, setIsLoading] = useState(!(hasInitialSessions && hasInitialActiveSession));
   const [editingSession, setEditingSession] = useState<SessionItem | null>(
     null
   );
@@ -97,6 +103,8 @@ export default function SessionsClient({
   }, []);
 
   useEffect(() => {
+    if (hasInitialSessions && hasInitialActiveSession) return;
+
     let isMounted = true;
     fetchSessions()
       .catch(() => null)
@@ -106,7 +114,7 @@ export default function SessionsClient({
     return () => {
       isMounted = false;
     };
-  }, [fetchSessions]);
+  }, [fetchSessions, hasInitialActiveSession, hasInitialSessions]);
 
   // ── Handlers ──
 
@@ -362,9 +370,8 @@ export default function SessionsClient({
                 const durationMs = getSessionDurationMs(session);
                 const revenue = hourlyRate * (durationMs / 3600000);
                 return (
-                  <motion.div
-                    key={session.id}
-                    variants={v.item}
+                  <motion.div key={session.id} variants={v.item}>
+                  <div
                     onClick={() => handleEdit(session)}
                     className="group flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 transition hover:shadow-md"
                   >
@@ -435,6 +442,7 @@ export default function SessionsClient({
                         </button>
                       </div>
                     </div>
+                  </div>
                   </motion.div>
                 );
               })}

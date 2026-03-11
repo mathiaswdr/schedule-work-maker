@@ -3,12 +3,22 @@ import DashboardSidebar from "@/components/dashboard/sidebar";
 import BusinessProfilePrompt from "@/components/dashboard/business-profile-prompt";
 import { auth } from "@/server/auth";
 import { type PlanId } from "@/lib/plans";
+import { prisma } from "@/server/prisma";
 
 const body = Space_Grotesk({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
+
+const REQUIRED_PROFILE_FIELDS = [
+  "companyName",
+  "address",
+  "city",
+  "postalCode",
+  "country",
+  "email",
+] as const;
 
 export default async function DashboardLayout({
   children,
@@ -17,6 +27,22 @@ export default async function DashboardLayout({
 }) {
   const session = await auth();
   const userPlan = (session?.user?.plan ?? "FREE") as PlanId;
+  const businessProfile = session?.user?.id
+    ? await prisma.businessProfile.findUnique({
+        where: { userId: session.user.id },
+        select: {
+          companyName: true,
+          address: true,
+          city: true,
+          postalCode: true,
+          country: true,
+          email: true,
+        },
+      })
+    : null;
+  const shouldPromptForBusinessProfile = !!session?.user?.id && REQUIRED_PROFILE_FIELDS.some(
+    (field) => !businessProfile?.[field]
+  );
 
   return (
     <div className={`${body.className} min-h-screen w-full bg-paper text-ink`}>
@@ -24,7 +50,7 @@ export default async function DashboardLayout({
         <DashboardSidebar userPlan={userPlan} />
         <div className="min-w-0 flex-1">{children}</div>
       </div>
-      <BusinessProfilePrompt />
+      <BusinessProfilePrompt shouldPrompt={shouldPromptForBusinessProfile} />
     </div>
   );
 }
