@@ -117,7 +117,7 @@ export default function ProjectsClient({ displayClassName, initialProjects }: Pr
                 {t("projects.subtitle")}
               </p>
             </div>
-            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <button
                 type="button"
                 onClick={() => setServiceTypeDialogOpen(true)}
@@ -160,7 +160,7 @@ export default function ProjectsClient({ displayClassName, initialProjects }: Pr
             <motion.section variants={v.fadeUp} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {projects.map((project) => (
                 <motion.div key={project.id} variants={v.item}>
-                <div className="group relative rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md">
+                <div className="group relative h-full rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-semibold">{project.name}</p>

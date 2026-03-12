@@ -854,7 +854,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                 <motion.div key={client.id} variants={v.item}>
                   <div
                     onClick={() => fetchClientDetail(client.id)}
-                    className="group relative cursor-pointer rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md"
+                    className="group relative h-full cursor-pointer rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
