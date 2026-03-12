@@ -2,92 +2,91 @@ import type { Variants, Transition } from "framer-motion";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-// ── Container (stagger children) ──
+// ── Container (single quick reveal) ──
 
 export const containerVariants: Variants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, y: 8 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.12, delayChildren: 0.04 },
+    y: 0,
+    transition: { duration: 0.22, ease: EASE },
   },
 };
 
 export const containerVariantsReduced: Variants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0, delayChildren: 0 } },
+  show: { opacity: 1, transition: { duration: 0.14 } },
 };
 
-// ── Fade-up section ──
+// ── Child sections (no extra entrance animation) ──
 
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+  hidden: {},
+  show: {},
 };
 
 export const fadeUpReduced: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.2 } },
+  hidden: {},
+  show: {},
 };
 
-// ── List (lighter stagger) ──
+// ── Lists (no stagger on page load) ──
 
 export const listVariants: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
+  show: {},
 };
 
 export const listVariantsReduced: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0 } },
+  show: {},
 };
 
-// ── Individual item ──
+// ── Individual items (static on initial load) ──
 
 export const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } },
+  hidden: {},
+  show: {},
 };
 
 export const itemVariantsReduced: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.15 } },
+  hidden: {},
+  show: {},
 };
 
-// ── Sidebar (slides from left) ──
+// ── Sidebar (single quick reveal) ──
 
 export const sidebarContainerVariants: Variants = {
-  hidden: { opacity: 0, y: 16 },
+  hidden: { opacity: 0, y: 8 },
   show: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.45,
+      duration: 0.22,
       ease: EASE,
-      staggerChildren: 0.08,
-      delayChildren: 0.04,
     },
   },
 };
 
 export const sidebarContainerVariantsReduced: Variants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0, delayChildren: 0 } },
+  show: { opacity: 1, transition: { duration: 0.14 } },
 };
 
 export const sidebarItemVariants: Variants = {
-  hidden: { opacity: 0, x: -10 },
-  show: { opacity: 1, x: 0, transition: { duration: 0.35, ease: EASE } },
+  hidden: {},
+  show: {},
 };
 
 export const sidebarItemVariantsReduced: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.15 } },
+  hidden: {},
+  show: {},
 };
 
 // ── Bar chart transition ──
 
 export const barTransition: Transition = {
-  duration: 0.6,
+  duration: 0.35,
   ease: EASE,
 };
 
