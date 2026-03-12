@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, Receipt, Settings2, Users } from "lucide-react";
@@ -34,6 +34,7 @@ function PlanBadge({ requiredPlan }: { requiredPlan: PlanId }) {
 
 export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
   const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations("dashboard");
   const shouldReduceMotion = useReducedMotion();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -55,6 +56,29 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
     const required = FEATURE_PLAN_MAP[key];
     return !isPlanSufficient(userPlan, required);
   };
+
+  useEffect(() => {
+    if (pathname !== "/dashboard") return;
+
+    let sessionsTimer: number | null = null;
+    let clientsTimer: number | null = null;
+
+    const startPrefetch = () => {
+      router.prefetch("/dashboard/sessions");
+      clientsTimer = window.setTimeout(() => {
+        router.prefetch("/dashboard/clients");
+      }, 400);
+    };
+
+    sessionsTimer = window.setTimeout(() => {
+      startPrefetch();
+    }, 1200);
+
+    return () => {
+      if (sessionsTimer !== null) window.clearTimeout(sessionsTimer);
+      if (clientsTimer !== null) window.clearTimeout(clientsTimer);
+    };
+  }, [pathname, router]);
 
   return (
     <>
@@ -90,6 +114,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={false}
                   className="block"
                 >
                   <motion.div
@@ -154,6 +179,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                     <Link
                       key={item.href}
                       href={item.href}
+                      prefetch={false}
                       onClick={() => setMoreOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
                         active
@@ -189,6 +215,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className="relative flex flex-1 flex-col items-center justify-center py-2"
               >
                 {active && (
