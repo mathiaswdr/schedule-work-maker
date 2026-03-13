@@ -71,7 +71,7 @@ type ClientDetail = ClientItem & {
   recentInvoices: ClientDetailInvoice[];
   hasMoreSessions: boolean;
   hasMoreInvoices: boolean;
-  analytics: ClientAnalytics;
+  analytics: ClientAnalytics | null;
 };
 
 type ClientsClientProps = {
@@ -121,6 +121,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
   // Detail view state
   const [selectedClient, setSelectedClient] = useState<ClientDetail | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false);
   const [isLoadingMoreSessions, setIsLoadingMoreSessions] = useState(false);
   const [isLoadingMoreInvoices, setIsLoadingMoreInvoices] = useState(false);
 
@@ -167,7 +168,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
       setSelectedClient((current) => ({
         ...payload.client,
         projects: payload.projects,
-        analytics: payload.analytics,
+        analytics: current?.id === payload.client.id ? current?.analytics ?? null : null,
         hasMoreSessions: payload.hasMoreSessions,
         hasMoreInvoices: payload.hasMoreInvoices,
         recentSessions: appendSessions
@@ -181,6 +182,27 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
       if (!appendSessions && !appendInvoices) {
         setIsDetailLoading(false);
       }
+    }
+  };
+
+  const fetchClientAnalytics = async (id: string) => {
+    setIsAnalyticsLoading(true);
+    try {
+      const response = await fetch(`/api/clients/${id}/analytics`, {
+        cache: "no-store",
+      });
+      if (!response.ok) return;
+      const payload = await response.json();
+      setSelectedClient((current) =>
+        current && current.id === id
+          ? {
+              ...current,
+              analytics: payload.analytics ?? null,
+            }
+          : current
+      );
+    } finally {
+      setIsAnalyticsLoading(false);
     }
   };
 
@@ -223,7 +245,9 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
   const handleDialogSuccess = () => {
     fetchClients();
     if (selectedClient) {
-      fetchClientDetail(selectedClient.id);
+      fetchClientDetail(selectedClient.id).then(() => {
+        void fetchClientAnalytics(selectedClient.id);
+      });
     }
   };
 
@@ -243,8 +267,9 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
     [locale]
   );
 
-  const dailyActivity = selectedClient?.analytics.dailyActivity ?? [];
-  const timeByProject = selectedClient?.analytics.timeByProject ?? [];
+  const analytics = selectedClient?.analytics ?? null;
+  const dailyActivity = analytics?.dailyActivity ?? [];
+  const timeByProject = analytics?.timeByProject ?? [];
   const maxDailyMs = useMemo(
     () => Math.max(...dailyActivity.map((d) => d.ms), 1),
     [dailyActivity]
@@ -291,9 +316,14 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
     [locale]
   );
 
-  const invoiceTotals = selectedClient?.analytics.invoiceTotals ?? {
+  const invoiceTotals = analytics?.invoiceTotals ?? {
     pending: 0,
     paid: 0,
+  };
+
+  const openClientDetail = async (id: string) => {
+    await fetchClientDetail(id);
+    void fetchClientAnalytics(id);
   };
 
   const handleLoadMoreSessions = async () => {
@@ -411,9 +441,13 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                 <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
                   {t("clients.totalTime")}
                 </p>
-                <p className="mt-2 text-2xl font-semibold">
-                  {formatDuration(selectedClient.analytics.totalTimeMs)}
-                </p>
+                {analytics ? (
+                  <p className="mt-2 text-2xl font-semibold">
+                    {formatDuration(analytics.totalTimeMs)}
+                  </p>
+                ) : (
+                  <div className="mt-3 h-8 w-24 animate-pulse rounded-lg bg-ink-soft" />
+                )}
               </div>
             </motion.section>
 
@@ -430,7 +464,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
             )}
 
             {/* ─── Analytics ─── */}
-            {dailyActivity.some((day) => day.ms > 0) && (
+            {analytics ? (
               <>
                 {/* Daily activity bar chart */}
                 <motion.section
@@ -503,15 +537,15 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                       {[
                         {
                           label: t("clients.avgSession"),
-                          value: formatDuration(selectedClient.analytics.avgSessionMs),
+                          value: formatDuration(analytics.avgSessionMs),
                         },
                         {
                           label: t("clients.longestSession"),
-                          value: formatDuration(selectedClient.analytics.longestSessionMs),
+                          value: formatDuration(analytics.longestSessionMs),
                         },
                         {
                           label: t("clients.productivity"),
-                          value: `${selectedClient.analytics.productivityPct}%`,
+                          value: `${analytics.productivityPct}%`,
                         },
                         {
                           label: t("clients.mostActiveDay"),
@@ -519,11 +553,11 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                         },
                         {
                           label: t("clients.totalBreaks"),
-                          value: String(selectedClient.analytics.totalBreakCount),
+                          value: String(analytics.totalBreakCount),
                         },
                         {
                           label: t("clients.avgBreakDuration"),
-                          value: formatDuration(selectedClient.analytics.avgBreakMs),
+                          value: formatDuration(analytics.avgBreakMs),
                         },
                       ].map((item) => (
                         <motion.div
@@ -557,8 +591,8 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                         {timeByProject.map((p) => {
                           const width = (p.ms / maxProjectMs) * 100;
                           const pct =
-                            selectedClient.analytics.totalTimeMs > 0
-                              ? Math.round((p.ms / selectedClient.analytics.totalTimeMs) * 100)
+                            analytics.totalTimeMs > 0
+                              ? Math.round((p.ms / analytics.totalTimeMs) * 100)
                               : 0;
                           return (
                             <motion.div
@@ -590,7 +624,15 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                   </motion.section>
                 )}
               </>
-            )}
+            ) : isAnalyticsLoading ? (
+              <motion.section
+                variants={v.fadeUp}
+                className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
+              >
+                <div className="h-64 animate-pulse rounded-3xl border border-line bg-white/80" />
+                <div className="h-64 animate-pulse rounded-3xl border border-line bg-panel" />
+              </motion.section>
+            ) : null}
 
             {/* Projects */}
             <motion.section variants={v.fadeUp}>
@@ -864,7 +906,9 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
               {clients.map((client) => (
                 <motion.div key={client.id} variants={v.item}>
                   <div
-                    onClick={() => fetchClientDetail(client.id)}
+                    onClick={() => {
+                      void openClientDetail(client.id);
+                    }}
                     className="group relative h-full cursor-pointer rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md"
                   >
                     <div className="flex items-start justify-between">
