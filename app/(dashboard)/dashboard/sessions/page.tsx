@@ -1,11 +1,16 @@
 import { Fraunces } from "next/font/google";
 import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
-import { getSessionUserId } from "@/server/work-sessions";
+import {
+  getEndedSessionMonthStats,
+  getSessionUserId,
+} from "@/server/work-sessions";
 import SessionsClient from "@/components/dashboard/sessions-client";
 import PlanGate from "@/components/dashboard/plan-gate";
 import { type PlanId } from "@/lib/plans";
 import { serializeForClient } from "@/lib/utils";
+
+const INITIAL_SESSIONS_PAGE_SIZE = 20;
 
 const display = Fraunces({
   subsets: ["latin"],
@@ -24,7 +29,7 @@ export default async function DashboardSessionsPage() {
       })
     : null;
 
-  const [initialActiveSession, initialSessions] = await Promise.all([
+  const [initialActiveSession, initialSessions, initialMonthStats] = await Promise.all([
     prisma.workSession.findFirst({
       where: {
         userId,
@@ -43,13 +48,21 @@ export default async function DashboardSessionsPage() {
         status: "ENDED",
       },
       orderBy: { startedAt: "desc" },
+      take: INITIAL_SESSIONS_PAGE_SIZE + 1,
       include: {
         breaks: { orderBy: { startedAt: "asc" } },
         client: { select: { id: true, name: true, color: true } },
         project: { select: { id: true, name: true } },
       },
     }),
+    getEndedSessionMonthStats(userId),
   ]);
+
+  const hasMoreInitialSessions =
+    initialSessions.length > INITIAL_SESSIONS_PAGE_SIZE;
+  const paginatedInitialSessions = hasMoreInitialSessions
+    ? initialSessions.slice(0, INITIAL_SESSIONS_PAGE_SIZE)
+    : initialSessions;
 
   return (
     <PlanGate userPlan={userPlan} requiredPlan="STARTER" feature="sessions">
@@ -58,7 +71,9 @@ export default async function DashboardSessionsPage() {
         currency={user?.currency ?? "CHF"}
         hourlyRate={user?.hourlyRate ?? 0}
         initialActiveSession={serializeForClient(initialActiveSession)}
-        initialSessions={serializeForClient(initialSessions)}
+        initialSessions={serializeForClient(paginatedInitialSessions)}
+        initialHasMore={hasMoreInitialSessions}
+        initialMonthStats={serializeForClient(initialMonthStats)}
       />
     </PlanGate>
   );

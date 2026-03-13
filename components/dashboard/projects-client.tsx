@@ -26,16 +26,25 @@ type ProjectItem = {
 type ProjectsClientProps = {
   displayClassName: string;
   initialProjects?: ProjectItem[];
+  initialHasMore?: boolean;
 };
 
-export default function ProjectsClient({ displayClassName, initialProjects }: ProjectsClientProps) {
+const PAGE_SIZE = 24;
+
+export default function ProjectsClient({
+  displayClassName,
+  initialProjects,
+  initialHasMore,
+}: ProjectsClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
   const shouldReduceMotion = useReducedMotion();
   const { confirm, ConfirmDialogElement } = useConfirm();
   const hasInitialProjects = initialProjects !== undefined;
   const [projects, setProjects] = useState<ProjectItem[]>(initialProjects ?? []);
+  const [hasMore, setHasMore] = useState(initialHasMore ?? false);
   const [isLoading, setIsLoading] = useState(!hasInitialProjects);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [serviceTypeDialogOpen, setServiceTypeDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
@@ -47,10 +56,16 @@ export default function ProjectsClient({ displayClassName, initialProjects }: Pr
     },
   });
 
-  const fetchProjects = async () => {
-    const response = await fetch("/api/projects", { cache: "no-store" });
+  const fetchProjects = async (offset = 0, append = false) => {
+    const response = await fetch(
+      `/api/projects?offset=${offset}&limit=${PAGE_SIZE}`,
+      { cache: "no-store" }
+    );
     const payload = await response.json();
-    setProjects(payload.projects);
+    setProjects((current) =>
+      append ? [...current, ...(payload.projects ?? [])] : payload.projects ?? []
+    );
+    setHasMore(Boolean(payload.hasMore));
   };
 
   useEffect(() => {
@@ -85,6 +100,15 @@ export default function ProjectsClient({ displayClassName, initialProjects }: Pr
       cancelLabel: tc("cancel"),
     });
     if (ok) executeDelete({ id });
+  };
+
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true);
+    try {
+      await fetchProjects(projects.length, true);
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
   const v = pickVariants(shouldReduceMotion);
@@ -216,6 +240,20 @@ export default function ProjectsClient({ displayClassName, initialProjects }: Pr
                 </motion.div>
               ))}
             </motion.section>
+          )}
+          {!isLoading && hasMore && (
+            <motion.div variants={v.fadeUp}>
+              <button
+                type="button"
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm font-medium text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isLoadingMore
+                  ? t("projects.loadingMore")
+                  : t("projects.loadMore")}
+              </button>
+            </motion.div>
           )}
         </motion.div>
       </div>

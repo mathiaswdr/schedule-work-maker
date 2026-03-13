@@ -13,6 +13,11 @@ export type WorkSummary = {
   weekDays: { date: string; valueMs: number; breakMs: number; breakCount: number }[];
 };
 
+export type EndedSessionMonthStats = {
+  totalMonthMs: number;
+  sessionCount: number;
+};
+
 export class WorkSessionTransitionError extends Error {
   statusCode: number;
 
@@ -210,6 +215,38 @@ export async function getRecentSessions(userId: string, limit = 5) {
       project: { select: { id: true, name: true } },
     },
   });
+}
+
+export async function getEndedSessionMonthStats(
+  userId: string
+): Promise<EndedSessionMonthStats> {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const monthSessions = await prisma.workSession.findMany({
+    where: {
+      userId,
+      status: WorkSessionStatus.ENDED,
+      startedAt: {
+        gte: monthStart,
+      },
+    },
+    include: {
+      breaks: {
+        select: {
+          startedAt: true,
+          endedAt: true,
+        },
+      },
+    },
+  });
+
+  return {
+    totalMonthMs: monthSessions.reduce(
+      (total, session) => total + getSessionMs(session, session.breaks, now),
+      0
+    ),
+    sessionCount: monthSessions.length,
+  };
 }
 
 export async function startSession(

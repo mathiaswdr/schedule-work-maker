@@ -31,13 +31,22 @@ type SessionItem = {
   project: { id: string; name: string } | null;
 };
 
+type SessionMonthStats = {
+  totalMonthMs: number;
+  sessionCount: number;
+};
+
 type SessionsClientProps = {
   displayClassName: string;
   currency: string;
   hourlyRate: number;
   initialSessions?: SessionItem[];
   initialActiveSession?: SessionItem | null;
+  initialHasMore?: boolean;
+  initialMonthStats?: SessionMonthStats;
 };
+
+const PAGE_SIZE = 20;
 
 // ── Helpers ──
 
@@ -67,6 +76,8 @@ export default function SessionsClient({
   hourlyRate,
   initialSessions,
   initialActiveSession,
+  initialHasMore,
+  initialMonthStats,
 }: SessionsClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
@@ -78,6 +89,11 @@ export default function SessionsClient({
   const hasInitialActiveSession = initialActiveSession !== undefined;
   const [sessions, setSessions] = useState<SessionItem[]>(initialSessions ?? []);
   const [activeSession, setActiveSession] = useState<SessionItem | null>(initialActiveSession ?? null);
+  const [hasMore, setHasMore] = useState(initialHasMore ?? false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [monthStats, setMonthStats] = useState<SessionMonthStats>(
+    initialMonthStats ?? { totalMonthMs: 0, sessionCount: 0 }
+  );
   const [isLoading, setIsLoading] = useState(!(hasInitialSessions && hasInitialActiveSession));
   const [editingSession, setEditingSession] = useState<SessionItem | null>(
     null
@@ -95,11 +111,18 @@ export default function SessionsClient({
 
   // ── Data fetching ──
 
-  const fetchSessions = useCallback(async () => {
-    const response = await fetch("/api/sessions", { cache: "no-store" });
+  const fetchSessions = useCallback(async (offset = 0, append = false) => {
+    const response = await fetch(
+      `/api/sessions?offset=${offset}&limit=${PAGE_SIZE}`,
+      { cache: "no-store" }
+    );
     const payload = await response.json();
-    setSessions(payload.sessions);
+    setSessions((current) =>
+      append ? [...current, ...(payload.sessions ?? [])] : payload.sessions ?? []
+    );
     setActiveSession(payload.activeSession ?? null);
+    setHasMore(Boolean(payload.hasMore));
+    setMonthStats(payload.monthStats ?? { totalMonthMs: 0, sessionCount: 0 });
   }, []);
 
   useEffect(() => {
@@ -168,22 +191,20 @@ export default function SessionsClient({
 
   // ── Stats ──
 
-  const monthSessions = useMemo(() => {
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    return sessions.filter((s) => new Date(s.startedAt) >= monthStart);
-  }, [sessions]);
-
-  const totalMonthMs = useMemo(
-    () => monthSessions.reduce((sum, s) => sum + getSessionDurationMs(s), 0),
-    [monthSessions]
-  );
-
-  const monthRevenue = hourlyRate * (totalMonthMs / 3600000);
+  const monthRevenue = hourlyRate * (monthStats.totalMonthMs / 3600000);
 
   // ── Animation variants ──
 
   const v = pickVariants(shouldReduceMotion);
+
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true);
+    try {
+      await fetchSessions(sessions.length, true);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   return (
     <main className="w-full">
@@ -313,7 +334,7 @@ export default function SessionsClient({
                   {t("sessions.hoursThisMonth")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
-                  {formatDuration(totalMonthMs)}
+                  {formatDuration(monthStats.totalMonthMs)}
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
@@ -336,7 +357,7 @@ export default function SessionsClient({
                   {t("sessions.sessionsThisMonth")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
-                  {monthSessions.length}
+                  {monthStats.sessionCount}
                 </p>
               </div>
             </motion.section>
@@ -446,6 +467,20 @@ export default function SessionsClient({
                   </motion.div>
                 );
               })}
+              {hasMore && (
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={handleLoadMore}
+                    disabled={isLoadingMore}
+                    className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm font-medium text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isLoadingMore
+                      ? t("sessions.loadingMore")
+                      : t("sessions.loadMore")}
+                  </button>
+                </div>
+              )}
             </motion.section>
           )}
         </motion.div>

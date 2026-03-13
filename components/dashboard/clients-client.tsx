@@ -52,10 +52,26 @@ type ClientDetailInvoice = {
   project: { id: string; name: string } | null;
 };
 
+type ClientAnalytics = {
+  totalTimeMs: number;
+  totalBreakMs: number;
+  totalBreakCount: number;
+  avgSessionMs: number;
+  longestSessionMs: number;
+  productivityPct: number;
+  avgBreakMs: number;
+  dailyActivity: { date: string; ms: number }[];
+  timeByProject: { name: string; color: string; ms: number }[];
+  invoiceTotals: { pending: number; paid: number };
+};
+
 type ClientDetail = ClientItem & {
   projects: ClientDetailProject[];
-  workSessions: ClientDetailSession[];
-  invoices: ClientDetailInvoice[];
+  recentSessions: ClientDetailSession[];
+  recentInvoices: ClientDetailInvoice[];
+  hasMoreSessions: boolean;
+  hasMoreInvoices: boolean;
+  analytics: ClientAnalytics;
 };
 
 type ClientsClientProps = {
@@ -105,6 +121,8 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
   // Detail view state
   const [selectedClient, setSelectedClient] = useState<ClientDetail | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [isLoadingMoreSessions, setIsLoadingMoreSessions] = useState(false);
+  const [isLoadingMoreInvoices, setIsLoadingMoreInvoices] = useState(false);
 
   const { execute: executeDelete } = useAction(deleteClient, {
     onSuccess: () => {
@@ -120,15 +138,49 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
     setClients(payload.clients);
   };
 
-  const fetchClientDetail = async (id: string) => {
-    setIsDetailLoading(true);
+  const fetchClientDetail = async (
+    id: string,
+    options?: {
+      sessionOffset?: number;
+      invoiceOffset?: number;
+      appendSessions?: boolean;
+      appendInvoices?: boolean;
+    }
+  ) => {
+    const {
+      sessionOffset = 0,
+      invoiceOffset = 0,
+      appendSessions = false,
+      appendInvoices = false,
+    } = options ?? {};
+
+    if (!appendSessions && !appendInvoices) {
+      setIsDetailLoading(true);
+    }
     try {
-      const response = await fetch(`/api/clients/${id}`, { cache: "no-store" });
+      const response = await fetch(
+        `/api/clients/${id}?sessionOffset=${sessionOffset}&invoiceOffset=${invoiceOffset}`,
+        { cache: "no-store" }
+      );
       if (!response.ok) return;
       const payload = await response.json();
-      setSelectedClient(payload.client);
+      setSelectedClient((current) => ({
+        ...payload.client,
+        projects: payload.projects,
+        analytics: payload.analytics,
+        hasMoreSessions: payload.hasMoreSessions,
+        hasMoreInvoices: payload.hasMoreInvoices,
+        recentSessions: appendSessions
+          ? [...(current?.recentSessions ?? []), ...(payload.recentSessions ?? [])]
+          : payload.recentSessions ?? [],
+        recentInvoices: appendInvoices
+          ? [...(current?.recentInvoices ?? []), ...(payload.recentInvoices ?? [])]
+          : payload.recentInvoices ?? [],
+      }));
     } finally {
-      setIsDetailLoading(false);
+      if (!appendSessions && !appendInvoices) {
+        setIsDetailLoading(false);
+      }
     }
   };
 
@@ -191,107 +243,16 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
     [locale]
   );
 
-  const totalTimeMs = useMemo(() => {
-    if (!selectedClient) return 0;
-    return selectedClient.workSessions.reduce(
-      (total, s) => total + getSessionMs(s, s.breaks),
-      0
-    );
-  }, [selectedClient]);
-
-  const totalBreakMs = useMemo(() => {
-    if (!selectedClient) return 0;
-    return selectedClient.workSessions.reduce((total, s) => {
-      const now = new Date();
-      return (
-        total +
-        s.breaks.reduce((bt, b) => {
-          const end = b.endedAt ? new Date(b.endedAt) : now;
-          return bt + (end.getTime() - new Date(b.startedAt).getTime());
-        }, 0)
-      );
-    }, 0);
-  }, [selectedClient]);
-
-  const totalBreakCount = useMemo(() => {
-    if (!selectedClient) return 0;
-    return selectedClient.workSessions.reduce((c, s) => c + s.breaks.length, 0);
-  }, [selectedClient]);
-
-  // Daily activity for last 14 days
-  const dailyActivity = useMemo(() => {
-    if (!selectedClient) return [];
-    const days: { date: Date; ms: number }[] = [];
-    const today = new Date();
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      d.setHours(0, 0, 0, 0);
-      days.push({ date: d, ms: 0 });
-    }
-    for (const s of selectedClient.workSessions) {
-      const sDate = new Date(s.startedAt);
-      sDate.setHours(0, 0, 0, 0);
-      const entry = days.find((d) => d.date.getTime() === sDate.getTime());
-      if (entry) entry.ms += getSessionMs(s, s.breaks);
-    }
-    return days;
-  }, [selectedClient]);
-
+  const dailyActivity = selectedClient?.analytics.dailyActivity ?? [];
+  const timeByProject = selectedClient?.analytics.timeByProject ?? [];
   const maxDailyMs = useMemo(
     () => Math.max(...dailyActivity.map((d) => d.ms), 1),
     [dailyActivity]
   );
-
-  // Time by project
-  const timeByProject = useMemo(() => {
-    if (!selectedClient) return [];
-    const map = new Map<string, { name: string; color: string; ms: number }>();
-    for (const s of selectedClient.workSessions) {
-      const key = s.project?.id ?? "__none__";
-      const label = s.project?.name ?? t("clients.noProjectLabel");
-      const existing = map.get(key) ?? { name: label, color: "#6B7280", ms: 0 };
-      existing.ms += getSessionMs(s, s.breaks);
-      map.set(key, existing);
-    }
-    // Assign colors from projects
-    for (const p of selectedClient.projects) {
-      const entry = map.get(p.id);
-      if (entry) entry.color = p.serviceType?.color ?? selectedClient.color ?? "#3B82F6";
-    }
-    const noneEntry = map.get("__none__");
-    if (noneEntry) noneEntry.color = "#9CA3AF";
-    return Array.from(map.values()).sort((a, b) => b.ms - a.ms);
-  }, [selectedClient, t]);
-
   const maxProjectMs = useMemo(
     () => Math.max(...timeByProject.map((p) => p.ms), 1),
     [timeByProject]
   );
-
-  // Highlights
-  const avgSessionMs = useMemo(() => {
-    if (!selectedClient || selectedClient.workSessions.length === 0) return 0;
-    return totalTimeMs / selectedClient.workSessions.length;
-  }, [selectedClient, totalTimeMs]);
-
-  const longestSessionMs = useMemo(() => {
-    if (!selectedClient) return 0;
-    return selectedClient.workSessions.reduce(
-      (max, s) => Math.max(max, getSessionMs(s, s.breaks)),
-      0
-    );
-  }, [selectedClient]);
-
-  const productivityPct = useMemo(() => {
-    if (totalTimeMs + totalBreakMs <= 0) return 0;
-    return Math.round((totalTimeMs / (totalTimeMs + totalBreakMs)) * 100);
-  }, [totalTimeMs, totalBreakMs]);
-
-  const avgBreakMs = useMemo(() => {
-    if (totalBreakCount <= 0) return 0;
-    return totalBreakMs / totalBreakCount;
-  }, [totalBreakMs, totalBreakCount]);
 
   const dayFormatter = useMemo(
     () => new Intl.DateTimeFormat(locale, { weekday: "short" }),
@@ -307,7 +268,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
     if (dailyActivity.length === 0) return "";
     const best = dailyActivity.reduce((a, b) => (b.ms > a.ms ? b : a));
     if (best.ms === 0) return "—";
-    return shortDateFormatter.format(best.date);
+    return shortDateFormatter.format(new Date(best.date));
   }, [dailyActivity, shortDateFormatter]);
 
   const currencyFormatter = useMemo(
@@ -330,17 +291,38 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
     [locale]
   );
 
-  const invoiceTotals = useMemo(() => {
-    if (!selectedClient) return { pending: 0, paid: 0 };
-    return selectedClient.invoices.reduce(
-      (acc, inv) => {
-        if (inv.status === "PAID") acc.paid += inv.total;
-        else acc.pending += inv.total;
-        return acc;
-      },
-      { pending: 0, paid: 0 }
-    );
-  }, [selectedClient]);
+  const invoiceTotals = selectedClient?.analytics.invoiceTotals ?? {
+    pending: 0,
+    paid: 0,
+  };
+
+  const handleLoadMoreSessions = async () => {
+    if (!selectedClient) return;
+    setIsLoadingMoreSessions(true);
+    try {
+      await fetchClientDetail(selectedClient.id, {
+        sessionOffset: selectedClient.recentSessions.length,
+        invoiceOffset: 0,
+        appendSessions: true,
+      });
+    } finally {
+      setIsLoadingMoreSessions(false);
+    }
+  };
+
+  const handleLoadMoreInvoices = async () => {
+    if (!selectedClient) return;
+    setIsLoadingMoreInvoices(true);
+    try {
+      await fetchClientDetail(selectedClient.id, {
+        sessionOffset: 0,
+        invoiceOffset: selectedClient.recentInvoices.length,
+        appendInvoices: true,
+      });
+    } finally {
+      setIsLoadingMoreInvoices(false);
+    }
+  };
 
   const v = pickVariants(shouldReduceMotion);
 
@@ -429,7 +411,9 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                 <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
                   {t("clients.totalTime")}
                 </p>
-                <p className="mt-2 text-2xl font-semibold">{formatDuration(totalTimeMs)}</p>
+                <p className="mt-2 text-2xl font-semibold">
+                  {formatDuration(selectedClient.analytics.totalTimeMs)}
+                </p>
               </div>
             </motion.section>
 
@@ -446,7 +430,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
             )}
 
             {/* ─── Analytics ─── */}
-            {selectedClient.workSessions.length > 0 && (
+            {dailyActivity.some((day) => day.ms > 0) && (
               <>
                 {/* Daily activity bar chart */}
                 <motion.section
@@ -471,10 +455,10 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                         const height =
                           day.ms > 0 ? Math.max((day.ms / maxDailyMs) * 100, 4) : 0;
                         const isToday =
-                          day.date.toDateString() === new Date().toDateString();
+                          new Date(day.date).toDateString() === new Date().toDateString();
                         return (
                           <motion.div
-                            key={day.date.toISOString()}
+                            key={day.date}
                             className="group relative flex flex-1 flex-col items-center"
                             style={{ height: "100%" }}
                             variants={v.item}
@@ -490,12 +474,15 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                               />
                             </div>
                             <span className="mt-1.5 text-[9px] text-ink-muted">
-                              {dayFormatter.format(day.date).charAt(0).toUpperCase()}
+                              {dayFormatter
+                                .format(new Date(day.date))
+                                .charAt(0)
+                                .toUpperCase()}
                             </span>
                             {/* Tooltip */}
                             {day.ms > 0 && (
                               <div className="pointer-events-none absolute -top-8 left-1/2 z-20 hidden -translate-x-1/2 rounded-lg bg-ink px-2 py-1 text-[10px] font-medium text-white whitespace-nowrap group-hover:block">
-                                {shortDateFormatter.format(day.date)} — {formatDuration(day.ms)}
+                                {shortDateFormatter.format(new Date(day.date))} — {formatDuration(day.ms)}
                               </div>
                             )}
                           </motion.div>
@@ -516,15 +503,15 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                       {[
                         {
                           label: t("clients.avgSession"),
-                          value: formatDuration(avgSessionMs),
+                          value: formatDuration(selectedClient.analytics.avgSessionMs),
                         },
                         {
                           label: t("clients.longestSession"),
-                          value: formatDuration(longestSessionMs),
+                          value: formatDuration(selectedClient.analytics.longestSessionMs),
                         },
                         {
                           label: t("clients.productivity"),
-                          value: `${productivityPct}%`,
+                          value: `${selectedClient.analytics.productivityPct}%`,
                         },
                         {
                           label: t("clients.mostActiveDay"),
@@ -532,11 +519,11 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                         },
                         {
                           label: t("clients.totalBreaks"),
-                          value: String(totalBreakCount),
+                          value: String(selectedClient.analytics.totalBreakCount),
                         },
                         {
                           label: t("clients.avgBreakDuration"),
-                          value: formatDuration(avgBreakMs),
+                          value: formatDuration(selectedClient.analytics.avgBreakMs),
                         },
                       ].map((item) => (
                         <motion.div
@@ -570,8 +557,8 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                         {timeByProject.map((p) => {
                           const width = (p.ms / maxProjectMs) * 100;
                           const pct =
-                            totalTimeMs > 0
-                              ? Math.round((p.ms / totalTimeMs) * 100)
+                            selectedClient.analytics.totalTimeMs > 0
+                              ? Math.round((p.ms / selectedClient.analytics.totalTimeMs) * 100)
                               : 0;
                           return (
                             <motion.div
@@ -647,9 +634,9 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
             {/* Recent sessions */}
             <motion.section variants={v.fadeUp}>
               <p className="mb-4 text-sm font-semibold">{t("clients.detailSessions")}</p>
-              {selectedClient.workSessions.length > 0 ? (
+              {selectedClient.recentSessions.length > 0 ? (
                 <div className="space-y-3">
-                  {selectedClient.workSessions.map((ws) => {
+                  {selectedClient.recentSessions.map((ws) => {
                     const duration = getSessionMs(ws, ws.breaks);
                     return (
                       <motion.div
@@ -680,6 +667,18 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                       </motion.div>
                     );
                   })}
+                  {selectedClient.hasMoreSessions && (
+                    <button
+                      type="button"
+                      onClick={handleLoadMoreSessions}
+                      disabled={isLoadingMoreSessions}
+                      className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm font-medium text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isLoadingMoreSessions
+                        ? t("clients.loadingMoreSessions")
+                        : t("clients.loadMoreSessions")}
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="rounded-2xl border border-dashed border-line bg-white/50 px-5 py-8 text-center text-sm text-ink-muted">
@@ -692,7 +691,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
             <motion.section variants={v.fadeUp}>
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-sm font-semibold">{t("clients.invoices")}</p>
-                {selectedClient.invoices.length > 0 && (
+                {selectedClient.recentInvoices.length > 0 && (
                   <div className="flex gap-3 text-xs">
                     <span className="text-ink-muted">
                       {t("clients.invoicesPending")}:{" "}
@@ -709,9 +708,9 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                   </div>
                 )}
               </div>
-              {selectedClient.invoices.length > 0 ? (
+              {selectedClient.recentInvoices.length > 0 ? (
                 <div className="space-y-3">
-                  {selectedClient.invoices.map((inv) => (
+                  {selectedClient.recentInvoices.map((inv) => (
                     <motion.div key={inv.id} variants={v.item}>
                       <div
                         onClick={() => router.push(`/dashboard/invoices?id=${inv.id}`)}
@@ -753,6 +752,18 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                       </div>
                     </motion.div>
                   ))}
+                  {selectedClient.hasMoreInvoices && (
+                    <button
+                      type="button"
+                      onClick={handleLoadMoreInvoices}
+                      disabled={isLoadingMoreInvoices}
+                      className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm font-medium text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isLoadingMoreInvoices
+                        ? t("clients.loadingMoreInvoices")
+                        : t("clients.loadMoreInvoices")}
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="rounded-2xl border border-dashed border-line bg-white/50 px-5 py-8 text-center text-sm text-ink-muted">

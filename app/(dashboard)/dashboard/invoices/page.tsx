@@ -7,6 +7,8 @@ import { checkInvoiceMonthlyLimit } from "@/lib/plan-limits";
 import { getSessionUserId } from "@/server/work-sessions";
 import { serializeForClient } from "@/lib/utils";
 
+const INITIAL_INVOICES_PAGE_SIZE = 24;
+
 const display = Fraunces({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
@@ -24,20 +26,36 @@ export default async function DashboardInvoicesPage() {
 
   const initialInvoices = await prisma.invoice.findMany({
     where: { userId },
-    include: {
-      items: { orderBy: { sortOrder: "asc" } },
+    select: {
+      id: true,
+      number: true,
+      displayNumber: true,
+      status: true,
+      source: true,
+      clientId: true,
+      projectId: true,
+      fileUrl: true,
+      issueDate: true,
+      total: true,
+      clientName: true,
       client: { select: { name: true, color: true } },
-      project: { select: { name: true } },
     },
     orderBy: { createdAt: "desc" },
+    take: INITIAL_INVOICES_PAGE_SIZE + 1,
   });
+  const hasMoreInitialInvoices =
+    initialInvoices.length > INITIAL_INVOICES_PAGE_SIZE;
+  const paginatedInitialInvoices = hasMoreInitialInvoices
+    ? initialInvoices.slice(0, INITIAL_INVOICES_PAGE_SIZE)
+    : initialInvoices;
 
   return (
     <InvoicesClient
       displayClassName={display.className}
       userPlan={userPlan}
       invoiceLimit={invoiceLimit}
-      initialInvoices={serializeForClient(initialInvoices)}
+      initialInvoices={serializeForClient(paginatedInitialInvoices)}
+      initialHasMore={hasMoreInitialInvoices}
     />
   );
 }

@@ -7,6 +7,8 @@ import PlanGate from "@/components/dashboard/plan-gate";
 import { type PlanId } from "@/lib/plans";
 import { serializeForClient } from "@/lib/utils";
 
+const INITIAL_PROJECTS_PAGE_SIZE = 24;
+
 const display = Fraunces({
   subsets: ["latin"],
   weight: ["600", "700", "800"],
@@ -20,18 +22,25 @@ export default async function DashboardProjectsPage() {
   const initialProjects = await prisma.project.findMany({
     where: { userId },
     orderBy: { name: "asc" },
+    take: INITIAL_PROJECTS_PAGE_SIZE + 1,
     include: {
       client: { select: { id: true, name: true, color: true } },
       serviceType: { select: { id: true, name: true, color: true } },
       _count: { select: { workSessions: true } },
     },
   });
+  const hasMoreInitialProjects =
+    initialProjects.length > INITIAL_PROJECTS_PAGE_SIZE;
+  const paginatedInitialProjects = hasMoreInitialProjects
+    ? initialProjects.slice(0, INITIAL_PROJECTS_PAGE_SIZE)
+    : initialProjects;
 
   return (
     <PlanGate userPlan={userPlan} requiredPlan="STARTER" feature="projects">
       <ProjectsClient
         displayClassName={display.className}
-        initialProjects={serializeForClient(initialProjects)}
+        initialProjects={serializeForClient(paginatedInitialProjects)}
+        initialHasMore={hasMoreInitialProjects}
       />
     </PlanGate>
   );

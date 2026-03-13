@@ -33,7 +33,7 @@ type InvoiceItem = {
   sortOrder: number;
 };
 
-type InvoiceListItem = {
+type InvoiceSummary = {
   id: string;
   number: number;
   displayNumber: string;
@@ -42,6 +42,13 @@ type InvoiceListItem = {
   fileUrl: string | null;
   clientId: string | null;
   projectId: string | null;
+  issueDate: string;
+  total: number;
+  clientName: string | null;
+  client: { name: string; color: string | null } | null;
+};
+
+type InvoiceDetail = InvoiceSummary & {
   templateType: string;
   customTemplateId: string | null;
   clientName: string | null;
@@ -72,7 +79,7 @@ type InvoiceListItem = {
   taxAmount: number;
   total: number;
   items: InvoiceItem[];
-  client: { name: string; color: string | null } | null;
+  client: { name: string; email: string | null; color: string | null } | null;
   project: { name: string } | null;
 };
 
@@ -80,8 +87,11 @@ type InvoicesClientProps = {
   displayClassName: string;
   userPlan?: string;
   invoiceLimit?: { allowed: boolean; current: number; max: number | null };
-  initialInvoices?: InvoiceListItem[];
+  initialInvoices?: InvoiceSummary[];
+  initialHasMore?: boolean;
 };
+
+const PAGE_SIZE = 24;
 
 const statusColors: Record<string, string> = {
   DRAFT: "bg-ink-soft text-ink-muted",
@@ -94,6 +104,7 @@ export default function InvoicesClient({
   userPlan,
   invoiceLimit,
   initialInvoices,
+  initialHasMore,
 }: InvoicesClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
@@ -103,20 +114,26 @@ export default function InvoicesClient({
   const searchParams = useSearchParams();
 
   const hasInitialInvoices = initialInvoices !== undefined;
-  const [invoices, setInvoices] = useState<InvoiceListItem[]>(initialInvoices ?? []);
+  const [invoices, setInvoices] = useState<InvoiceSummary[]>(initialInvoices ?? []);
+  const [hasMore, setHasMore] = useState(initialHasMore ?? false);
   const [isLoading, setIsLoading] = useState(!hasInitialInvoices);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(
     searchParams.get("id")
   );
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceDetail | null>(
+    null
+  );
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
-  const [editingInvoice, setEditingInvoice] = useState<InvoiceListItem | null>(
+  const [editingInvoice, setEditingInvoice] = useState<InvoiceDetail | null>(
     null
   );
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [downloading, setDownloading] = useState<string | null>(null);
   const [uploadFormOpen, setUploadFormOpen] = useState(false);
   const [editingUploadedInvoice, setEditingUploadedInvoice] =
-    useState<InvoiceListItem | null>(null);
+    useState<InvoiceDetail | null>(null);
   const [qrBillDialogOpen, setQrBillDialogOpen] = useState(false);
 
   const dateFormatter = useMemo(
@@ -138,11 +155,29 @@ export default function InvoicesClient({
     [locale]
   );
 
-  const fetchInvoices = async () => {
-    const res = await fetch("/api/invoices", { cache: "no-store" });
+  const fetchInvoices = async (offset = 0, append = false) => {
+    const res = await fetch(`/api/invoices?offset=${offset}&limit=${PAGE_SIZE}`, {
+      cache: "no-store",
+    });
     if (res.ok) {
       const data = await res.json();
-      setInvoices(data.invoices || []);
+      setInvoices((current) =>
+        append ? [...current, ...(data.invoices || [])] : data.invoices || []
+      );
+      setHasMore(Boolean(data.hasMore));
+    }
+  };
+
+  const fetchInvoiceDetail = async (id: string) => {
+    setIsDetailLoading(true);
+    try {
+      const res = await fetch(`/api/invoices/${id}`, { cache: "no-store" });
+      if (!res.ok) return null;
+      const data = await res.json();
+      setSelectedInvoice(data.invoice ?? null);
+      return data.invoice as InvoiceDetail | null;
+    } finally {
+      setIsDetailLoading(false);
     }
   };
 
@@ -154,10 +189,21 @@ export default function InvoicesClient({
       .finally(() => setIsLoading(false));
   }, [hasInitialInvoices]);
 
+  useEffect(() => {
+    if (!selectedId) {
+      setSelectedInvoice(null);
+      return;
+    }
+    if (selectedInvoice?.id === selectedId) return;
+
+    fetchInvoiceDetail(selectedId).catch(() => null);
+  }, [selectedId, selectedInvoice?.id]);
+
   const { execute: execDelete } = useAction(deleteInvoice, {
     onSuccess: () => {
       toast.success(t("invoices.deleted"));
       setSelectedId(null);
+      setSelectedInvoice(null);
       fetchInvoices();
     },
   });
@@ -166,6 +212,9 @@ export default function InvoicesClient({
     onSuccess: () => {
       toast.success(t("invoices.statusUpdated"));
       fetchInvoices();
+      if (selectedId) {
+        fetchInvoiceDetail(selectedId).catch(() => null);
+      }
     },
   });
 
@@ -192,7 +241,7 @@ export default function InvoicesClient({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const inv = invoices.find((i) => i.id === id);
+      const inv = invoices.find((i) => i.id === id) ?? selectedInvoice;
       const ext = format === "docx" ? ".docx" : ".pdf";
       const suffix = format === "qrbill" ? "-qr" : "";
       a.download = `${inv?.displayNumber ?? "invoice"}${suffix}${ext}`;
@@ -205,7 +254,7 @@ export default function InvoicesClient({
     }
   };
 
-  const selected = invoices.find((i) => i.id === selectedId) ?? null;
+  const selected = selectedInvoice?.id === selectedId ? selectedInvoice : null;
 
   const filtered =
     statusFilter === "all"
@@ -232,6 +281,32 @@ export default function InvoicesClient({
 
   const v = pickVariants(shouldReduceMotion);
 
+  const handleLoadMore = async () => {
+    setIsLoadingMore(true);
+    try {
+      await fetchInvoices(invoices.length, true);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const handleOpenInvoice = (id: string) => {
+    setSelectedId(id);
+  };
+
+  const handleEditInvoice = async (id: string, source: "GENERATED" | "UPLOADED") => {
+    const detail =
+      selectedInvoice?.id === id ? selectedInvoice : await fetchInvoiceDetail(id);
+    if (!detail) return;
+    if (source === "UPLOADED") {
+      setEditingUploadedInvoice(detail);
+      setUploadFormOpen(true);
+      return;
+    }
+    setEditingInvoice(detail);
+    setFormOpen(true);
+  };
+
   return (
     <main className="w-full">
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
@@ -246,19 +321,32 @@ export default function InvoicesClient({
           animate="show"
         >
           {/* ===== DETAIL VIEW ===== */}
-          {selected ? (
+          {selectedId ? (
             <>
               <motion.section variants={v.fadeUp}>
                 <button
                   type="button"
-                  onClick={() => setSelectedId(null)}
+                  onClick={() => {
+                    setSelectedId(null);
+                    setSelectedInvoice(null);
+                  }}
                   className="flex items-center gap-2 text-sm text-ink-muted transition hover:text-ink"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   {t("invoices.back")}
                 </button>
               </motion.section>
-
+              {isDetailLoading || !selected ? (
+                <motion.div variants={v.fadeUp} className="space-y-3">
+                  {[...Array(3)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="h-20 w-full animate-pulse rounded-2xl bg-ink-soft"
+                    />
+                  ))}
+                </motion.div>
+              ) : (
+                <>
               <motion.section
                 variants={v.fadeUp}
                 className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
@@ -304,19 +392,11 @@ export default function InvoicesClient({
                       {t("invoices.detail.markAsPaid")}
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (selected.source === "UPLOADED") {
-                        setEditingUploadedInvoice(selected);
-                        setUploadFormOpen(true);
-                      } else {
-                        setEditingInvoice(selected);
-                        setFormOpen(true);
-                      }
-                    }}
-                    className="rounded-2xl border border-line bg-white/80 px-3 py-2 text-xs text-ink-muted transition hover:bg-white"
-                  >
+                    <button
+                      type="button"
+                      onClick={() => handleEditInvoice(selected.id, selected.source)}
+                      className="rounded-2xl border border-line bg-white/80 px-3 py-2 text-xs text-ink-muted transition hover:bg-white"
+                    >
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                   <button
@@ -541,6 +621,8 @@ export default function InvoicesClient({
                   </div>
                 </motion.section>
               )}
+                </>
+              )}
             </>
           ) : (
             /* ===== LIST VIEW ===== */
@@ -635,7 +717,7 @@ export default function InvoicesClient({
                     {filtered.map((inv) => (
                       <motion.div key={inv.id} variants={v.item}>
                         <div
-                          onClick={() => setSelectedId(inv.id)}
+                          onClick={() => handleOpenInvoice(inv.id)}
                           className="group cursor-pointer rounded-2xl border border-line bg-white/80 p-5 transition hover:border-line-strong hover:shadow-[0_20px_40px_-32px_rgba(15,118,110,0.45)]"
                         >
                           <div className="flex items-center justify-between">
@@ -685,13 +767,7 @@ export default function InvoicesClient({
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (inv.source === "UPLOADED") {
-                                  setEditingUploadedInvoice(inv);
-                                  setUploadFormOpen(true);
-                                } else {
-                                  setEditingInvoice(inv);
-                                  setFormOpen(true);
-                                }
+                                void handleEditInvoice(inv.id, inv.source);
                               }}
                               className="rounded-xl border border-line bg-white px-2 py-1 text-xs text-ink-muted hover:bg-white/80"
                             >
@@ -720,6 +796,20 @@ export default function InvoicesClient({
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="h-16 w-full animate-pulse rounded-2xl bg-ink-soft" />
                   ))}
+                </motion.div>
+              )}
+              {!isLoading && hasMore && (
+                <motion.div variants={v.fadeUp}>
+                  <button
+                    type="button"
+                    onClick={handleLoadMore}
+                    disabled={isLoadingMore}
+                    className="w-full rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm font-medium text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isLoadingMore
+                      ? t("invoices.loadingMore")
+                      : t("invoices.loadMore")}
+                  </button>
                 </motion.div>
               )}
             </>
