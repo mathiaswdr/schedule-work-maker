@@ -4,11 +4,13 @@ import { withAuthenticatedRoute } from "@/server/auth-helpers"
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuthenticatedRoute(async (userId) => {
+    const { id } = await params
+
     const expense = await prisma.expense.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
       include: {
         receipts: { orderBy: { createdAt: "desc" } },
       },

@@ -25,11 +25,12 @@ const getSessionMs = (
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuthenticatedRoute(async (userId) => {
+    const { id } = await params;
     const client = await prisma.client.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
       select: { id: true, color: true },
     });
 
@@ -39,7 +40,7 @@ export async function GET(
 
     const [projects, sessions, invoiceTotals] = await Promise.all([
       prisma.project.findMany({
-        where: { clientId: params.id, userId },
+        where: { clientId: id, userId },
         select: {
           id: true,
           name: true,
@@ -47,7 +48,7 @@ export async function GET(
         },
       }),
       prisma.workSession.findMany({
-        where: { clientId: params.id, userId },
+        where: { clientId: id, userId },
         select: {
           startedAt: true,
           endedAt: true,
@@ -62,7 +63,7 @@ export async function GET(
       }),
       prisma.invoice.groupBy({
         by: ["status"],
-        where: { clientId: params.id, userId },
+        where: { clientId: id, userId },
         _sum: { total: true },
       }),
     ]);

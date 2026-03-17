@@ -1,6 +1,6 @@
 import type { Variants, Transition } from "framer-motion";
 
-const EASE = [0.16, 1, 0.3, 1] as const;
+export const EASE = [0.16, 1, 0.3, 1] as const;
 
 // ── Container (single quick reveal) ──
 

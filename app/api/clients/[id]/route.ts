@@ -8,9 +8,10 @@ const DEFAULT_INVOICE_LIMIT = 20;
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return withAuthenticatedRoute(async (userId) => {
+    const { id } = await params;
     const { searchParams } = new URL(request.url);
     const sessionOffset = Math.max(
       Number(searchParams.get("sessionOffset") ?? "0"),
@@ -36,7 +37,7 @@ export async function GET(
     );
 
     const client = await prisma.client.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
       select: {
         id: true,
         name: true,
@@ -57,7 +58,7 @@ export async function GET(
 
     const [projects, recentSessions, recentInvoices] = await Promise.all([
       prisma.project.findMany({
-        where: { clientId: params.id, userId },
+        where: { clientId: id, userId },
         orderBy: { name: "asc" },
         include: {
           serviceType: { select: { id: true, name: true, color: true } },
@@ -65,7 +66,7 @@ export async function GET(
         },
       }),
       prisma.workSession.findMany({
-        where: { clientId: params.id, userId },
+        where: { clientId: id, userId },
         orderBy: { startedAt: "desc" },
         skip: sessionOffset,
         take: sessionLimit + 1,
@@ -84,7 +85,7 @@ export async function GET(
         },
       }),
       prisma.invoice.findMany({
-        where: { clientId: params.id, userId },
+        where: { clientId: id, userId },
         orderBy: [{ issueDate: "desc" }, { createdAt: "desc" }],
         skip: invoiceOffset,
         take: invoiceLimit + 1,
@@ -122,9 +123,10 @@ export async function GET(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
+  const { id } = await params;
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -132,7 +134,7 @@ export async function DELETE(
 
   const result = await prisma.client.deleteMany({
     where: {
-      id: params.id,
+      id,
       userId: session.user.id,
     },
   });

@@ -552,5 +552,7 @@ export async function generateInvoicePdf(invoice: InvoiceData): Promise<Buffer> 
       component = React.createElement(ClassicTemplate, { invoice });
   }
 
-  return renderToBuffer(component);
+  return renderToBuffer(
+    component as React.ReactElement<React.ComponentProps<typeof Document>>
+  );
 }

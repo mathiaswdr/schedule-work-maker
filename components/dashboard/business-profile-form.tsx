@@ -21,6 +21,7 @@ import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { upsertBusinessProfile } from "@/server/actions/business-profile";
 import { CloudinaryUploadButton } from "@/components/ui/cloudinary-upload-button";
+import { EASE } from "@/lib/motion-variants";
 
 type BusinessProfileData = {
   companyName: string | null;
@@ -102,7 +103,7 @@ const BusinessProfileForm = forwardRef<
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.4, ease: EASE },
     },
   };
 

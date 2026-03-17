@@ -14,17 +14,17 @@ test("login flow works with a magic link", async ({ page, request }, testInfo) =
 test("protected settings page redirects unauthenticated users", async ({ page }) => {
   await page.goto("/dashboard/settings");
 
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL("/auth/login");
   await expect(
-    page.getByRole("heading", { level: 1, name: /Track your hours\./i })
+    page.getByRole("heading", { level: 3, name: /Welcome back/i })
   ).toBeVisible();
 });
 
 test("protected subscription page redirects unauthenticated users", async ({ page }) => {
   await page.goto("/dashboard/subscription");
 
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL("/auth/login");
   await expect(
-    page.getByRole("heading", { level: 1, name: /Track your hours\./i })
+    page.getByRole("heading", { level: 3, name: /Welcome back/i })
   ).toBeVisible();
 });

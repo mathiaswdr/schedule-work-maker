@@ -7,7 +7,7 @@ import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, LogOut, Receipt, Settings2, Users } from "lucide-react";
-import { pickVariants } from "@/lib/motion-variants";
+import { EASE, pickVariants } from "@/lib/motion-variants";
 import { type PlanId, type FeatureKey, FEATURE_PLAN_MAP, isPlanSufficient } from "@/lib/plans";
 
 const navItems: { href: string; icon: typeof Clock; key: FeatureKey }[] = [
@@ -156,7 +156,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                 initial={{ opacity: 0, y: 12, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.2, ease: EASE }}
                 className="absolute bottom-full right-4 z-50 mb-2 min-w-[180px] overflow-hidden rounded-2xl border border-line bg-panel shadow-[0_12px_40px_-8px_rgba(0,0,0,0.12)]"
               >
                 {mobileMoreItems.map((item) => {
@@ -200,7 +200,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          transition={{ duration: 0.5, ease: EASE, delay: 0.2 }}
           className="flex items-center justify-around rounded-full border border-line bg-panel px-1 py-1 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.1)]"
         >
           {mobileMainItems.map((item) => {

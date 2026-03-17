@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { pickVariants } from "@/lib/motion-variants";
+import { EASE, pickVariants } from "@/lib/motion-variants";
 import { useAction } from "next-safe-action/hooks";
 import {
   ArrowLeft,
@@ -868,7 +868,7 @@ export default function ExpensesClient({
                           transition={{
                             duration: shouldReduceMotion ? 0 : 0.8,
                             delay: shouldReduceMotion ? 0 : i * 0.1,
-                            ease: [0.16, 1, 0.3, 1],
+                            ease: EASE,
                           }}
                         />
                       ))}

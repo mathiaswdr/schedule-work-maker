@@ -9,9 +9,10 @@ import type { QrBillData } from "@/lib/invoice-qrbill";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
+  const { id } = await params;
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -22,7 +23,7 @@ export async function POST(
   };
 
   const invoice = await prisma.invoice.findFirst({
-    where: { id: params.id, userId: session.user.id },
+    where: { id, userId: session.user.id },
     include: {
       items: { orderBy: { sortOrder: "asc" } },
       customTemplate: true,

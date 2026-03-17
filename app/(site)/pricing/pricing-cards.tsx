@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { type PlanId, type BillingPeriod, PLANS } from "@/lib/plans";
+import { EASE } from "@/lib/motion-variants";
 import { PricingCta } from "./pricing-cta";
 
 type PricingPlan = {
@@ -141,7 +142,7 @@ export function PricingCards({
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.25, ease: EASE }}
                     className="text-3xl font-semibold text-ink"
                   >
                     {displayPrice === 0 ? "0" : displayPrice} CHF

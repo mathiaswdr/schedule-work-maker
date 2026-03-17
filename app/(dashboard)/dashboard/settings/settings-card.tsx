@@ -38,6 +38,7 @@ import BankAccountFormDialog from "@/components/dashboard/bank-account-form-dial
 import { deleteBankAccount } from "@/server/actions/bank-accounts";
 import { Pencil, Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
+import { EASE } from "@/lib/motion-variants";
 
 const CURRENCIES = [
   { code: "CHF", label: "CHF – Franc suisse" },
@@ -282,7 +283,7 @@ export default function SettingsCard({
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.5, ease: EASE },
     },
   };
 
@@ -300,7 +301,7 @@ export default function SettingsCard({
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.4, ease: EASE },
     },
   };
 

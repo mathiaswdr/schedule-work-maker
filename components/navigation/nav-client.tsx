@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 import type { ExtendUser } from "@/next-auth";
 import { scrollToSection } from "@/utils/tools";
+import { EASE } from "@/lib/motion-variants";
 
 // Offset en pixels pour le scroll vers les ancres (positif = plus bas, negatif = plus haut)
 const ANCHOR_SCROLL_OFFSET = -40;
@@ -207,7 +208,7 @@ export default function NavClient({ user }: NavClientProps) {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.25, ease: EASE }}
               className="fixed left-4 right-4 top-[88px] z-50 overflow-hidden rounded-3xl border border-line bg-panel shadow-[0_12px_40px_-8px_rgba(0,0,0,0.1)]"
             >
               <div className="p-2">

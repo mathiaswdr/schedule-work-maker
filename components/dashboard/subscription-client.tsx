@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
-import { pickVariants } from "@/lib/motion-variants";
+import { EASE, pickVariants } from "@/lib/motion-variants";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { PLANS, canUpgrade, type PlanId, type BillingPeriod } from "@/lib/plans";
@@ -42,7 +42,7 @@ export default function SubscriptionClient({
       const data = await response.json();
 
       if (data.url) {
-        window.location.href = data.url;
+        window.location.assign(data.url);
       } else if (data.message) {
         toast.error(data.message);
       }
@@ -60,7 +60,7 @@ export default function SubscriptionClient({
       const data = await response.json();
 
       if (data.url) {
-        window.location.href = data.url;
+        window.location.assign(data.url);
       } else if (data.message) {
         toast.error(data.message);
       }
@@ -203,7 +203,7 @@ export default function SubscriptionClient({
                           initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -12 }}
-                          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                          transition={{ duration: 0.25, ease: EASE }}
                           className="whitespace-nowrap text-3xl font-semibold text-ink"
                         >
                           {displayPrice === 0 ? "0" : displayPrice} CHF

@@ -3,13 +3,15 @@ import { getRequestConfig } from "next-intl/server";
 
 const locales = ["fr", "en"] as const;
 
-const resolveLocale = () => {
-  const cookieLocale = cookies().get("NEXT_LOCALE")?.value;
+const resolveLocale = async () => {
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value;
   if (cookieLocale && locales.includes(cookieLocale as (typeof locales)[number])) {
     return cookieLocale;
   }
 
-  const acceptLanguage = headers().get("accept-language") ?? "";
+  const headerStore = await headers();
+  const acceptLanguage = headerStore.get("accept-language") ?? "";
   const accepted = acceptLanguage
     .split(",")
     .map((part) => part.trim().split(";")[0]?.toLowerCase())
@@ -26,7 +28,7 @@ const resolveLocale = () => {
 };
 
 export default getRequestConfig(async () => {
-  const resolvedLocale = resolveLocale();
+  const resolvedLocale = await resolveLocale();
 
   return {
     locale: resolvedLocale,
