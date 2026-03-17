@@ -86,6 +86,12 @@ body{
   overflow-x: hidden;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 @keyframes fade-up {
   0% {
     opacity: 0;

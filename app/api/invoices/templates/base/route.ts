@@ -9,7 +9,6 @@ import {
   AlignmentType,
   WidthType,
   BorderStyle,
-  ShadingType,
 } from "docx";
 
 const FONT = "Calibri";

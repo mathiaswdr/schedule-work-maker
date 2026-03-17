@@ -11,22 +11,29 @@ const CheckoutBody = z.object({
   billing: z.enum(["monthly", "yearly"]).default("monthly"),
 });
 
+const isResourceMissingError = (error: unknown): error is { code: string } =>
+  typeof error === "object" &&
+  error !== null &&
+  "code" in error &&
+  typeof error.code === "string" &&
+  error.code === "resource_missing";
+
 export async function POST(req: NextRequest) {
   try {
     const authSession = await auth();
 
-    if (!authSession?.user.id) {
+    if (!authSession?.user?.id) {
       return NextResponse.json({
-        message: "You need to be authenticated...",
+        message: "You need to be authenticated.",
         success: false,
-      }, { status: 200 });
+      }, { status: 401 });
     }
 
     const body = await req.json();
     const parsed = CheckoutBody.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ message: "Invalid plan.", success: false }, { status: 200 });
+      return NextResponse.json({ message: "Invalid plan.", success: false }, { status: 400 });
     }
 
     const targetPlan = parsed.data.plan as PlanId;
@@ -42,10 +49,12 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    if (!user) return NextResponse.json({ message: "No user found.", success: false }, { status: 200 });
+    if (!user) {
+      return NextResponse.json({ message: "No user found.", success: false }, { status: 404 });
+    }
 
     if (!canUpgrade(user.plan, targetPlan)) {
-      return NextResponse.json({ message: "You cannot upgrade to this plan.", success: false }, { status: 200 });
+      return NextResponse.json({ message: "You cannot upgrade to this plan.", success: false }, { status: 400 });
     }
 
     let stripeCustomerId = user.stripeCustomerId;
@@ -55,7 +64,9 @@ export async function POST(req: NextRequest) {
     }
 
     const priceId = getStripePriceId(targetPlan, billing);
-    if (!priceId) return NextResponse.json({ message: "Price not configured.", success: false }, { status: 200 });
+    if (!priceId) {
+      return NextResponse.json({ message: "Price not configured.", success: false }, { status: 500 });
+    }
 
     let session;
     try {
@@ -73,8 +84,8 @@ export async function POST(req: NextRequest) {
         success_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription?success=true`,
         cancel_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
       });
-    } catch (stripeError: any) {
-      if (stripeError?.code === "resource_missing") {
+    } catch (stripeError: unknown) {
+      if (isResourceMissingError(stripeError)) {
         stripeCustomerId = await createStripeCustomer(authSession.user.id, user.email, user.name);
 
         session = await stripe.checkout.sessions.create({
@@ -91,13 +102,19 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (!session.url) return NextResponse.json({ message: "An error occured.", success: false }, { status: 200 });
+    if (!session.url) {
+      return NextResponse.json({ message: "An error occurred.", success: false }, { status: 500 });
+    }
 
-    return NextResponse.json({ url: session.url }, { status: 200 });
+    return NextResponse.json({
+      url: session.url,
+      success: true,
+      message: "Redirecting to Stripe checkout.",
+    });
 
   } catch (error) {
     console.error("Error creating Stripe session:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ message: "Internal server error", success: false }, { status: 500 });
   }
 }
 

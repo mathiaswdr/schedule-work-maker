@@ -15,7 +15,7 @@ export default function SuccessComponent(){
 
     return(
         <div className="w-full min-h-screen flex justify-center items-center">
-            <h1 className="text-5xl font-medium">Thank's for purchasing the Pro version of Pokedy</h1>
+            <h1 className="text-5xl font-medium">Thank&apos;s for purchasing the Pro version of Pokedy</h1>
         </div>
     )
 }

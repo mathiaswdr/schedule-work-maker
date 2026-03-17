@@ -48,7 +48,7 @@ export default function InvoiceItemsEditor({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="hidden gap-3 text-xs uppercase tracking-[0.2em] text-ink-muted sm:grid sm:grid-cols-[1fr_2fr_0.7fr_0.9fr_0.8fr_auto]">
+      <div className="hidden gap-3 text-xs uppercase text-ink-muted sm:grid sm:grid-cols-[1fr_2fr_0.7fr_0.9fr_0.8fr_auto]">
         <span>{t("category")}</span>
         <span>{t("description")}</span>
         <span>{t("quantity")}</span>

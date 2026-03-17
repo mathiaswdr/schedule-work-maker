@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Fraunces, Space_Grotesk } from "next/font/google";
+import { DM_Serif_Display, Space_Grotesk } from "next/font/google";
 import { getTranslations } from "next-intl/server";
 
-const display = Fraunces({
+const display = DM_Serif_Display({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: "400",
   display: "swap",
 });
 
@@ -46,7 +46,7 @@ export default async function AboutPage() {
         <section className="mx-auto w-full maxW px-6 pb-12 pt-32">
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("hero.eyebrow")}
               </p>
               <h1
@@ -83,7 +83,7 @@ export default async function AboutPage() {
                     key={stat.label}
                     className="rounded-2xl border border-line bg-panel px-4 py-3"
                   >
-                    <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                    <p className="text-xs uppercase text-ink-muted">
                       {stat.label}
                     </p>
                     <p className="mt-1 text-lg font-semibold text-ink">
@@ -98,7 +98,7 @@ export default async function AboutPage() {
 
         <section className="mx-auto w-full maxW px-6 py-10">
           <div className="flex flex-col gap-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+            <p className="text-xs uppercase text-ink-muted">
               {t("mission.eyebrow")}
             </p>
             <h2
@@ -156,7 +156,7 @@ export default async function AboutPage() {
             </div>
 
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("story.eyebrow")}
               </p>
               <h2
@@ -183,7 +183,7 @@ export default async function AboutPage() {
 
         <section className="mx-auto w-full maxW px-6 pb-24">
           <div className="rounded-[32px] border border-line bg-brand-2/10 px-6 py-12 text-center sm:px-12">
-            <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+            <p className="text-xs uppercase text-ink-muted">
               {t("closing.eyebrow")}
             </p>
             <h2

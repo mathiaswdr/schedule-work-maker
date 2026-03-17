@@ -264,7 +264,7 @@ export default function UploadInvoiceDialog({
         <div className="space-y-4">
           {/* File upload — drag & drop */}
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+            <label className="text-xs uppercase text-ink-muted">
               {t("upload.file")}
             </label>
 
@@ -421,7 +421,7 @@ export default function UploadInvoiceDialog({
           {/* Invoice number + Total */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("upload.invoiceNumber")}
               </label>
               <Input
@@ -432,7 +432,7 @@ export default function UploadInvoiceDialog({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("upload.totalAmount")}
               </label>
               <Input
@@ -449,7 +449,7 @@ export default function UploadInvoiceDialog({
 
           {/* Client */}
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+            <label className="text-xs uppercase text-ink-muted">
               {t("form.selectClient")}
             </label>
             <Select value={clientId} onValueChange={setClientId}>
@@ -476,7 +476,7 @@ export default function UploadInvoiceDialog({
 
           {/* Project */}
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+            <label className="text-xs uppercase text-ink-muted">
               {t("form.selectProject")}
             </label>
             <Select value={projectId} onValueChange={setProjectId}>
@@ -497,7 +497,7 @@ export default function UploadInvoiceDialog({
           {/* Dates + Status */}
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("form.issueDate")}
               </label>
               <Input
@@ -508,7 +508,7 @@ export default function UploadInvoiceDialog({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("form.dueDate")}
               </label>
               <Input
@@ -519,7 +519,7 @@ export default function UploadInvoiceDialog({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("upload.status")}
               </label>
               <Select value={status} onValueChange={setStatus}>
@@ -539,7 +539,7 @@ export default function UploadInvoiceDialog({
 
           {/* Notes */}
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+            <label className="text-xs uppercase text-ink-muted">
               {t("notes")}
             </label>
             <textarea

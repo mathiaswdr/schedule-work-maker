@@ -191,7 +191,7 @@ export default function QrBillDialog({
         <div className="space-y-5">
           {/* Creditor section */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted">
+            <p className="text-xs font-semibold uppercase text-ink-muted">
               {t("creditor")}
             </p>
             <div className="space-y-3">
@@ -300,7 +300,7 @@ export default function QrBillDialog({
 
           {/* Debtor section */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-muted">
+            <p className="text-xs font-semibold uppercase text-ink-muted">
               {t("debtor")}
             </p>
             <div className="space-y-3">

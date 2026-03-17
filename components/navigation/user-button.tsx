@@ -7,14 +7,13 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
   
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import Image from "next/image"
-import { LogOut, Moon, Settings, Sun, TruckIcon, User, Captions, ChartNoAxesGantt } from "lucide-react"
+import { LogOut, Moon, Settings, Sun, User, Captions, ChartNoAxesGantt } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useState } from "react"
 import { Switch } from "../ui/switch"
@@ -28,16 +27,6 @@ export const UserButton = ({user}: Session) => {
     const {setTheme, theme} = useTheme()
     const [checked, setChecked] = useState(false)
     const router = useRouter()
-
-
-    function setSwitchState(){
-        switch(theme){
-            case "dark": return setChecked(true);
-            case "light": return setChecked(false);
-            case "system": return setChecked(false);
-        }
-    }
-
     return(
         <DropdownMenu modal={false}>
         <DropdownMenuTrigger>

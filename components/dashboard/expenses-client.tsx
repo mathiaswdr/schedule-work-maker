@@ -427,7 +427,7 @@ export default function ExpensesClient({
               className="grid gap-4 sm:grid-cols-3"
             >
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("expenses.amount")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
@@ -440,7 +440,7 @@ export default function ExpensesClient({
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("expenses.recurrence")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
@@ -450,7 +450,7 @@ export default function ExpensesClient({
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("expenses.startDate")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
@@ -675,7 +675,7 @@ export default function ExpensesClient({
             className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("eyebrow")}
               </p>
               <h1
@@ -704,7 +704,7 @@ export default function ExpensesClient({
               className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
             >
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("expenses.monthlyTotal")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
@@ -712,7 +712,7 @@ export default function ExpensesClient({
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("expenses.annualTotal")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
@@ -720,13 +720,13 @@ export default function ExpensesClient({
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("expenses.activeSubscriptions")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">{activeCount}</p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("expenses.avgPerSubscription")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">

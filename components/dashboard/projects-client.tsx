@@ -131,7 +131,7 @@ export default function ProjectsClient({
             className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("eyebrow")}
               </p>
               <h1 className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}>
@@ -198,6 +198,7 @@ export default function ProjectsClient({
                       <button
                         type="button"
                         onClick={() => handleEdit(project)}
+                        aria-label={t("projects.editProject")}
                         className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink"
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -205,6 +206,7 @@ export default function ProjectsClient({
                       <button
                         type="button"
                         onClick={() => handleDelete(project.id)}
+                        aria-label={t("projects.deleteProject")}
                         className="rounded-lg p-1.5 text-ink-muted hover:bg-red-50 hover:text-red-600"
                       >
                         <Trash2 className="h-3.5 w-3.5" />

@@ -34,8 +34,6 @@ export const createPaymentIntent = action
         }
     })
 
-    console.log(paymentIntent)
-
     return {
         success: {
             paymentIntentID: paymentIntent.id,

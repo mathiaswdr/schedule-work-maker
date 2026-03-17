@@ -1,4 +1,4 @@
-import { Fraunces } from "next/font/google";
+import { DM_Serif_Display } from "next/font/google";
 import TimeTrackingClient from "@/components/dashboard/time-tracking-client";
 import {
   getActiveSession,
@@ -9,9 +9,9 @@ import {
 import { prisma } from "@/server/prisma";
 import { serializeForClient } from "@/lib/utils";
 
-const display = Fraunces({
+const display = DM_Serif_Display({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: "400",
 });
 
 export default async function DashboardPage() {

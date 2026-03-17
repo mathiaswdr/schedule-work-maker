@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import { pickVariants } from "@/lib/motion-variants";
-import { useAction } from "next-safe-action/hooks";
 import { ArrowLeft, FileText, FolderKanban, Mail, Pencil, Plus, Trash2, Users } from "lucide-react";
-import { deleteClient } from "@/server/actions/clients";
 import ClientFormDialog from "@/components/dashboard/client-form-dialog";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
@@ -105,7 +103,7 @@ const getSessionMs = (
   return Math.max(end.getTime() - start.getTime() - breakMs, 0);
 };
 
-export default function ClientsClient({ displayClassName, currency, userPlan, clientLimit, initialClients }: ClientsClientProps) {
+export default function ClientsClient({ displayClassName, currency, clientLimit, initialClients }: ClientsClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
   const locale = useLocale();
@@ -124,14 +122,6 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
   const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false);
   const [isLoadingMoreSessions, setIsLoadingMoreSessions] = useState(false);
   const [isLoadingMoreInvoices, setIsLoadingMoreInvoices] = useState(false);
-
-  const { execute: executeDelete } = useAction(deleteClient, {
-    onSuccess: () => {
-      toast.success(t("clients.deleted"));
-      setSelectedClient(null);
-      fetchClients();
-    },
-  });
 
   const fetchClients = async () => {
     const response = await fetch("/api/clients", { cache: "no-store" });
@@ -239,7 +229,23 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
       confirmLabel: tc("delete"),
       cancelLabel: tc("cancel"),
     });
-    if (ok) executeDelete({ id });
+    if (!ok) return;
+
+    try {
+      const response = await fetch(`/api/clients/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Delete failed");
+      }
+
+      toast.success(t("clients.deleted"));
+      setSelectedClient(null);
+      await fetchClients();
+    } catch {
+      toast.error(t("settingsPage.error"));
+    }
   };
 
   const handleDialogSuccess = () => {
@@ -268,8 +274,14 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
   );
 
   const analytics = selectedClient?.analytics ?? null;
-  const dailyActivity = analytics?.dailyActivity ?? [];
-  const timeByProject = analytics?.timeByProject ?? [];
+  const dailyActivity = useMemo(
+    () => analytics?.dailyActivity ?? [],
+    [analytics?.dailyActivity]
+  );
+  const timeByProject = useMemo(
+    () => analytics?.timeByProject ?? [],
+    [analytics?.timeByProject]
+  );
   const maxDailyMs = useMemo(
     () => Math.max(...dailyActivity.map((d) => d.ms), 1),
     [dailyActivity]
@@ -407,6 +419,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                   <button
                     type="button"
                     onClick={() => handleEdit(selectedClient)}
+                    aria-label={t("clients.editClient")}
                     className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink"
                   >
                     <Pencil className="h-4 w-4" />
@@ -415,6 +428,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                   <button
                     type="button"
                     onClick={(e) => handleDelete(selectedClient.id, e)}
+                    aria-label={t("clients.deleteClient")}
                     className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -426,19 +440,19 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
             {/* Summary cards */}
             <motion.section variants={v.fadeUp} className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("clients.detailProjects")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">{selectedClient._count.projects}</p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("clients.sessions", { count: "" }).replace(/^\s+/, "").replace(/\s+$/, "")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">{selectedClient._count.workSessions}</p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("clients.totalTime")}
                 </p>
                 {analytics ? (
@@ -780,7 +794,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                             {currencyFormatter.format(inv.total)}
                           </span>
                           <span
-                            className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                            className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase ${
                               inv.status === "PAID"
                                 ? "bg-green-100 text-green-700"
                                 : inv.status === "SENT"
@@ -829,6 +843,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
           onSuccess={handleDialogSuccess}
           editingClient={editingClient}
         />
+        {ConfirmDialogElement}
       </main>
     );
   }
@@ -852,7 +867,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
             className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("eyebrow")}
               </p>
               <h1 className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}>
@@ -928,6 +943,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                         <button
                           type="button"
                           onClick={(e) => handleEdit(client, e)}
+                          aria-label={t("clients.editClient")}
                           className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -935,6 +951,7 @@ export default function ClientsClient({ displayClassName, currency, userPlan, cl
                         <button
                           type="button"
                           onClick={(e) => handleDelete(client.id, e)}
+                          aria-label={t("clients.deleteClient")}
                           className="rounded-lg p-1.5 text-ink-muted hover:bg-red-50 hover:text-red-600"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

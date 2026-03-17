@@ -24,8 +24,14 @@ export default function BusinessProfilePrompt({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (!shouldPrompt) {
+      sessionStorage.removeItem(DISMISS_KEY);
+      setOpen(false);
+      return;
+    }
+
     const dismissed = sessionStorage.getItem(DISMISS_KEY);
-    if (dismissed || !shouldPrompt) return;
+    if (dismissed) return;
     setOpen(true);
   }, [shouldPrompt]);
 

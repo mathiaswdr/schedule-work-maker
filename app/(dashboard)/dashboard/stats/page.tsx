@@ -1,4 +1,4 @@
-import { Fraunces } from "next/font/google";
+import { DM_Serif_Display } from "next/font/google";
 import { prisma } from "@/server/prisma";
 import {
   getActiveSession,
@@ -10,9 +10,9 @@ import StatsClient from "@/components/dashboard/stats-client";
 import PlanGate from "@/components/dashboard/plan-gate";
 import { type PlanId } from "@/lib/plans";
 
-const display = Fraunces({
+const display = DM_Serif_Display({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: "400",
   display: "swap",
 });
 

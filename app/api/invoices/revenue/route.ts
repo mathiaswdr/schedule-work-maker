@@ -1,22 +1,23 @@
 import { NextResponse } from "next/server"
-import { getSessionUserId } from "@/server/work-sessions"
 import { prisma } from "@/server/prisma"
+import { withAuthenticatedRoute } from "@/server/auth-helpers"
 
 export async function GET() {
-  const userId = await getSessionUserId()
-  const now = new Date()
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  return withAuthenticatedRoute(async (userId) => {
+    const now = new Date()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
 
-  const result = await prisma.invoice.aggregate({
-    where: {
-      userId,
-      status: "PAID",
-      issueDate: { gte: monthStart },
-    },
-    _sum: { total: true },
-  })
+    const result = await prisma.invoice.aggregate({
+      where: {
+        userId,
+        status: "PAID",
+        issueDate: { gte: monthStart },
+      },
+      _sum: { total: true },
+    })
 
-  return NextResponse.json({
-    monthTotal: result._sum.total ?? 0,
+    return NextResponse.json({
+      monthTotal: result._sum.total ?? 0,
+    })
   })
 }

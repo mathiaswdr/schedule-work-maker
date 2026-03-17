@@ -129,7 +129,7 @@ export function PricingCards({
                 )}
               </AnimatePresence>
 
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {plan.name}
               </p>
 

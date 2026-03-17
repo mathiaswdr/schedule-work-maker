@@ -123,7 +123,7 @@ export default function BankAccountFormDialog({
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+            <label className="text-xs uppercase text-ink-muted">
               {t("label")}
             </label>
             <Input
@@ -135,7 +135,7 @@ export default function BankAccountFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+            <label className="text-xs uppercase text-ink-muted">
               {t("bankName")}
             </label>
             <Input
@@ -147,7 +147,7 @@ export default function BankAccountFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+            <label className="text-xs uppercase text-ink-muted">
               {t("iban")}
             </label>
             <Input
@@ -159,7 +159,7 @@ export default function BankAccountFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+            <label className="text-xs uppercase text-ink-muted">
               {t("bic")}
             </label>
             <Input

@@ -1,4 +1,3 @@
-import { stat } from "fs";
 import {create} from "zustand";
 
 export type Variant = {
@@ -24,7 +23,7 @@ export type CartState = {
 export const useCartStore = create<CartState>((set) => ({
     cart: [],
     checkoutProgress: "cart-page",
-    setCheckoutProgress: (val) => set((state) => ({checkoutProgress: val})),
+    setCheckoutProgress: (val) => set(() => ({checkoutProgress: val})),
     addToCart: (item) => set((state) => {
         const existingItem = state.cart.find((cartItem) => cartItem.variant.variantID === item.variant.variantID)
 

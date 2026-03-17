@@ -44,7 +44,7 @@ export const updateClient = action
     const user = await auth()
     if (!user) return { error: "User not found" }
 
-    const client = await prisma.client.update({
+    const result = await prisma.client.updateMany({
       where: { id, userId: user.user.id },
       data: {
         name: values.name,
@@ -58,6 +58,14 @@ export const updateClient = action
       },
     })
 
+    if (result.count === 0) return { error: "Client not found" }
+
+    const client = await prisma.client.findUnique({
+      where: { id },
+    })
+
+    if (!client) return { error: "Client not found" }
+
     revalidatePath("/dashboard/clients")
     return { success: client }
   })
@@ -68,9 +76,11 @@ export const deleteClient = action
     const user = await auth()
     if (!user) return { error: "User not found" }
 
-    await prisma.client.delete({
+    const result = await prisma.client.deleteMany({
       where: { id, userId: user.user.id },
     })
+
+    if (result.count === 0) return { error: "Client not found" }
 
     revalidatePath("/dashboard/clients")
     return { success: true }

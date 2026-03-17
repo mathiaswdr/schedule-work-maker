@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getSessionUserId } from "@/server/work-sessions";
 import { prisma } from "@/server/prisma";
+import { withAuthenticatedRoute } from "@/server/auth-helpers";
 
 const getBreakMs = (
   breaks: { startedAt: Date; endedAt: Date | null }[],
@@ -27,46 +27,45 @@ export async function GET(
   _request: Request,
   { params }: { params: { id: string } }
 ) {
-  const userId = await getSessionUserId();
+  return withAuthenticatedRoute(async (userId) => {
+    const client = await prisma.client.findFirst({
+      where: { id: params.id, userId },
+      select: { id: true, color: true },
+    });
 
-  const client = await prisma.client.findFirst({
-    where: { id: params.id, userId },
-    select: { id: true, color: true },
-  });
+    if (!client) {
+      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    }
 
-  if (!client) {
-    return NextResponse.json({ error: "Client not found" }, { status: 404 });
-  }
-
-  const [projects, sessions, invoiceTotals] = await Promise.all([
-    prisma.project.findMany({
-      where: { clientId: params.id, userId },
-      select: {
-        id: true,
-        name: true,
-        serviceType: { select: { color: true } },
-      },
-    }),
-    prisma.workSession.findMany({
-      where: { clientId: params.id, userId },
-      select: {
-        startedAt: true,
-        endedAt: true,
-        projectId: true,
-        breaks: {
-          select: {
-            startedAt: true,
-            endedAt: true,
+    const [projects, sessions, invoiceTotals] = await Promise.all([
+      prisma.project.findMany({
+        where: { clientId: params.id, userId },
+        select: {
+          id: true,
+          name: true,
+          serviceType: { select: { color: true } },
+        },
+      }),
+      prisma.workSession.findMany({
+        where: { clientId: params.id, userId },
+        select: {
+          startedAt: true,
+          endedAt: true,
+          projectId: true,
+          breaks: {
+            select: {
+              startedAt: true,
+              endedAt: true,
+            },
           },
         },
-      },
-    }),
-    prisma.invoice.groupBy({
-      by: ["status"],
-      where: { clientId: params.id, userId },
-      _sum: { total: true },
-    }),
-  ]);
+      }),
+      prisma.invoice.groupBy({
+        by: ["status"],
+        where: { clientId: params.id, userId },
+        _sum: { total: true },
+      }),
+    ]);
 
   const now = new Date();
   const projectMeta = new Map(
@@ -142,26 +141,27 @@ export async function GET(
     .filter((entry) => entry.status !== "PAID")
     .reduce((total, entry) => total + Number(entry._sum.total ?? 0), 0);
 
-  return NextResponse.json({
-    analytics: {
-      totalTimeMs,
-      totalBreakMs,
-      totalBreakCount,
-      avgSessionMs,
-      longestSessionMs,
-      productivityPct,
-      avgBreakMs,
-      dailyActivity: dailyActivityBase.map((day) => ({
-        date: day.date.toISOString(),
-        ms: day.ms,
-      })),
-      timeByProject: Array.from(timeByProjectMap.values()).sort(
-        (a, b) => b.ms - a.ms
-      ),
-      invoiceTotals: {
-        pending: pendingTotal,
-        paid: paidTotal,
+    return NextResponse.json({
+      analytics: {
+        totalTimeMs,
+        totalBreakMs,
+        totalBreakCount,
+        avgSessionMs,
+        longestSessionMs,
+        productivityPct,
+        avgBreakMs,
+        dailyActivity: dailyActivityBase.map((day) => ({
+          date: day.date.toISOString(),
+          ms: day.ms,
+        })),
+        timeByProject: Array.from(timeByProjectMap.values()).sort(
+          (a, b) => b.ms - a.ms
+        ),
+        invoiceTotals: {
+          pending: pendingTotal,
+          paid: paidTotal,
+        },
       },
-    },
+    });
   });
 }

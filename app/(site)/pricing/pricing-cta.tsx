@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { canUpgrade, type PlanId, type BillingPeriod } from "@/lib/plans";
 
@@ -18,7 +17,6 @@ type PricingCtaProps = {
 
 export function PricingCta({
   planId,
-  planName,
   highlight,
   userPlan,
   billing,
@@ -26,8 +24,6 @@ export function PricingCta({
   ctaCurrentLabel,
   ctaManageLabel,
 }: PricingCtaProps) {
-  const router = useRouter();
-
   // Not logged in → link to login
   if (!userPlan) {
     return (

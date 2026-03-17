@@ -1,7 +1,6 @@
 "use client";
 
 import { Session } from "next-auth";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRef, useState } from "react";
@@ -9,6 +8,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 import {
   Form,
@@ -21,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { SettingsSchema } from "@/types/settings-schema";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
-import { settings } from "@/server/actions/settings";
+import { deleteAccount, settings } from "@/server/actions/settings";
 import { redeemAccessCode } from "@/server/actions/redeem-code";
 import { CloudinaryUploadButton } from "@/components/ui/cloudinary-upload-button";
 import {
@@ -36,6 +37,7 @@ import type { BusinessProfileFormHandle } from "@/components/dashboard/business-
 import BankAccountFormDialog from "@/components/dashboard/bank-account-form-dialog";
 import { deleteBankAccount } from "@/server/actions/bank-accounts";
 import { Pencil, Trash2 } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 const CURRENCIES = [
   { code: "CHF", label: "CHF – Franc suisse" },
@@ -90,11 +92,15 @@ export default function SettingsCard({
   displayClassName,
 }: SettingsCardProps) {
   const t = useTranslations("dashboard");
+  const tc = useTranslations("common");
   const shouldReduceMotion = useReducedMotion();
+  const router = useRouter();
+  const { confirm, ConfirmDialogElement } = useConfirm();
 
   const [imageUploading, setImageUploading] = useState(false);
   const [billingLoading, setBillingLoading] = useState(false);
   const businessProfileRef = useRef<BusinessProfileFormHandle>(null);
+  const businessProfileSectionRef = useRef<HTMLElement | null>(null);
 
   // Bank accounts state
   const [bankAccounts, setBankAccounts] = useState(initialBankAccounts);
@@ -132,13 +138,44 @@ export default function SettingsCard({
 
   const { execute, status } = useAction(settings, {
     onSuccess: (data) => {
-      if (data) toast.success(t("settingsPage.success"));
-      else toast.error(t("settingsPage.error"));
+      if (data.data?.success) {
+        toast.success(t("settingsPage.success"));
+        router.refresh();
+        return;
+      }
+
+      toast.error(t("settingsPage.error"));
     },
     onError: () => {
       toast.error(t("settingsPage.error"));
     },
   });
+
+  const { execute: executeDeleteAccount, status: deleteAccountStatus } =
+    useAction(deleteAccount, {
+      onSuccess: async ({ data }) => {
+        if (data?.success) {
+          toast.success(t("settingsPage.account.deleteSuccess"));
+          await signOut({ callbackUrl: "/" });
+          return;
+        }
+
+        if (data?.error === "stripe_cleanup_failed") {
+          toast.error(t("settingsPage.account.deleteStripeError"));
+          return;
+        }
+
+        if (data?.error === "cloudinary_cleanup_failed") {
+          toast.error(t("settingsPage.account.deleteCloudinaryError"));
+          return;
+        }
+
+        toast.error(t("settingsPage.account.deleteError"));
+      },
+      onError: () => {
+        toast.error(t("settingsPage.account.deleteError"));
+      },
+    });
 
   const [accessCode, setAccessCode] = useState("");
   const { execute: executeRedeem, status: redeemStatus } = useAction(
@@ -174,10 +211,60 @@ export default function SettingsCard({
     businessProfileRef.current?.submit();
   };
 
+  const handleDeleteAccount = async () => {
+    const confirmed = await confirm({
+      title: t("settingsPage.account.deleteConfirmTitle"),
+      description: t("settingsPage.account.deleteConfirmDescription"),
+      confirmLabel: t("settingsPage.account.deleteAction"),
+      cancelLabel: tc("cancel"),
+      variant: "destructive",
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    executeDeleteAccount({});
+  };
+
   const isSaving =
     status === "executing" ||
     imageUploading ||
     (businessProfileRef.current?.isExecuting ?? false);
+  const isDeletingAccount = deleteAccountStatus === "executing";
+  const businessProfileFields = [
+    businessProfile?.companyName,
+    businessProfile?.address,
+    businessProfile?.city,
+    businessProfile?.postalCode,
+    businessProfile?.country,
+    businessProfile?.email,
+  ];
+  const isBusinessProfileComplete = businessProfileFields.every(
+    (value) => typeof value === "string" && value.trim().length > 0
+  );
+  const onboardingItems = [
+    {
+      label: t("settingsPage.onboarding.items.profile"),
+      done: !!session.user?.name,
+    },
+    {
+      label: t("settingsPage.onboarding.items.businessProfile"),
+      done: isBusinessProfileComplete,
+    },
+    {
+      label: t("settingsPage.onboarding.items.bankAccount"),
+      done: bankAccounts.length > 0,
+    },
+    {
+      label: t("settingsPage.onboarding.items.hourlyRate"),
+      done: hourlyRate > 0,
+    },
+  ];
+  const onboardingCompleted = onboardingItems.filter((item) => item.done).length;
+  const onboardingProgress = Math.round(
+    (onboardingCompleted / onboardingItems.length) * 100
+  );
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -219,6 +306,7 @@ export default function SettingsCard({
 
   return (
     <main className="w-full">
+      {ConfirmDialogElement}
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-4 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
         <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
         <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
@@ -236,7 +324,7 @@ export default function SettingsCard({
             className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
           >
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("eyebrow")}
               </p>
               <h1
@@ -256,6 +344,67 @@ export default function SettingsCard({
             >
               {t("settingsPage.submit")}
             </button>
+          </motion.section>
+
+          <motion.section variants={fadeUp}>
+            <div className="overflow-hidden rounded-3xl border border-line bg-panel p-4 sm:p-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-sm font-semibold">
+                    {t("settingsPage.onboarding.title")}
+                  </p>
+                  <p className="mt-1 text-sm text-ink-muted">
+                    {t("settingsPage.onboarding.subtitle", {
+                      completed: onboardingCompleted,
+                      total: onboardingItems.length,
+                    })}
+                  </p>
+                </div>
+                {!isBusinessProfileComplete && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      businessProfileSectionRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      })
+                    }
+                    className="rounded-2xl border border-line-strong bg-white/80 px-4 py-2 text-sm font-semibold text-ink transition hover:bg-white"
+                  >
+                    {t("settingsPage.onboarding.cta")}
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/80">
+                <div
+                  className="h-full rounded-full bg-brand transition-[width] duration-500"
+                  style={{ width: `${onboardingProgress}%` }}
+                />
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {onboardingItems.map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3"
+                  >
+                    <span className="text-sm text-ink">{item.label}</span>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                        item.done
+                          ? "bg-brand-2/10 text-brand-2"
+                          : "bg-brand/10 text-brand"
+                      }`}
+                    >
+                      {item.done
+                        ? t("settingsPage.onboarding.complete")
+                        : t("settingsPage.onboarding.pending")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </motion.section>
 
           {/* Profile form */}
@@ -282,11 +431,15 @@ export default function SettingsCard({
                         render={({ field }) => (
                           <FormItem>
                             <div className="rounded-2xl border border-line bg-white/70 px-4 py-4">
-                              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                              <label
+                                htmlFor="settings-display-name"
+                                className="text-xs uppercase text-ink-muted"
+                              >
                                 {t("settingsPage.profile.nameLabel")}
                               </label>
                               <FormControl>
                                 <Input
+                                  id="settings-display-name"
                                   disabled={status === "executing"}
                                   placeholder={t(
                                     "settingsPage.profile.namePlaceholder"
@@ -313,7 +466,7 @@ export default function SettingsCard({
                         render={({ field }) => (
                           <FormItem>
                             <div className="rounded-2xl border border-line bg-white/70 px-4 py-4">
-                              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                              <label className="text-xs uppercase text-ink-muted">
                                 {t("settingsPage.profile.avatarLabel")}
                               </label>
                               <div className="mt-3 flex items-center gap-4">
@@ -448,6 +601,8 @@ export default function SettingsCard({
                             </span>
                             <FormControl>
                               <Input
+                                id="settings-hourly-rate"
+                                aria-label={t("settingsPage.account.hourlyRateLabel")}
                                 type="number"
                                 min={0}
                                 step={0.01}
@@ -473,7 +628,7 @@ export default function SettingsCard({
                   </motion.div>
 
                   <div className="mt-5 rounded-2xl border border-line bg-white/70 px-4 py-3">
-                    <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                    <p className="text-xs uppercase text-ink-muted">
                       {t("settingsPage.account.planHint")}
                     </p>
                   </div>
@@ -502,6 +657,25 @@ export default function SettingsCard({
                         : t("settingsPage.account.manageBilling")}
                     </button>
                   )}
+
+                  <div className="mt-4 rounded-2xl border border-red-200 bg-red-50/80 px-4 py-4">
+                    <p className="text-sm font-semibold text-red-700">
+                      {t("settingsPage.account.deleteTitle")}
+                    </p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {t("settingsPage.account.deleteHint")}
+                    </p>
+                    <button
+                      type="button"
+                      disabled={isDeletingAccount}
+                      onClick={handleDeleteAccount}
+                      className="mt-4 w-full rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isDeletingAccount
+                        ? t("settingsPage.account.deleting")
+                        : t("settingsPage.account.deleteAction")}
+                    </button>
+                  </div>
                 </div>
               </motion.section>
             </div>
@@ -631,7 +805,7 @@ export default function SettingsCard({
           </motion.section>
 
           {/* Business Profile section */}
-          <motion.section variants={fadeUp}>
+          <motion.section variants={fadeUp} ref={businessProfileSectionRef}>
             <BusinessProfileForm
               ref={businessProfileRef}
               profile={businessProfile}

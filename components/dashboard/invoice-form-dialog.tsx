@@ -314,7 +314,7 @@ export default function InvoiceFormDialog({
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <label className="text-xs uppercase text-ink-muted">
                   {t("form.invoiceTitle")}
                 </label>
                 <Input
@@ -325,7 +325,7 @@ export default function InvoiceFormDialog({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <label className="text-xs uppercase text-ink-muted">
                   {t("form.subject")}
                 </label>
                 <Input
@@ -338,7 +338,7 @@ export default function InvoiceFormDialog({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("form.selectClient")}
               </label>
               <Select value={clientId} onValueChange={setClientId}>
@@ -364,7 +364,7 @@ export default function InvoiceFormDialog({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("form.selectProject")}
               </label>
               <Select
@@ -386,7 +386,7 @@ export default function InvoiceFormDialog({
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("form.location")}
               </label>
               <Input
@@ -399,7 +399,7 @@ export default function InvoiceFormDialog({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <label className="text-xs uppercase text-ink-muted">
                   {t("form.issueDate")}
                 </label>
                 <Input
@@ -410,7 +410,7 @@ export default function InvoiceFormDialog({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <label className="text-xs uppercase text-ink-muted">
                   {t("form.dueDate")}
                 </label>
                 <Input
@@ -468,7 +468,7 @@ export default function InvoiceFormDialog({
         {step === 2 && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("notes")}
               </label>
               <textarea
@@ -482,7 +482,7 @@ export default function InvoiceFormDialog({
 
             {/* Payment terms */}
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("form.paymentTerms")}
               </label>
               <textarea
@@ -496,7 +496,7 @@ export default function InvoiceFormDialog({
 
             {/* Banking info */}
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("form.bankingInfo")}
               </label>
               {bankAccounts.length > 0 && (
@@ -553,7 +553,7 @@ export default function InvoiceFormDialog({
             </div>
 
             <div className="space-y-3">
-              <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+              <label className="text-xs uppercase text-ink-muted">
                 {t("template.title")}
               </label>
 

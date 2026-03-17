@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { Fraunces, Space_Grotesk } from "next/font/google";
+import { DM_Serif_Display, Space_Grotesk } from "next/font/google";
 import { getTranslations } from "next-intl/server";
+import ScrollSectionButton from "@/components/ui/scroll-section-button";
 import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import { PricingCards } from "./pricing-cards";
 
-const display = Fraunces({
+const display = DM_Serif_Display({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: "400",
   display: "swap",
 });
 
@@ -16,6 +17,8 @@ const body = Space_Grotesk({
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
+
+const SITE_SECTION_OFFSET = -112;
 
 type PricingPlan = {
   name: string;
@@ -62,7 +65,7 @@ export default async function PricingPage() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.08)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
 
         <section className="mx-auto w-full maxW px-6 pb-10 pt-32 text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+          <p className="text-xs uppercase text-ink-muted">
             {t("hero.eyebrow")}
           </p>
           <h1
@@ -80,12 +83,14 @@ export default async function PricingPage() {
             >
               {t("hero.ctaPrimary")}
             </Link>
-            <Link
-              href="/#demo"
+            <ScrollSectionButton
+              pagePath="/"
+              sectionId="demo"
+              offsetY={SITE_SECTION_OFFSET}
               className="rounded-full border border-line-strong bg-white/70 px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white"
             >
               {t("hero.ctaSecondary")}
-            </Link>
+            </ScrollSectionButton>
           </div>
         </section>
 
@@ -110,7 +115,7 @@ export default async function PricingPage() {
         <section className="mx-auto w-full maxW px-6 py-12">
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("included.eyebrow")}
               </p>
               <h2
@@ -180,7 +185,7 @@ export default async function PricingPage() {
 
         <section className="mx-auto w-full maxW px-6 pb-24">
           <div className="rounded-[32px] border border-line bg-brand-2/10 px-6 py-12 text-center sm:px-12">
-            <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+            <p className="text-xs uppercase text-ink-muted">
               {t("closing.eyebrow")}
             </p>
             <h2

@@ -1,4 +1,4 @@
-import { Fraunces } from "next/font/google";
+import { DM_Serif_Display } from "next/font/google";
 import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import { getSessionUserId } from "@/server/work-sessions";
@@ -9,9 +9,9 @@ import { serializeForClient } from "@/lib/utils";
 
 const INITIAL_PROJECTS_PAGE_SIZE = 24;
 
-const display = Fraunces({
+const display = DM_Serif_Display({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: "400",
   display: "swap",
 });
 

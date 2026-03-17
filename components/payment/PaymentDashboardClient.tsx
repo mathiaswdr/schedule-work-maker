@@ -33,20 +33,19 @@ export default function PaymentDashboardClient() {
     setLoading(true);
 
     try {
-      // Appel à l'API pour générer la session Stripe du tableau de bord de gestion
       const response = await fetch("/api/payment-dashboard", {
         method: "POST",
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create Stripe billing portal session");
-      }
-
       const data = await response.json();
 
-      setRequestData(data); // Mettre à jour l'état avec les données reçues
+      setRequestData(data);
 
-    if (data.url) {
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create Stripe billing portal session");
+      }
+
+      if (data.url) {
         window.location.href = data.url;
       } else {
         throw new Error("No URL found in response");
@@ -54,7 +53,11 @@ export default function PaymentDashboardClient() {
 
     } catch (error) {
       console.error("Error during payment dashboard request:", error);
-      toast.error("An unexpected error occurred.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to create Stripe billing portal session."
+      );
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Project Overview
 
-TempoWork (package name: "pokedy") — a work time-tracking SaaS built with Next.js 14 App Router, TypeScript, Prisma/PostgreSQL, and Stripe payments.
+Temiqo (package name: "temiqo") — a work time-tracking SaaS built with Next.js 14 App Router, TypeScript, Prisma/PostgreSQL, and Stripe payments.
 
 ## Commands
 

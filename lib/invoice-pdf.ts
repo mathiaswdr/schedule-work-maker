@@ -6,7 +6,6 @@ import {
   View,
   StyleSheet,
   renderToBuffer,
-  Font,
 } from "@react-pdf/renderer";
 
 export type InvoiceData = {

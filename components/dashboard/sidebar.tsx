@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, Receipt, Settings2, Users } from "lucide-react";
+import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, LogOut, Receipt, Settings2, Users } from "lucide-react";
 import { pickVariants } from "@/lib/motion-variants";
 import { type PlanId, type FeatureKey, FEATURE_PLAN_MAP, isPlanSufficient } from "@/lib/plans";
 
@@ -68,7 +69,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-[10px] uppercase text-ink-muted">
                 {t("sidebar.subtitle")}
               </p>
               <p className="text-lg font-semibold text-ink">
@@ -76,7 +77,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
               </p>
             </div>
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-line bg-white text-sm font-semibold text-brand">
-              TW
+              T
             </div>
           </div>
 
@@ -114,6 +115,17 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                 </Link>
               );
             })}
+
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="flex items-center gap-3 rounded-2xl border border-transparent px-3 py-2 text-sm font-medium text-ink-muted transition hover:border-line hover:bg-white/60 hover:text-ink"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-ink-soft text-ink">
+                <LogOut className="h-4 w-4" />
+              </span>
+              <span>{t("sidebar.signOut")}</span>
+            </button>
           </nav>
 
           <div className="mt-6 rounded-2xl border border-line bg-white/80 px-4 py-3 text-xs text-ink-muted">
@@ -171,6 +183,14 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                     </Link>
                   );
                 })}
+                <button
+                  type="button"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-ink-muted transition-colors hover:bg-brand/5 hover:text-ink"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>{t("sidebar.signOut")}</span>
+                </button>
               </motion.div>
             </>
           )}
@@ -208,7 +228,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                     }`}
                   />
                   <span
-                    className={`text-[9px] font-semibold leading-none tracking-wide transition-colors ${
+                    className={`text-[9px] font-semibold leading-none transition-colors ${
                       active ? "text-brand" : "text-ink-muted/60"
                     }`}
                   >
@@ -239,7 +259,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                 }`}
               />
               <span
-                className={`text-[9px] font-semibold leading-none tracking-wide transition-colors ${
+                className={`text-[9px] font-semibold leading-none transition-colors ${
                   isMoreActive || moreOpen ? "text-brand" : "text-ink-muted/60"
                 }`}
               >

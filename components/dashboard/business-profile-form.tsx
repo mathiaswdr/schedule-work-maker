@@ -188,12 +188,16 @@ const BusinessProfileForm = forwardRef<
                   render={({ field }) => (
                     <FormItem>
                       <div className="rounded-2xl border border-line bg-white/70 px-4 py-3">
-                        <label className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                        <label
+                          htmlFor={`business-profile-${f.name}`}
+                          className="text-xs uppercase text-ink-muted"
+                        >
                           {f.label}
                           {f.required && <span className="text-brand ml-0.5">*</span>}
                         </label>
                         <FormControl>
                           <Input
+                            id={`business-profile-${f.name}`}
                             disabled={status === "executing"}
                             placeholder={f.placeholder}
                             className="mt-1.5 border-line bg-white/60 focus:bg-white"

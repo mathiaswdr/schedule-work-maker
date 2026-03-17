@@ -7,9 +7,16 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 import type { ExtendUser } from "@/next-auth";
+import { scrollToSection } from "@/utils/tools";
 
 // Offset en pixels pour le scroll vers les ancres (positif = plus bas, negatif = plus haut)
 const ANCHOR_SCROLL_OFFSET = -40;
+
+type NavLinkItem = {
+  href: string;
+  label: string;
+  sectionId?: string;
+};
 
 type NavClientProps = {
   user: ExtendUser | null;
@@ -38,47 +45,36 @@ export default function NavClient({ user }: NavClientProps) {
     };
   }, [mobileOpen]);
 
-  const smoothScrollTo = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const top = el.getBoundingClientRect().top + window.scrollY + ANCHOR_SCROLL_OFFSET;
-    window.scrollTo({ top, behavior: "smooth" });
-  }, []);
-
   const handleAnchorClick = useCallback(
-    (e: React.MouseEvent, href: string) => {
-      const [pagePath, hash] = href.split("#");
-      if (!hash) return; // pas un lien ancre, laisser Next.js gerer
+    (e: React.MouseEvent, pagePath: string, sectionId?: string) => {
+      if (!sectionId) return;
 
       e.preventDefault();
       setMobileOpen(false);
 
       if (pathname === pagePath || (pagePath === "" && pathname === "/")) {
-        // Deja sur la bonne page, scroll direct
-        smoothScrollTo(hash);
+        scrollToSection(sectionId, ANCHOR_SCROLL_OFFSET);
       } else {
-        // Naviguer vers la page, puis scroll apres chargement
         router.push(pagePath || "/");
         const waitForElement = () => {
-          const el = document.getElementById(hash);
+          const el = document.getElementById(sectionId);
           if (el) {
-            smoothScrollTo(hash);
+            scrollToSection(sectionId, ANCHOR_SCROLL_OFFSET);
           } else {
             requestAnimationFrame(waitForElement);
           }
         };
-        // Petit delai pour laisser la navigation commencer
         setTimeout(waitForElement, 100);
       }
     },
-    [pathname, router, smoothScrollTo],
+    [pathname, router],
   );
 
-  const navLinks = [
+  const navLinks: NavLinkItem[] = [
     { href: "/", label: t("home") },
     { href: "/pricing", label: t("pricing") },
     { href: "/about", label: t("about") },
-    { href: "/#faq", label: t("faq") },
+    { href: "/", label: t("faq"), sectionId: "faq" },
   ];
 
   return (
@@ -90,23 +86,20 @@ export default function NavClient({ user }: NavClientProps) {
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center gap-2 text-lg font-bold tracking-tight text-neutral-900"
+              className="text-lg font-bold text-neutral-900"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand/10 text-xs font-bold text-brand">
-                TW
-              </span>
-              <span className="hidden sm:inline">TempoWork</span>
+              <span>Temiqo</span>
             </Link>
 
             {/* Desktop links */}
             <div className="hidden items-center gap-1 md:flex">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = !link.sectionId && pathname === link.href;
                 return (
                   <Link
-                    key={link.href}
+                    key={`${link.href}-${link.sectionId ?? "page"}`}
                     href={link.href}
-                    onClick={(e) => handleAnchorClick(e, link.href)}
+                    onClick={(e) => handleAnchorClick(e, link.href, link.sectionId)}
                     className={`relative rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                       isActive
                         ? "text-neutral-900"
@@ -220,10 +213,10 @@ export default function NavClient({ user }: NavClientProps) {
               <div className="p-2">
                 {/* Nav links */}
                 {navLinks.map((link, i) => {
-                  const isActive = pathname === link.href;
+                  const isActive = !link.sectionId && pathname === link.href;
                   return (
                     <motion.div
-                      key={link.href}
+                      key={`${link.href}-${link.sectionId ?? "page"}`}
                       initial={{ opacity: 0, x: -12 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.05, duration: 0.25 }}
@@ -231,8 +224,8 @@ export default function NavClient({ user }: NavClientProps) {
                       <Link
                         href={link.href}
                         onClick={(e) => {
-                          handleAnchorClick(e, link.href);
-                          if (!link.href.includes("#")) setMobileOpen(false);
+                          handleAnchorClick(e, link.href, link.sectionId);
+                          if (!link.sectionId) setMobileOpen(false);
                         }}
                         className={`flex items-center rounded-2xl px-4 py-3 text-[15px] font-medium transition-colors ${
                           isActive

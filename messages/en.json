@@ -23,11 +23,11 @@
       "login": "Sign in"
     },
     "languageLabel": "Language",
-    "copy": "TempoWork. Time tracking and freelance invoicing."
+    "copy": "Temiqo. Time tracking and freelance invoicing."
   },
   "auth": {
     "title": "Welcome back",
-    "subtitle": "Welcome to TempoWork. Sign in with social or a magic link.",
+    "subtitle": "Welcome to Temiqo. Sign in with social or a magic link.",
     "backLabel": "Create a new account",
     "emailLabel": "Email",
     "emailPlaceholder": "name@company.com",
@@ -36,6 +36,7 @@
     "helperIdle": "Receive a sign-in link by email.",
     "helperSent": "Magic link sent if the account exists.",
     "helperError": "Unable to send the link. Check your email.",
+    "magicLinkUnavailable": "Magic link sign-in is not configured in this environment.",
     "google": "Sign in with Google"
   },
   "home": {
@@ -43,9 +44,9 @@
       "badge": "Time tracking software for freelancers",
       "title": "Track your hours.\nGenerate your invoices.",
       "titleAccent": "Get paid.",
-      "subtitle": "TempoWork is a simple time tracking software for freelancers and small teams. Track your hours, manage your projects and generate invoices with Swiss QR invoice in a few clicks.",
+      "subtitle": "Temiqo is a simple time tracking software for freelancers and small teams. Track your hours, manage your projects and generate invoices with Swiss QR invoice in a few clicks.",
       "ctaPrimary": "Start for free",
-      "ctaSecondary": "See the demo",
+      "ctaSecondary": "Learn more",
       "bullets": [
         "Simple time tracking",
         "Invoices with Swiss QR invoice",
@@ -76,7 +77,7 @@
     "features": {
       "eyebrow": "Key features",
       "title": "Simple time tracking for freelancers and teams.",
-      "subtitle": "TempoWork is a time tracking software built for freelancers and small teams who want to track their hours and generate Swiss QR invoices.",
+      "subtitle": "Temiqo is a time tracking software built for freelancers and small teams who want to track their hours and generate Swiss QR invoices.",
       "cards": [
         {
           "title": "Simple time tracking",
@@ -208,11 +209,11 @@
       "items": [
         {
           "q": "Can I generate a Swiss QR invoice?",
-          "a": "Yes, TempoWork lets you generate invoices compatible with Swiss QR invoice standards."
+          "a": "Yes, Temiqo lets you generate invoices compatible with Swiss QR invoice standards."
         },
         {
           "q": "Is this a time tracking software for freelancers?",
-          "a": "Yes, TempoWork is built for freelancers and small teams who want to track their hours simply."
+          "a": "Yes, Temiqo is built for freelancers and small teams who want to track their hours simply."
         },
         {
           "q": "Can I track my hours by client?",
@@ -227,7 +228,7 @@
     "closing": {
       "eyebrow": "Ready to start",
       "title": "Turn your hours into invoices.",
-      "subtitle": "Start for free with TempoWork and simplify your time management.",
+      "subtitle": "Start for free with Temiqo and simplify your time management.",
       "ctaPrimary": "Start for free",
       "ctaSecondary": "See the demo"
     }
@@ -357,7 +358,7 @@
     "hero": {
       "eyebrow": "About",
       "title": "We help teams make time visible.",
-      "subtitle": "TempoWork was born from a simple need: stop spreadsheets and give teams a clear view of their real hours. We build a tool that respects each rhythm, with clear stats and clean reports.",
+      "subtitle": "Temiqo was born from a simple need: stop spreadsheets and give teams a clear view of their real hours. We build a tool that respects each rhythm, with clear stats and clean reports.",
       "ctaPrimary": "Free trial",
       "ctaSecondary": "See pricing"
     },
@@ -392,7 +393,7 @@
     "story": {
       "eyebrow": "Our story",
       "title": "From spreadsheet to a clear suite.",
-      "subtitle": "We launched TempoWork in 2023 to replace a manual tracker used by a hybrid team. Since then, the product evolved with different rhythms, time zones and payroll constraints.",
+      "subtitle": "We launched Temiqo in 2023 to replace a manual tracker used by a hybrid team. Since then, the product evolved with different rhythms, time zones and payroll constraints.",
       "timeline": [
         "2023 - Beta launch with 4 pilot teams.",
         "2024 - Payroll export and monthly reports.",
@@ -400,7 +401,7 @@
       ]
     },
     "closing": {
-      "eyebrow": "Join TempoWork",
+      "eyebrow": "Join Temiqo",
       "title": "Ready to make your hours visible?",
       "subtitle": "Start a free trial and see your stats from week one.",
       "ctaPrimary": "Free trial",
@@ -410,7 +411,7 @@
   "dashboard": {
     "eyebrow": "Dashboard",
     "sidebar": {
-      "title": "TempoWork",
+      "title": "Temiqo",
       "subtitle": "Workspace",
       "time": "Time tracking",
       "sessions": "Sessions",
@@ -422,6 +423,7 @@
       "subscription": "Subscription",
       "settings": "Settings",
       "more": "More",
+      "signOut": "Sign out",
       "hint": "Demo workspace ready for your first session.",
       "profilePrompt": {
         "title": "Complete your profile",
@@ -547,7 +549,30 @@
         "currencyLabel": "Currency",
         "currencyHint": "Currency used across the app.",
         "hourlyRateLabel": "Hourly rate",
-        "hourlyRateHint": "Your hourly rate for revenue calculations."
+        "hourlyRateHint": "Your hourly rate for revenue calculations.",
+        "deleteTitle": "Delete account",
+        "deleteHint": "This permanently deletes your profile, sessions, invoices, clients, projects, and billing links.",
+        "deleteAction": "Delete my account",
+        "deleting": "Deleting account...",
+        "deleteConfirmTitle": "Delete your account?",
+        "deleteConfirmDescription": "This action is permanent and cannot be undone.",
+        "deleteSuccess": "Your account has been deleted.",
+        "deleteError": "Unable to delete your account right now.",
+        "deleteStripeError": "We could not cancel your billing cleanly. Please try again or contact support before deleting the account.",
+        "deleteCloudinaryError": "Your uploaded files could not be fully removed. Please try again before deleting the account."
+      },
+      "onboarding": {
+        "title": "Setup status",
+        "subtitle": "{completed} of {total} setup steps completed.",
+        "cta": "Finish company profile",
+        "complete": "Complete",
+        "pending": "Pending",
+        "items": {
+          "profile": "Add your display name",
+          "businessProfile": "Complete business profile",
+          "bankAccount": "Add a bank account",
+          "hourlyRate": "Set your hourly rate"
+        }
       },
       "submit": "Save changes",
       "success": "Settings updated",

@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
         const stream = cloudinary.uploader.upload_stream(
           {
             resource_type: uploadType === "raw" ? "raw" : uploadType === "invoice" ? "auto" : "image",
-            folder: `tempowork/${session.user!.id}`,
+            folder: `temiqo/${session.user!.id}`,
           },
           (error, result) => {
             if (error || !result) reject(error || new Error("Upload failed"));

@@ -1,18 +1,18 @@
-import { Fraunces } from "next/font/google";
+import { DM_Serif_Display } from "next/font/google";
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/server/prisma";
 import SettingsCard from "./settings-card";
 
-const display = Fraunces({
+const display = DM_Serif_Display({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: "400",
 });
 
 export default async function Settings() {
   const session = await auth();
 
-  if (!session) redirect("/");
+  if (!session) redirect("/auth/login");
 
   const [businessProfile, user, bankAccounts] = await Promise.all([
     prisma.businessProfile.findUnique({

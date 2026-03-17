@@ -101,7 +101,6 @@ const statusColors: Record<string, string> = {
 
 export default function InvoicesClient({
   displayClassName,
-  userPlan,
   invoiceLimit,
   initialInvoices,
   initialHasMore,
@@ -439,7 +438,7 @@ export default function InvoicesClient({
                     variants={v.item}
                     className="rounded-2xl border border-line bg-white/80 px-5 py-4"
                   >
-                    <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                    <p className="text-xs uppercase text-ink-muted">
                       {card.label}
                     </p>
                     <p className="mt-2 text-xl font-semibold">{card.value}</p>
@@ -506,7 +505,7 @@ export default function InvoicesClient({
                       {groupedItems.map((group) => (
                         <div key={group.category}>
                           {group.category && (
-                            <p className="mb-2 text-xs uppercase tracking-[0.2em] text-ink-muted">
+                            <p className="mb-2 text-xs uppercase text-ink-muted">
                               {group.category}
                             </p>
                           )}
@@ -632,7 +631,7 @@ export default function InvoicesClient({
                 className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="space-y-2">
-                  <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+                  <p className="text-xs uppercase text-ink-muted">
                     {t("eyebrow")}
                   </p>
                   <h1

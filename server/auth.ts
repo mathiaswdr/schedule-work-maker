@@ -1,114 +1,155 @@
-import NextAuth from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "@/server/prisma"
-import Google from "next-auth/providers/google"
-import { UserPlan } from "@prisma/client"
-import { stripe } from "./stripe"
+import NextAuth from "next-auth";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import Google from "next-auth/providers/google";
+import Email from "next-auth/providers/email";
+import type { Provider } from "next-auth/providers";
+import { UserPlan } from "@prisma/client";
 
+import { prisma } from "@/server/prisma";
+import { stripe } from "./stripe";
+import { isE2ETestMode, isEmailAuthEnabled, storeMagicLink } from "./e2e-auth";
 
+const providers: Provider[] = [];
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  providers.push(
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    })
+  );
+}
+
+if (isEmailAuthEnabled) {
+  providers.push(
+    Email({
+      id: "email",
+      name: "Email",
+      from: process.env.EMAIL_FROM ?? "Temiqo <no-reply@temiqo.local>",
+      server: isE2ETestMode
+        ? { jsonTransport: true }
+        : {
+            host: process.env.EMAIL_SERVER_HOST!,
+            port: Number(process.env.EMAIL_SERVER_PORT),
+            auth:
+              process.env.EMAIL_SERVER_USER && process.env.EMAIL_SERVER_PASSWORD
+                ? {
+                    user: process.env.EMAIL_SERVER_USER,
+                    pass: process.env.EMAIL_SERVER_PASSWORD,
+                  }
+                : undefined,
+          },
+      ...(isE2ETestMode
+        ? {
+            async sendVerificationRequest({ identifier, url }) {
+              storeMagicLink(identifier, url);
+            },
+          }
+        : {}),
+    })
+  );
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-
   secret: process.env.AUTH_SECRET!,
   session: { strategy: "jwt" },
-
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    })
-  ],
-
+  providers,
   events: {
     createUser: async (message) => {
-        const userId = message.user.id
-        const email = message.user.email
-        const name = message.user.name
+      if (isE2ETestMode) {
+        await prisma.user.update({
+          where: { id: message.user.id },
+          data: { plan: UserPlan.STARTER },
+        });
+        return;
+      }
 
-        if(!userId || !email){
-          return;
-        }
-        
+      const userId = message.user.id;
+      const email = message.user.email;
+      const name = message.user.name;
+
+      if (!userId || !email) {
+        return;
+      }
+
+      try {
         const stripeCustomer = await stripe.customers.create({
-            email: email,
-            name: name ?? undefined,
-        })
+          email,
+          name: name ?? undefined,
+        });
 
         await prisma.user.update({
           where: {
             id: userId,
-          }, 
+          },
           data: {
             stripeCustomerId: stripeCustomer.id,
-          }
-        })
-        
-      
-    } 
+          },
+        });
+      } catch (error) {
+        console.error("Stripe customer creation failed:", error);
+      }
+    },
   },
-
-
   callbacks: {
     async session({ session, token }) {
       if (session && token.sub) {
-        session.user.id = token.sub
+        session.user.id = token.sub;
       }
 
       if (session.user && token.role) {
-        session.user.role = token.role as string
+        session.user.role = token.role as string;
       }
 
       if (session.user) {
-        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean
-        session.user.name = token.name
-        session.user.email = token.email as string
-        session.user.isOAuth = token.isOAuth as boolean
-        session.user.image = token.image as string
-        session.user.plan = token.plan as UserPlan
+        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
+        session.user.name = token.name;
+        session.user.email = token.email as string;
+        session.user.isOAuth = token.isOAuth as boolean;
+        session.user.image = token.image as string;
+        session.user.plan = token.plan as UserPlan;
       }
 
-      return session
+      return session;
     },
 
     async jwt({ token }) {
-      if (!token.sub) return token
+      if (!token.sub) return token;
 
       try {
-        // Utilisation de la transaction Prisma pour combiner les deux requêtes
-          const existingUser = await prisma.user.findUnique({
-            where: { id: token.sub },
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-              isTwoFactorEnabled: true,
-              image: true,
-              plan: true,
-            },
-          });
+        const existingUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            isTwoFactorEnabled: true,
+            image: true,
+            plan: true,
+          },
+        });
 
-          if (!existingUser) return token;
+        if (!existingUser) return token;
 
-          // Vérifie s'il existe un compte OAuth
-          const existingAccount = await prisma.account.findFirst({
-            where: { userId: existingUser.id },
-          });
+        const existingAccount = await prisma.account.findFirst({
+          where: { userId: existingUser.id },
+        });
 
-          token.isOAuth = !!existingAccount;
-          token.name = existingUser.name;
-          token.email = existingUser.email;
-          token.role = existingUser.role;
-          token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
-          token.image = existingUser.image;
-          token.plan = existingUser.plan;
+        token.isOAuth = !!existingAccount;
+        token.name = existingUser.name;
+        token.email = existingUser.email;
+        token.role = existingUser.role;
+        token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+        token.image = existingUser.image;
+        token.plan = existingUser.plan;
 
         return token;
       } catch (error) {
         console.error("JWT Transaction Error:", error);
-        return token; // Retourne le token même en cas d'erreur pour éviter de bloquer l'authentification
+        return token;
       }
     },
   },
-})
+});

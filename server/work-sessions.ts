@@ -1,9 +1,7 @@
 import { cache } from "react";
 import { WorkSessionStatus } from "@prisma/client";
-import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
-
-const DEMO_EMAIL = "demo@tempowork.local";
+import { requireUserId } from "@/server/auth-helpers";
 
 export type WorkSummary = {
   todayMs: number;
@@ -28,24 +26,7 @@ export class WorkSessionTransitionError extends Error {
   }
 }
 
-export const getSessionUserId = cache(async () => {
-  const session = await auth();
-
-  if (session?.user?.id) {
-    return session.user.id;
-  }
-
-  const demoUser = await prisma.user.upsert({
-    where: { email: DEMO_EMAIL },
-    update: {},
-    create: {
-      email: DEMO_EMAIL,
-      name: "TempoWork Demo",
-    },
-  });
-
-  return demoUser.id;
-});
+export const getSessionUserId = cache(requireUserId);
 
 export async function getActiveSession(userId: string) {
   return prisma.workSession.findFirst({

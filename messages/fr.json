@@ -23,11 +23,11 @@
       "login": "Connexion"
     },
     "languageLabel": "Langue",
-    "copy": "TempoWork. Suivi du temps et facturation freelance."
+    "copy": "Temiqo. Suivi du temps et facturation freelance."
   },
   "auth": {
     "title": "Welcome back",
-    "subtitle": "Bienvenue sur TempoWork. Connectez-vous avec un social ou un lien magique.",
+    "subtitle": "Bienvenue sur Temiqo. Connectez-vous avec un social ou un lien magique.",
     "backLabel": "Creer un nouveau compte",
     "emailLabel": "Email",
     "emailPlaceholder": "nom@entreprise.com",
@@ -36,6 +36,7 @@
     "helperIdle": "Recevez un lien de connexion par email.",
     "helperSent": "Lien magique envoye si le compte existe.",
     "helperError": "Impossible d'envoyer le lien. Verifiez votre email.",
+    "magicLinkUnavailable": "La connexion par lien magique n'est pas configuree dans cet environnement.",
     "google": "Se connecter avec Google"
   },
   "home": {
@@ -43,9 +44,9 @@
       "badge": "Logiciel de suivi du temps pour freelances",
       "title": "Suivez vos heures.\nGenerez vos factures.",
       "titleAccent": "Soyez paye.",
-      "subtitle": "TempoWork est un logiciel simple de suivi du temps pour freelances et petites equipes. Suivez vos heures, gerez vos projets et generez des factures avec QR facture suisse en quelques clics.",
+      "subtitle": "Temiqo est un logiciel simple de suivi du temps pour freelances et petites equipes. Suivez vos heures, gerez vos projets et generez des factures avec QR facture suisse en quelques clics.",
       "ctaPrimary": "Commencer gratuitement",
-      "ctaSecondary": "Voir la demo",
+      "ctaSecondary": "En savoir plus",
       "bullets": [
         "Suivi du temps simple",
         "Factures avec QR facture suisse",
@@ -76,7 +77,7 @@
     "features": {
       "eyebrow": "Fonctions cle",
       "title": "Un suivi du temps simple pour freelances et equipes.",
-      "subtitle": "TempoWork est un logiciel de suivi du temps concu pour freelances et petites equipes qui souhaitent suivre leurs heures et generer des factures compatibles QR facture suisse.",
+      "subtitle": "Temiqo est un logiciel de suivi du temps concu pour freelances et petites equipes qui souhaitent suivre leurs heures et generer des factures compatibles QR facture suisse.",
       "cards": [
         {
           "title": "Suivi du temps simple",
@@ -208,11 +209,11 @@
       "items": [
         {
           "q": "Peut-on generer une QR facture suisse ?",
-          "a": "Oui, TempoWork permet de generer des factures compatibles QR facture suisse."
+          "a": "Oui, Temiqo permet de generer des factures compatibles QR facture suisse."
         },
         {
           "q": "Est-ce un logiciel de suivi du temps pour freelances ?",
-          "a": "Oui, TempoWork est concu pour freelances et petites equipes qui souhaitent suivre leurs heures simplement."
+          "a": "Oui, Temiqo est concu pour freelances et petites equipes qui souhaitent suivre leurs heures simplement."
         },
         {
           "q": "Puis-je suivre mes heures par client ?",
@@ -227,7 +228,7 @@
     "closing": {
       "eyebrow": "Pret a commencer",
       "title": "Transformez vos heures en factures.",
-      "subtitle": "Commencez gratuitement avec TempoWork et simplifiez votre gestion du temps.",
+      "subtitle": "Commencez gratuitement avec Temiqo et simplifiez votre gestion du temps.",
       "ctaPrimary": "Commencer gratuitement",
       "ctaSecondary": "Voir la demo"
     }
@@ -357,7 +358,7 @@
     "hero": {
       "eyebrow": "A propos",
       "title": "Nous aidons les equipes a rendre le temps visible.",
-      "subtitle": "TempoWork est ne d'un besoin simple: arreter les tableurs et donner aux equipes une vision nette de leurs vraies heures. Nous construisons un outil qui respecte le rythme de chacun, avec des stats claires et des rapports propres.",
+      "subtitle": "Temiqo est ne d'un besoin simple: arreter les tableurs et donner aux equipes une vision nette de leurs vraies heures. Nous construisons un outil qui respecte le rythme de chacun, avec des stats claires et des rapports propres.",
       "ctaPrimary": "Essai gratuit",
       "ctaSecondary": "Voir les tarifs"
     },
@@ -392,7 +393,7 @@
     "story": {
       "eyebrow": "Notre histoire",
       "title": "De la feuille de calcul a une suite claire.",
-      "subtitle": "Nous avons lance TempoWork en 2023 pour remplacer un systeme de suivi manuel utilise par une equipe hybride. Depuis, le produit a evolue avec des rythmes differents, des fuseaux horaires et des contraintes de paie.",
+      "subtitle": "Nous avons lance Temiqo en 2023 pour remplacer un systeme de suivi manuel utilise par une equipe hybride. Depuis, le produit a evolue avec des rythmes differents, des fuseaux horaires et des contraintes de paie.",
       "timeline": [
         "2023 - Lancement beta avec 4 equipes pilotes.",
         "2024 - Export paie et rapports mensuels.",
@@ -400,7 +401,7 @@
       ]
     },
     "closing": {
-      "eyebrow": "Rejoignez TempoWork",
+      "eyebrow": "Rejoignez Temiqo",
       "title": "Pret a rendre vos heures visibles ?",
       "subtitle": "Lancez un essai gratuit et voyez vos stats des la premiere semaine.",
       "ctaPrimary": "Essai gratuit",
@@ -410,7 +411,7 @@
   "dashboard": {
     "eyebrow": "Dashboard",
     "sidebar": {
-      "title": "TempoWork",
+      "title": "Temiqo",
       "subtitle": "Espace",
       "time": "Suivi du temps",
       "sessions": "Sessions",
@@ -422,6 +423,7 @@
       "subscription": "Abonnement",
       "settings": "Parametres",
       "more": "Plus",
+      "signOut": "Se deconnecter",
       "hint": "Espace demo pret pour votre premier suivi.",
       "profilePrompt": {
         "title": "Completez votre profil",
@@ -547,7 +549,30 @@
         "currencyLabel": "Devise",
         "currencyHint": "Devise utilisee dans l'application.",
         "hourlyRateLabel": "Taux horaire",
-        "hourlyRateHint": "Votre taux horaire pour le calcul des revenus."
+        "hourlyRateHint": "Votre taux horaire pour le calcul des revenus.",
+        "deleteTitle": "Supprimer le compte",
+        "deleteHint": "Cette action supprime definitivement votre profil, vos sessions, vos factures, vos clients, vos projets et vos liens de facturation.",
+        "deleteAction": "Supprimer mon compte",
+        "deleting": "Suppression du compte...",
+        "deleteConfirmTitle": "Supprimer votre compte ?",
+        "deleteConfirmDescription": "Cette action est definitive et irreversible.",
+        "deleteSuccess": "Votre compte a ete supprime.",
+        "deleteError": "Impossible de supprimer votre compte pour le moment.",
+        "deleteStripeError": "La facturation Stripe n'a pas pu etre nettoyee correctement. Reessayez ou contactez le support avant de supprimer le compte.",
+        "deleteCloudinaryError": "Les fichiers importes n'ont pas pu etre supprimes completement. Reessayez avant de supprimer le compte."
+      },
+      "onboarding": {
+        "title": "Etat de configuration",
+        "subtitle": "{completed} etapes sur {total} completees.",
+        "cta": "Terminer le profil entreprise",
+        "complete": "Complet",
+        "pending": "A faire",
+        "items": {
+          "profile": "Ajouter votre nom d'affichage",
+          "businessProfile": "Completer le profil entreprise",
+          "bankAccount": "Ajouter un compte bancaire",
+          "hourlyRate": "Definir votre taux horaire"
+        }
       },
       "submit": "Enregistrer",
       "success": "Parametres mis a jour",

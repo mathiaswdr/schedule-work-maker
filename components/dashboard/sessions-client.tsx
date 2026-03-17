@@ -221,7 +221,7 @@ export default function SessionsClient({
         >
           {/* Header */}
           <motion.section variants={v.fadeUp} className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+            <p className="text-xs uppercase text-ink-muted">
               {t("eyebrow")}
             </p>
             <h1
@@ -330,7 +330,7 @@ export default function SessionsClient({
               className="grid gap-4 sm:grid-cols-3"
             >
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("sessions.hoursThisMonth")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
@@ -338,7 +338,7 @@ export default function SessionsClient({
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("sessions.revenueThisMonth")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
@@ -353,7 +353,7 @@ export default function SessionsClient({
                 )}
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("sessions.sessionsThisMonth")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">

@@ -122,10 +122,11 @@ export default function ClientFormDialog({
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-xs font-medium text-ink-muted">
+            <label htmlFor="client-name" className="text-xs font-medium text-ink-muted">
               {t("clients.name")}
             </label>
             <Input
+              id="client-name"
               {...form.register("name")}
               placeholder="Acme Inc."
               className="rounded-xl"
@@ -138,10 +139,11 @@ export default function ClientFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-ink-muted">
+            <label htmlFor="client-email" className="text-xs font-medium text-ink-muted">
               {t("clients.email")}
             </label>
             <Input
+              id="client-email"
               {...form.register("email")}
               type="email"
               placeholder="contact@acme.com"
@@ -150,10 +152,11 @@ export default function ClientFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-ink-muted">
+            <label htmlFor="client-address" className="text-xs font-medium text-ink-muted">
               {t("clients.address")}
             </label>
             <Input
+              id="client-address"
               {...form.register("address")}
               placeholder="123 Rue Example"
               className="rounded-xl"
@@ -162,20 +165,22 @@ export default function ClientFormDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <label className="text-xs font-medium text-ink-muted">
+              <label htmlFor="client-postal-code" className="text-xs font-medium text-ink-muted">
                 {t("clients.postalCode")}
               </label>
               <Input
+                id="client-postal-code"
                 {...form.register("postalCode")}
                 placeholder="75001"
                 className="rounded-xl"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-medium text-ink-muted">
+              <label htmlFor="client-city" className="text-xs font-medium text-ink-muted">
                 {t("clients.city")}
               </label>
               <Input
+                id="client-city"
                 {...form.register("city")}
                 placeholder="Paris"
                 className="rounded-xl"
@@ -184,10 +189,11 @@ export default function ClientFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-ink-muted">
+            <label htmlFor="client-country" className="text-xs font-medium text-ink-muted">
               {t("clients.country")}
             </label>
             <Input
+              id="client-country"
               {...form.register("country")}
               placeholder="France"
               className="rounded-xl"
@@ -216,10 +222,11 @@ export default function ClientFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-ink-muted">
+            <label htmlFor="client-notes" className="text-xs font-medium text-ink-muted">
               {t("clients.notes")}
             </label>
             <Textarea
+              id="client-notes"
               {...form.register("notes")}
               placeholder="..."
               className="rounded-xl"

@@ -241,7 +241,7 @@ export default function TimeTrackingClient({
   const session = data?.session ?? null;
   const summary = data?.summary ?? emptySummary;
   const recentSessions = data?.recentSessions ?? [];
-  const breaks = session?.breaks ?? [];
+  const breaks = useMemo(() => session?.breaks ?? [], [session?.breaks]);
   const isSessionPaused = session?.status === "PAUSED";
 
   useEffect(() => {
@@ -399,7 +399,7 @@ export default function TimeTrackingClient({
           <div className="lg:hidden">
             {/* Header compact */}
             <motion.div variants={v.fadeUp} className="flex items-center justify-between">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-[10px] uppercase text-ink-muted">
                 {t("timer.eyebrow")}
               </p>
               <TimeCard />
@@ -448,10 +448,10 @@ export default function TimeTrackingClient({
                   endedAt={session.endedAt}
                   breaks={breaks}
                   paused={isSessionPaused}
-                  className="text-6xl font-semibold tracking-tight text-ink"
+                  className="text-6xl font-semibold text-ink"
                 />
               ) : (
-                <span className="text-6xl font-semibold tracking-tight text-ink" style={{ fontVariantNumeric: "tabular-nums" }}>
+                <span className="text-6xl font-semibold text-ink" style={{ fontVariantNumeric: "tabular-nums" }}>
                   00:00:00
                 </span>
               )}
@@ -463,6 +463,7 @@ export default function TimeTrackingClient({
                 type="button"
                 onClick={() => handleAction(primaryAction.action)}
                 disabled={primaryAction.disabled}
+                aria-label={primaryAction.label}
                 whileTap={{ scale: 0.92 }}
                 className={`flex h-24 w-24 items-center justify-center rounded-full ${primaryAction.color} ${primaryAction.shadow} ring-4 ${primaryAction.ring} text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
               >
@@ -487,6 +488,7 @@ export default function TimeTrackingClient({
                         type="button"
                         onClick={() => handleAction(secondaryAction.action)}
                         disabled={secondaryAction.disabled}
+                        aria-label={secondaryAction.label}
                         className="flex items-center gap-2 rounded-full border border-line-strong bg-white/80 px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-white disabled:opacity-50"
                       >
                         <Square className="h-4 w-4" />
@@ -505,7 +507,7 @@ export default function TimeTrackingClient({
                           <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
                         </button>
                       </motion.div>
-                      <div className="pointer-events-none absolute -top-12 right-0 z-20 w-52 rounded-xl bg-ink px-3 py-2 text-[11px] font-medium leading-tight text-white opacity-0 shadow-lg transition-opacity duration-150 delay-0 group-hover:opacity-100 group-hover:delay-[2000ms] group-focus-within:opacity-100 group-focus-within:delay-[2000ms]">
+                      <div className="pointer-events-none absolute -top-12 right-0 z-20 w-52 rounded-xl bg-ink px-3 py-2 text-[11px] font-medium leading-tight text-white opacity-0 shadow-lg transition-opacity duration-150 [transition-delay:0ms] group-hover:opacity-100 group-hover:[transition-delay:2000ms] group-focus-within:opacity-100 group-focus-within:[transition-delay:2000ms]">
                         {refreshTooltip}
                       </div>
                     </div>
@@ -572,7 +574,7 @@ export default function TimeTrackingClient({
 
             {/* Summary stats (horizontal scroll) */}
             <motion.div variants={v.fadeUp} className="mt-8">
-              <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-ink-muted">
+              <p className="mb-3 text-[10px] uppercase text-ink-muted">
                 {t("summary.eyebrow")}
               </p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -585,7 +587,7 @@ export default function TimeTrackingClient({
                     key={card.label}
                     className="rounded-2xl border border-line bg-white/80 px-4 py-3"
                   >
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-ink-muted">
+                    <p className="text-[10px] uppercase text-ink-muted">
                       {card.label}
                     </p>
                     <p className="mt-1 text-lg font-semibold">{card.value}</p>
@@ -754,7 +756,7 @@ export default function TimeTrackingClient({
             className="hidden lg:flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
           >
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("eyebrow")}
               </p>
               <h1 className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}>
@@ -770,7 +772,7 @@ export default function TimeTrackingClient({
           <motion.section variants={v.fadeUp} className="hidden lg:block">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("summary.eyebrow")}
                 </p>
                 <p className="text-sm text-ink-muted">{t("summary.subtitle")}</p>
@@ -802,7 +804,7 @@ export default function TimeTrackingClient({
                   variants={v.item}
                   className="rounded-2xl border border-line bg-white/80 px-5 py-4"
                 >
-                  <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                  <p className="text-xs uppercase text-ink-muted">
                     {card.label}
                   </p>
                   <p className="mt-2 text-2xl font-semibold">{card.value}</p>
@@ -820,7 +822,7 @@ export default function TimeTrackingClient({
               <div className="rounded-3xl border border-line bg-panel p-6 shadow-[0_30px_60px_-46px_rgba(15,118,110,0.35)]">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+                    <p className="text-xs uppercase text-ink-muted">
                       {t("timer.eyebrow")}
                     </p>
                     {session ? (
@@ -942,7 +944,7 @@ export default function TimeTrackingClient({
                     >
                       <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
                     </button>
-                    <div className="pointer-events-none absolute -top-14 right-0 z-20 w-60 rounded-xl bg-ink px-3 py-2 text-[11px] font-medium leading-tight text-white opacity-0 shadow-lg transition-opacity duration-150 delay-0 group-hover:opacity-100 group-hover:delay-[2000ms] group-focus-within:opacity-100 group-focus-within:delay-[2000ms]">
+                    <div className="pointer-events-none absolute -top-14 right-0 z-20 w-60 rounded-xl bg-ink px-3 py-2 text-[11px] font-medium leading-tight text-white opacity-0 shadow-lg transition-opacity duration-150 [transition-delay:0ms] group-hover:opacity-100 group-hover:[transition-delay:2000ms] group-focus-within:opacity-100 group-focus-within:[transition-delay:2000ms]">
                       {refreshTooltip}
                     </div>
                   </div>

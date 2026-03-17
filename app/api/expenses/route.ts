@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server"
-import { getSessionUserId } from "@/server/work-sessions"
 import { prisma } from "@/server/prisma"
+import { withAuthenticatedRoute } from "@/server/auth-helpers"
 
 export async function GET() {
-  const userId = await getSessionUserId()
+  return withAuthenticatedRoute(async (userId) => {
+    const expenses = await prisma.expense.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    })
 
-  const expenses = await prisma.expense.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
+    return NextResponse.json({ expenses })
   })
-
-  return NextResponse.json({ expenses })
 }

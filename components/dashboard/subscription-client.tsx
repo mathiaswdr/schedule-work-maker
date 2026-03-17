@@ -86,7 +86,7 @@ export default function SubscriptionClient({
         >
           {/* Header */}
           <motion.section variants={v.fadeUp} className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+            <p className="text-xs uppercase text-ink-muted">
               {t("eyebrow")}
             </p>
             <h1
@@ -185,7 +185,7 @@ export default function SubscriptionClient({
                     </AnimatePresence>
 
                     <div className="flex items-center justify-between">
-                      <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+                      <p className="text-xs uppercase text-ink-muted">
                         {t(`subscriptionPage.plans.${i18nKey}.name`)}
                       </p>
                       {isCurrent && (

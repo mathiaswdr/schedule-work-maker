@@ -38,13 +38,12 @@ export default function BuyButtonClient({ plan = "STARTER" }: BuyButtonClientPro
         body: JSON.stringify({ plan }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create Stripe session");
-      }
-
       const data = await response.json();
-
       setRequestData(data)
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create Stripe session");
+      }
 
       if (data.url) {
         window.location.href = data.url;
@@ -54,6 +53,9 @@ export default function BuyButtonClient({ plan = "STARTER" }: BuyButtonClientPro
 
     } catch (error) {
       console.error("Error during payment:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create Stripe session"
+      );
     } finally {
       setLoading(false);
     }

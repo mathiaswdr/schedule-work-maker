@@ -1,37 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Temiqo
 
-## Getting Started
+Temiqo is a Next.js 14 SaaS for time tracking, client management, invoicing, and subscription billing.
 
-First, run the development server:
+## Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app runs on [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Playwright E2E
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Playwright is configured in `playwright.config.ts` and the tests live in `tests/e2e/`.
 
-## Learn More
+Current E2E coverage focuses on the main user paths:
 
-To learn more about Next.js, take a look at the following resources:
+- `tests/e2e/home.spec.ts`: homepage rendering
+- `tests/e2e/auth.spec.ts`: magic-link login and unauthenticated redirect protection
+- `tests/e2e/logout.spec.ts`: authenticated logout flow
+- `tests/e2e/settings.spec.ts`: settings save and business profile completion
+- `tests/e2e/clients.spec.ts`: authenticated client create, edit, and delete flows
+- `tests/e2e/time-tracking.spec.ts`: start, pause, resume, and finish session flow
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Local setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Install the browser once:
 
-## Deploy on Vercel
+```bash
+npm run test:e2e:install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Run the full suite:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-# SaasTemplate092024
+```bash
+npm run test:e2e
+```
+
+Run the suite in headed mode:
+
+```bash
+npm run test:e2e:headed
+```
+
+Open the HTML report after a run:
+
+```bash
+npm run test:e2e:report
+```
+
+### Notes
+
+- The Playwright web server starts the app with `E2E_TEST_MODE=1`, which enables a local-only magic-link capture flow for testing.
+- Outside E2E mode, magic-link login requires `EMAIL_SERVER_HOST`, `EMAIL_SERVER_PORT`, `EMAIL_FROM`, and optional `EMAIL_SERVER_USER` / `EMAIL_SERVER_PASSWORD`.
+- Test artifacts are written to `playwright-report/` and `test-results/`.

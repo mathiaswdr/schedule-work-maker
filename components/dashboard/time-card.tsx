@@ -22,7 +22,7 @@ export default function TimeCard() {
 
   return (
     <div className="rounded-2xl border border-line bg-white/80 px-4 py-3 text-right shadow-[0_18px_40px_-34px_rgba(29,27,22,0.25)]">
-      <p className="text-[10px] uppercase tracking-[0.3em] text-ink-muted">
+      <p className="text-[10px] uppercase text-ink-muted">
         {t("currentTime")}
       </p>
       <p className="mt-1 text-lg font-semibold text-ink">

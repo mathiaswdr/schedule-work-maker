@@ -10,11 +10,11 @@ export default async function Footer() {
       <div className="mx-auto w-full maxW px-6 py-10">
         <div className="grid gap-8 md:grid-cols-[1.4fr_0.8fr_0.8fr]">
           <div>
-            <p className="text-sm font-semibold text-neutral-900">TempoWork</p>
+            <p className="text-sm font-semibold text-neutral-900">Temiqo</p>
             <p className="mt-3 text-sm text-neutral-600">{t("tagline")}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-neutral-500">
+            <p className="text-xs uppercase text-neutral-500">
               {t("linksTitle")}
             </p>
             <div className="mt-3 flex flex-col gap-2 text-sm text-neutral-600">
@@ -39,7 +39,7 @@ export default async function Footer() {
             </div>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-neutral-500">
+            <p className="text-xs uppercase text-neutral-500">
               {t("languageLabel")}
             </p>
             <div className="mt-3">

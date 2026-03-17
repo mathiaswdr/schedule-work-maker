@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Fraunces, Space_Grotesk } from "next/font/google";
+import { DM_Serif_Display, Space_Grotesk } from "next/font/google";
 import { getTranslations } from "next-intl/server";
+import ScrollSectionButton from "@/components/ui/scroll-section-button";
 import { PricingCards } from "./pricing/pricing-cards";
 
-const display = Fraunces({
+const display = DM_Serif_Display({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: "400",
   display: "swap",
 });
 
@@ -60,6 +61,8 @@ type FaqItem = {
   a: string;
 };
 
+const SITE_SECTION_OFFSET = -112;
+
 export default async function Home() {
   const t = await getTranslations("home");
   const heroBullets = t.raw("hero.bullets") as string[];
@@ -90,7 +93,7 @@ export default async function Home() {
 
         <section className="relative mx-auto flex w-full maxW flex-col gap-12 px-6 pb-16 pt-32 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="relative z-10 flex flex-col gap-6">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-line-strong bg-white/70 px-4 py-1 text-xs uppercase tracking-[0.2em] text-ink-muted motion-safe:opacity-0 motion-safe:animate-[fade-up_0.8s_ease-out_forwards]">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-line-strong bg-white/70 px-4 py-1 text-xs uppercase text-ink-muted motion-safe:opacity-0 motion-safe:animate-[fade-up_0.8s_ease-out_forwards]">
               {t("hero.badge")}
             </span>
             <h1
@@ -112,18 +115,20 @@ export default async function Home() {
               className="flex flex-wrap items-center gap-4 motion-safe:opacity-0 motion-safe:animate-[fade-up_1s_ease-out_forwards]"
               style={{ animationDelay: "320ms" }}
             >
-              <Link
-                href="#pricing"
+              <ScrollSectionButton
+                sectionId="pricing"
+                offsetY={SITE_SECTION_OFFSET}
                 className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] hover:shadow-[0_20px_44px_-22px_rgba(249,115,22,0.95)]"
               >
                 {t("hero.ctaPrimary")}
-              </Link>
-              <Link
-                href="#demo"
+              </ScrollSectionButton>
+              <ScrollSectionButton
+                sectionId="home-features"
+                offsetY={SITE_SECTION_OFFSET}
                 className="rounded-full border border-line-strong bg-white/70 px-6 py-3 text-sm font-semibold text-ink transition hover:translate-y-[-1px] hover:bg-white"
               >
                 {t("hero.ctaSecondary")}
-              </Link>
+              </ScrollSectionButton>
             </div>
             <ul className="mt-2 grid gap-3 text-sm text-ink-muted sm:grid-cols-3">
               {heroBullets.map((item, index) => (
@@ -146,7 +151,7 @@ export default async function Home() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+                <p className="text-xs uppercase text-ink-muted">
                   {t("demo.eyebrow")}
                 </p>
                 <p className="text-2xl font-semibold text-ink">
@@ -183,7 +188,7 @@ export default async function Home() {
                   key={stat.title}
                   className="rounded-2xl border border-line bg-white/70 px-4 py-3"
                 >
-                  <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                  <p className="text-xs uppercase text-ink-muted">
                     {stat.title}
                   </p>
                   <p className="mt-1 text-sm font-semibold text-ink">
@@ -213,9 +218,12 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mx-auto w-full maxW px-6 py-16">
+        <section
+          id="home-features"
+          className="mx-auto w-full maxW scroll-mt-28 px-6 py-16"
+        >
           <div className="flex flex-col gap-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+            <p className="text-xs uppercase text-ink-muted">
               {t("features.eyebrow")}
             </p>
             <h2
@@ -247,7 +255,7 @@ export default async function Home() {
         <section className="mx-auto w-full maxW px-6 py-12">
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("steps.eyebrow")}
               </p>
               <h2
@@ -309,7 +317,7 @@ export default async function Home() {
                     key={stat.label}
                     className="rounded-2xl border border-line bg-panel px-4 py-3"
                   >
-                    <p className="text-xs uppercase tracking-[0.2em] text-ink-muted">
+                    <p className="text-xs uppercase text-ink-muted">
                       {stat.label}
                     </p>
                     <p className="mt-1 text-sm font-semibold text-ink">
@@ -327,7 +335,7 @@ export default async function Home() {
             {t("pricing.socialProof")}
           </p>
           <div className="flex flex-col gap-4 text-center">
-            <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+            <p className="text-xs uppercase text-ink-muted">
               {t("pricing.eyebrow")}
             </p>
             <h2
@@ -361,7 +369,7 @@ export default async function Home() {
         <section id="faq" className="mx-auto w-full maxW px-6 py-16">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+              <p className="text-xs uppercase text-ink-muted">
                 {t("faq.eyebrow")}
               </p>
               <h2
@@ -393,7 +401,7 @@ export default async function Home() {
 
         <section className="mx-auto w-full maxW px-6 pb-24">
           <div className="rounded-[32px] border border-line bg-brand-2/10 px-6 py-12 text-center sm:px-12">
-            <p className="text-xs uppercase tracking-[0.3em] text-ink-muted">
+            <p className="text-xs uppercase text-ink-muted">
               {t("closing.eyebrow")}
             </p>
             <h2
@@ -411,12 +419,13 @@ export default async function Home() {
               >
                 {t("closing.ctaPrimary")}
               </Link>
-              <Link
-                href="#demo"
+              <ScrollSectionButton
+                sectionId="demo"
+                offsetY={SITE_SECTION_OFFSET}
                 className="rounded-full border border-line-strong bg-white/70 px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white"
               >
                 {t("closing.ctaSecondary")}
-              </Link>
+              </ScrollSectionButton>
             </div>
           </div>
         </section>

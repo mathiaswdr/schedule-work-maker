@@ -120,10 +120,14 @@ export default function ProjectFormDialog({
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-xs font-medium text-ink-muted">
+            <label
+              htmlFor="project-name"
+              className="text-xs font-medium text-ink-muted"
+            >
               {t("projects.name")}
             </label>
             <Input
+              id="project-name"
               {...form.register("name")}
               placeholder="Website Redesign"
               className="rounded-xl"
@@ -136,10 +140,14 @@ export default function ProjectFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-ink-muted">
+            <label
+              htmlFor="project-description"
+              className="text-xs font-medium text-ink-muted"
+            >
               {t("projects.description")}
             </label>
             <Textarea
+              id="project-description"
               {...form.register("description")}
               placeholder="..."
               className="rounded-xl"
