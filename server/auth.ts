@@ -7,7 +7,12 @@ import { UserPlan } from "@prisma/client";
 
 import { prisma } from "@/server/prisma";
 import { stripe } from "./stripe";
-import { isE2ETestMode, isEmailAuthEnabled, storeMagicLink } from "./e2e-auth";
+import {
+  isE2ETestMode,
+  isEmailAuthEnabled,
+  isMagicLinkCaptureEnabled,
+  storeMagicLink,
+} from "./e2e-auth";
 
 const providers: Provider[] = [];
 
@@ -26,7 +31,7 @@ if (isEmailAuthEnabled) {
       id: "email",
       name: "Email",
       from: process.env.EMAIL_FROM ?? "Temiqo <no-reply@temiqo.local>",
-      server: isE2ETestMode
+      server: isMagicLinkCaptureEnabled
         ? { jsonTransport: true }
         : {
             host: process.env.EMAIL_SERVER_HOST!,
@@ -39,7 +44,7 @@ if (isEmailAuthEnabled) {
                   }
                 : undefined,
           },
-      ...(isE2ETestMode
+      ...(isMagicLinkCaptureEnabled
         ? {
             async sendVerificationRequest({ identifier, url }) {
               storeMagicLink(identifier, url);

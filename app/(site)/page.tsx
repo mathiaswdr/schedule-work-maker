@@ -31,6 +31,18 @@ type SummaryStat = {
   value: string;
 };
 
+type ImportTableHeaders = {
+  name: string;
+  email: string;
+  city: string;
+};
+
+type ImportPreviewRow = {
+  name: string;
+  email: string;
+  city: string;
+};
+
 type QuickStat = {
   value: string;
   label: string;
@@ -73,6 +85,11 @@ export default async function Home() {
   const steps = t.raw("steps.items") as StepItem[];
   const days = t.raw("steps.days") as string[];
   const summaryStats = t.raw("steps.summaryStats") as SummaryStat[];
+  const importBenefits = t.raw("importCta.benefits") as string[];
+  const importAcceptedFormats = t.raw("importCta.acceptedFormats") as string[];
+  const importTableHeaders = t.raw("importCta.tableHeaders") as ImportTableHeaders;
+  const importPreviewRows = t.raw("importCta.previewRows") as ImportPreviewRow[];
+  const importSummaryStats = t.raw("importCta.summaryStats") as QuickStat[];
   const pricingPlans = t.raw("pricing.plans") as PricingPlan[];
   const faqItems = t.raw("faq.items") as FaqItem[];
 
@@ -325,6 +342,132 @@ export default async function Home() {
                     </p>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto w-full maxW px-6 py-12">
+          <div className="relative overflow-hidden rounded-[32px] border border-line bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(255,247,237,0.96))] px-6 py-8 shadow-[0_28px_70px_-52px_rgba(249,115,22,0.45)] sm:px-8 lg:grid lg:grid-cols-[1fr_0.95fr] lg:items-center lg:gap-10">
+            <div className="pointer-events-none absolute right-[-5rem] top-[-5rem] h-40 w-40 rounded-full bg-brand/15 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-[-6rem] left-[-3rem] h-44 w-44 rounded-full bg-brand-2/10 blur-3xl" />
+
+            <div className="relative z-10">
+              <p className="text-xs uppercase text-ink-muted">
+                {t("importCta.eyebrow")}
+              </p>
+              <h2
+                className={`${display.className} mt-3 max-w-2xl text-3xl font-semibold text-ink sm:text-4xl`}
+              >
+                {t("importCta.title")}
+              </h2>
+              <p className="mt-4 max-w-2xl text-ink-muted">
+                {t("importCta.subtitle")}
+              </p>
+
+              <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+                {importBenefits.map((benefit) => (
+                  <li
+                    key={benefit}
+                    className="flex items-start gap-3 rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm text-ink-muted"
+                  >
+                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-brand" />
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-6 flex flex-wrap items-center gap-4">
+                <Link
+                  href="/auth/login"
+                  className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] hover:shadow-[0_20px_44px_-22px_rgba(249,115,22,0.95)]"
+                >
+                  {t("importCta.ctaPrimary")}
+                </Link>
+                <ScrollSectionButton
+                  sectionId="pricing"
+                  offsetY={SITE_SECTION_OFFSET}
+                  className="rounded-full border border-line-strong bg-white/75 px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white"
+                >
+                  {t("importCta.ctaSecondary")}
+                </ScrollSectionButton>
+              </div>
+            </div>
+
+            <div className="relative z-10 mt-8 lg:mt-0">
+              <div className="rounded-[28px] border border-line bg-ink p-4 text-white shadow-[0_24px_64px_-40px_rgba(29,27,22,0.8)]">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-white/60">
+                      {t("importCta.fileBadge")}
+                    </p>
+                    <p className="mt-1 text-base font-semibold">
+                      {t("importCta.fileName")}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    {importAcceptedFormats.map((format) => (
+                      <span
+                        key={format}
+                        className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/80"
+                      >
+                        {format}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-3xl bg-white/95 p-4 text-ink">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs uppercase text-ink-muted">
+                      {t("importCta.acceptedLabel")}
+                    </p>
+                    <span className="rounded-full bg-brand-2/10 px-3 py-1 text-xs font-semibold text-brand-2">
+                      {t("importCta.summaryLabel")}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 overflow-hidden rounded-2xl border border-line">
+                    <div className="grid grid-cols-[1.1fr_1.25fr_0.8fr] gap-3 bg-panel px-4 py-3 text-xs font-semibold uppercase text-ink-muted">
+                      <span>{importTableHeaders.name}</span>
+                      <span>{importTableHeaders.email}</span>
+                      <span>{importTableHeaders.city}</span>
+                    </div>
+                    <div className="divide-y divide-line">
+                      {importPreviewRows.map((row) => (
+                        <div
+                          key={`${row.name}-${row.email}`}
+                          className="grid grid-cols-[1.1fr_1.25fr_0.8fr] gap-3 px-4 py-3 text-sm"
+                        >
+                          <span className="font-medium text-ink">{row.name}</span>
+                          <span className="truncate text-ink-muted">{row.email}</span>
+                          <span className="text-ink-muted">{row.city}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-2xl bg-panel p-4">
+                    <p className="text-sm font-semibold text-ink">
+                      {t("importCta.summaryTitle")}
+                    </p>
+                    <p className="mt-1 text-sm text-ink-muted">
+                      {t("importCta.summaryCopy")}
+                    </p>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                      {importSummaryStats.map((stat) => (
+                        <div
+                          key={stat.label}
+                          className="rounded-2xl border border-line bg-white px-3 py-3"
+                        >
+                          <p className="text-lg font-semibold text-ink">{stat.value}</p>
+                          <p className="text-xs text-ink-muted">{stat.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

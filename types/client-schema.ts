@@ -11,6 +11,20 @@ export const ClientSchema = z.object({
   notes: z.string().max(500).optional(),
 })
 
+export const ClientImportRowSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+  email: z.string().email().optional().or(z.literal("")),
+  address: z.string().max(500).optional(),
+  postalCode: z.string().max(20).optional(),
+  city: z.string().max(200).optional(),
+  country: z.string().max(100).optional(),
+  notes: z.string().max(500).optional(),
+})
+
+export const ClientImportSchema = z.object({
+  clients: z.array(ClientImportRowSchema).min(1).max(250),
+})
+
 export const ClientUpdateSchema = ClientSchema.extend({
   id: z.string().cuid(),
 })

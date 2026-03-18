@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import { pickVariants } from "@/lib/motion-variants";
-import { ArrowLeft, FileText, FolderKanban, Mail, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { ArrowLeft, FileSpreadsheet, FileText, FolderKanban, Mail, Pencil, Plus, Trash2, Users } from "lucide-react";
 import ClientFormDialog from "@/components/dashboard/client-form-dialog";
+import ClientImportDialog from "@/components/dashboard/client-import-dialog";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 
@@ -114,6 +115,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
   const [clients, setClients] = useState<ClientItem[]>(initialClients ?? []);
   const [isLoading, setIsLoading] = useState(!hasInitialClients);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientItem | null>(null);
 
   // Detail view state
@@ -843,6 +845,11 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
           onSuccess={handleDialogSuccess}
           editingClient={editingClient}
         />
+        <ClientImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          onSuccess={handleDialogSuccess}
+        />
         {ConfirmDialogElement}
       </main>
     );
@@ -877,12 +884,21 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                 {t("clients.subtitle")}
               </p>
             </div>
-            <div className="flex items-center gap-3 self-start">
+            <div className="flex flex-wrap items-center gap-3 self-start">
               {clientLimit?.max !== null && clientLimit?.max !== undefined && (
                 <span className="rounded-full bg-ink-soft px-3 py-1 text-xs font-semibold text-ink-muted">
                   {clientLimit.current}/{clientLimit.max}
                 </span>
               )}
+              <button
+                type="button"
+                onClick={() => setImportDialogOpen(true)}
+                disabled={clientLimit ? !clientLimit.allowed : false}
+                className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                {t("clients.import.cta")}
+              </button>
               <button
                 type="button"
                 onClick={handleAdd}
@@ -980,6 +996,11 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
         onOpenChange={setDialogOpen}
         onSuccess={handleDialogSuccess}
         editingClient={editingClient}
+      />
+      <ClientImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onSuccess={handleDialogSuccess}
       />
       {ConfirmDialogElement}
     </main>

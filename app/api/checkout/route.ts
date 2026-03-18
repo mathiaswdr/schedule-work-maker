@@ -80,6 +80,14 @@ export async function POST(req: NextRequest) {
         customer: stripeCustomerId,
         mode: "subscription",
         payment_method_types: ["card", "link"],
+        billing_address_collection: "auto",
+        customer_update: {
+          address: "auto",
+          name: "auto",
+        },
+        tax_id_collection: {
+          enabled: true,
+        },
         line_items: [
           {
             price: priceId,
@@ -98,6 +106,14 @@ export async function POST(req: NextRequest) {
           customer: stripeCustomerId,
           mode: "subscription",
           payment_method_types: ["card", "link"],
+          billing_address_collection: "auto",
+          customer_update: {
+            address: "auto",
+            name: "auto",
+          },
+          tax_id_collection: {
+            enabled: true,
+          },
           line_items: [{ price: priceId, quantity: 1 }],
           metadata: { planId: targetPlan },
           success_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription?success=true`,

@@ -7,13 +7,17 @@ import { AuthCard } from "./auth-card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
-type Status = "idle" | "sending" | "sent" | "error";
+type Status = "idle" | "sending" | "sent" | "opening" | "error";
 
 type LoginFormProps = {
   showEmailLogin: boolean;
+  showLocalMagicLinkTools?: boolean;
 };
 
-export const LoginForm = ({ showEmailLogin }: LoginFormProps) => {
+export const LoginForm = ({
+  showEmailLogin,
+  showLocalMagicLinkTools = false,
+}: LoginFormProps) => {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const t = useTranslations("auth");
@@ -42,9 +46,43 @@ export const LoginForm = ({ showEmailLogin }: LoginFormProps) => {
     setStatus("sent");
   };
 
+  const handleOpenMagicLink = async () => {
+    const safeEmail = email.trim();
+
+    if (!safeEmail) {
+      setStatus("error");
+      return;
+    }
+
+    setStatus("opening");
+
+    const response = await fetch(
+      `/api/test/auth-link?email=${encodeURIComponent(safeEmail)}`,
+      { cache: "no-store" }
+    );
+
+    if (!response.ok) {
+      setStatus("error");
+      return;
+    }
+
+    const payload = (await response.json()) as { url?: string };
+
+    if (!payload.url) {
+      setStatus("error");
+      return;
+    }
+
+    window.location.assign(payload.url);
+  };
+
   const helperText =
-    status === "sent"
-      ? t("helperSent")
+    status === "opening"
+      ? t("openingMagicLink")
+      : status === "sent"
+      ? showLocalMagicLinkTools
+        ? t("helperSentLocal")
+        : t("helperSent")
       : status === "error"
       ? t("helperError")
       : t("helperIdle");
@@ -58,6 +96,11 @@ export const LoginForm = ({ showEmailLogin }: LoginFormProps) => {
     >
       {showEmailLogin ? (
         <form onSubmit={handleSubmit} className="space-y-4">
+          {showLocalMagicLinkTools ? (
+            <p className="text-xs text-neutral-500">
+              {t("localMagicLinkMode")}
+            </p>
+          ) : null}
           <div className="space-y-2">
             <label
               htmlFor="login-email"
@@ -77,10 +120,23 @@ export const LoginForm = ({ showEmailLogin }: LoginFormProps) => {
           <Button
             type="submit"
             className="w-full"
-            disabled={status === "sending"}
+            disabled={status === "sending" || status === "opening"}
           >
             {status === "sending" ? t("sending") : t("magicLink")}
           </Button>
+          {showLocalMagicLinkTools && (status === "sent" || status === "opening") ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={handleOpenMagicLink}
+              disabled={status === "opening"}
+            >
+              {status === "opening"
+                ? t("openingMagicLink")
+                : t("openLocalMagicLink")}
+            </Button>
+          ) : null}
           <p aria-live="polite" className="text-xs text-neutral-500">
             {helperText}
           </p>

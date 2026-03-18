@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { getMagicLink, isE2ETestMode } from "@/server/e2e-auth";
+import { getMagicLink, isMagicLinkCaptureEnabled } from "@/server/e2e-auth";
 
 export async function GET(request: Request) {
-  if (!isE2ETestMode) {
+  if (!isMagicLinkCaptureEnabled) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

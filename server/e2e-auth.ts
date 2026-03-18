@@ -20,9 +20,14 @@ if (process.env.NODE_ENV !== "production") {
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
 export const isE2ETestMode = process.env.E2E_TEST_MODE === "1";
+export const isLocalMagicLinkMode =
+  process.env.NODE_ENV !== "production" &&
+  process.env.LOCAL_MAGIC_LINK === "1";
+export const isMagicLinkCaptureEnabled =
+  isE2ETestMode || isLocalMagicLinkMode;
 
 export const isEmailAuthEnabled =
-  isE2ETestMode ||
+  isMagicLinkCaptureEnabled ||
   EMAIL_ENV_KEYS.every((key) => {
     const value = process.env[key];
     return typeof value === "string" && value.length > 0;

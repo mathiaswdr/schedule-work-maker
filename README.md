@@ -54,5 +54,6 @@ npm run test:e2e:report
 ### Notes
 
 - The Playwright web server starts the app with `E2E_TEST_MODE=1`, which enables a local-only magic-link capture flow for testing.
+- For regular local development, set `LOCAL_MAGIC_LINK=1` to enable the same capture flow on `/auth/login` without configuring SMTP.
 - Outside E2E mode, magic-link login requires `EMAIL_SERVER_HOST`, `EMAIL_SERVER_PORT`, `EMAIL_FROM`, and optional `EMAIL_SERVER_USER` / `EMAIL_SERVER_PASSWORD`.
 - Test artifacts are written to `playwright-report/` and `test-results/`.

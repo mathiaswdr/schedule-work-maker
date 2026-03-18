@@ -35,7 +35,11 @@
     "sending": "Sending...",
     "helperIdle": "Receive a sign-in link by email.",
     "helperSent": "Magic link sent if the account exists.",
+    "helperSentLocal": "Magic link captured locally. Open it to sign in.",
     "helperError": "Unable to send the link. Check your email.",
+    "openingMagicLink": "Opening magic link...",
+    "openLocalMagicLink": "Open local magic link",
+    "localMagicLinkMode": "Local mode is active: the magic link is captured in the app instead of being sent by email.",
     "magicLinkUnavailable": "Magic link sign-in is not configured in this environment.",
     "google": "Sign in with Google"
   },
@@ -129,6 +133,52 @@
       "summaryStats": [
         {"label": "Average time", "value": "6h 12m"},
         {"label": "Avg breaks", "value": "22m"}
+      ]
+    },
+    "importCta": {
+      "eyebrow": "Fast import",
+      "title": "Start quickly by importing your client Excel file.",
+      "subtitle": "Import your Excel, XLS or CSV file with all your current clients and find them directly in Temiqo, without manual re-entry.",
+      "ctaPrimary": "Import my clients",
+      "ctaSecondary": "See pricing",
+      "benefits": [
+        "Import your existing clients in just a few minutes",
+        "The main columns are recognized automatically",
+        "Move from Excel to Temiqo without starting from scratch"
+      ],
+      "acceptedLabel": "Accepted formats",
+      "acceptedFormats": [".xlsx", ".xls", ".csv"],
+      "fileBadge": "Client import",
+      "fileName": "current-clients.xlsx",
+      "tableHeaders": {
+        "name": "Client",
+        "email": "Email",
+        "city": "City"
+      },
+      "previewRows": [
+        {
+          "name": "Studio Nera",
+          "email": "hello@studionera.ch",
+          "city": "Lausanne"
+        },
+        {
+          "name": "Atelier Miro",
+          "email": "contact@ateliermiro.ch",
+          "city": "Geneva"
+        },
+        {
+          "name": "North Peak",
+          "email": "team@northpeak.io",
+          "city": "Zurich"
+        }
+      ],
+      "summaryLabel": "Ready to import",
+      "summaryTitle": "Bring over your current clients before your first tracked session.",
+      "summaryCopy": "Upload your file, check the preview, then start tracking time with a client base that is already set up.",
+      "summaryStats": [
+        {"value": "250", "label": "clients max / import"},
+        {"value": "7", "label": "recognized columns"},
+        {"value": "0", "label": "manual re-entry"}
       ]
     },
     "pricing": {
@@ -266,6 +316,7 @@
         "perks": [
           "✓ Full time tracking",
           "✓ Unlimited clients",
+          "✓ Excel/CSV client import",
           "✓ Projects",
           "✓ Invoice generation",
           "✓ Swiss QR invoice",
@@ -287,11 +338,32 @@
       "items": [
         "One-click timer",
         "CSV and PDF export",
+        "Excel and CSV client import",
         "Anti-miss alerts",
         "Weekly board",
-        "Break tracking",
-        "Fast support"
+        "Break tracking"
       ]
+    },
+    "migration": {
+      "eyebrow": "Fast migration",
+      "title": "Import your clients from Excel in a few clicks.",
+      "subtitle": "If your clients still live in a spreadsheet, Temiqo reads the Excel or CSV file and automatically creates client records with the right details.",
+      "items": [
+        "Import .xlsx, .xls and .csv files",
+        "Automatic detection for name, email, address, postal code, city and country columns",
+        "Instant client creation without manual re-entry"
+      ],
+      "cta": "Try client import",
+      "demo": {
+        "label": "Example source file",
+        "arrow": "Automatic import",
+        "resultTitle": "Result in Temiqo",
+        "resultSubtitle": "Your clients are created and ready to be linked to sessions, projects, and invoices.",
+        "created": "Clients created",
+        "manual": "Manual entry",
+        "time": "Time saved",
+        "timeValue": "< 1 min"
+      }
     },
     "example": {
       "title": "Example impact",
@@ -314,7 +386,7 @@
         },
         {
           "q": "Can I import my old data?",
-          "a": "Yes, a CSV assistant is available from the Pro plan."
+          "a": "Yes, you can import an Excel or CSV file to automatically create your clients. Your plan's client limits still apply."
         }
       ]
     },
@@ -517,7 +589,7 @@
         "emailLabel": "Email",
         "planLabel": "Current plan",
         "manageBilling": "Manage billing",
-        "planHint": "Manage your subscription in the billing portal.",
+        "planHint": "Manage your subscription and access your invoices in the billing portal.",
         "currencyLabel": "Currency",
         "currencyHint": "Currency used across the app.",
         "hourlyRateLabel": "Hourly rate",
@@ -614,6 +686,46 @@
       "title": "Clients",
       "subtitle": "Manage your clients and track time per client.",
       "addClient": "Add client",
+      "import": {
+        "cta": "Import Excel",
+        "title": "Import clients",
+        "subtitle": "Upload an Excel or CSV file and Temiqo will automatically create your clients.",
+        "accepted": "Accepted formats: Excel (.xlsx, .xls) and CSV",
+        "expectedColumns": "The file must include at least a name column.",
+        "columns": "Recognized columns: name, email, address, postal code, city, country, notes.",
+        "chooseFile": "Choose file",
+        "dropzone": "Drag and drop your file here or click to select it",
+        "dropHere": "Release to import the file",
+        "parsing": "Reading file...",
+        "columnFallback": "Column",
+        "ready": "Ready to import",
+        "skipped": "Skipped rows",
+        "duplicates": "Duplicates in file",
+        "mappingTitle": "Column mapping",
+        "mappingSubtitle": "Temiqo pre-fills recognized fields. You can adjust each column before import.",
+        "detectedColumns": "{count} column(s) detected",
+        "sourceColumn": "Choose source column",
+        "ignore": "Ignore this field",
+        "required": "Required",
+        "optional": "Optional",
+        "autoDetected": "Auto-detected",
+        "manualMapping": "Manual mapping",
+        "nameRequiredHint": "Map a client name column to enable import.",
+        "previewTitle": "Preview before import",
+        "previewSubtitle": "Temiqo uses the first sheet in the file and shows a sample before creation.",
+        "previewEmpty": "Add a file to preview detected clients.",
+        "previewNeedsMapping": "Map the client name column first to generate the preview.",
+        "moreRows": "+{count} more rows",
+        "submit": "Create clients",
+        "success": "{count} clients imported. {skipped} row(s) skipped.",
+        "limitReached": "Import blocked: {remaining} slot(s) left on your plan for {attempted} client(s) to create.",
+        "noNewClients": "No new client to import. They already exist or are duplicates.",
+        "noValidRows": "No valid client could be detected in this file.",
+        "emptyFile": "The file is empty or contains no usable rows.",
+        "invalidFormat": "Unsupported format. Import an Excel or CSV file.",
+        "parseError": "Unable to read this file. Check the format or the column headers.",
+        "submitError": "Client import failed."
+      },
       "editClient": "Edit client",
       "deleteClient": "Delete client",
       "deleteConfirm": "Are you sure you want to delete this client? Associated projects will be unlinked.",
@@ -936,10 +1048,10 @@
     },
     "subscriptionPage": {
       "title": "Subscription",
-      "subtitle": "Manage your plan and billing.",
+      "subtitle": "Manage your plan, billing, and subscription invoices.",
       "currentPlan": "Current plan",
       "upgrade": "Upgrade",
-      "manageBilling": "Manage billing",
+      "manageBilling": "Manage billing and invoices",
       "successMessage": "Your subscription has been updated!",
       "billingToggle": {
         "monthly": "Monthly",
@@ -968,10 +1080,11 @@
         "pro": {
           "name": "Pro",
           "perks": [
-            "✓ Full time tracking",
-            "✓ Unlimited clients",
-            "✓ Projects",
-            "✓ Invoice generation",
+          "✓ Full time tracking",
+          "✓ Unlimited clients",
+          "✓ Excel/CSV client import",
+          "✓ Projects",
+          "✓ Invoice generation",
             "✓ Swiss QR invoice",
             "✓ Payment reminders",
             "✓ Full session history",

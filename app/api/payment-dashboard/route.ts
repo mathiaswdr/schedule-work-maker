@@ -43,6 +43,7 @@ export async function POST() {
     try {
       session = await stripe.billingPortal.sessions.create({
         customer: stripeCustomerId,
+        configuration: process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID || undefined,
         return_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
       });
     } catch (stripeError: unknown) {
@@ -51,6 +52,7 @@ export async function POST() {
 
         session = await stripe.billingPortal.sessions.create({
           customer: stripeCustomerId,
+          configuration: process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID || undefined,
           return_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
         });
       } else {

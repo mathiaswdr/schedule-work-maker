@@ -35,7 +35,11 @@
     "sending": "Envoi en cours...",
     "helperIdle": "Recevez un lien de connexion par email.",
     "helperSent": "Lien magique envoye si le compte existe.",
+    "helperSentLocal": "Lien magique capture localement. Ouvrez-le pour vous connecter.",
     "helperError": "Impossible d'envoyer le lien. Verifiez votre email.",
+    "openingMagicLink": "Ouverture du lien magique...",
+    "openLocalMagicLink": "Ouvrir le lien magique local",
+    "localMagicLinkMode": "Mode local actif: le lien magique est capture dans l'application au lieu d'etre envoye par email.",
     "magicLinkUnavailable": "La connexion par lien magique n'est pas configuree dans cet environnement.",
     "google": "Se connecter avec Google"
   },
@@ -129,6 +133,52 @@
       "summaryStats": [
         {"label": "Temps moyen", "value": "6h 12m"},
         {"label": "Pauses moy.", "value": "22m"}
+      ]
+    },
+    "importCta": {
+      "eyebrow": "Import express",
+      "title": "Commencez rapidement en important votre fichier Excel clients.",
+      "subtitle": "Importez votre fichier Excel, XLS ou CSV avec tous vos clients actuels et retrouvez-les directement dans Temiqo, sans ressaisie manuelle.",
+      "ctaPrimary": "Importer mes clients",
+      "ctaSecondary": "Voir les tarifs",
+      "benefits": [
+        "Importez vos clients existants en quelques minutes",
+        "Les colonnes principales sont reconnues automatiquement",
+        "Passez d'Excel a Temiqo sans repartir de zero"
+      ],
+      "acceptedLabel": "Formats acceptes",
+      "acceptedFormats": [".xlsx", ".xls", ".csv"],
+      "fileBadge": "Import clients",
+      "fileName": "clients-actuels.xlsx",
+      "tableHeaders": {
+        "name": "Client",
+        "email": "Email",
+        "city": "Ville"
+      },
+      "previewRows": [
+        {
+          "name": "Studio Nera",
+          "email": "hello@studionera.ch",
+          "city": "Lausanne"
+        },
+        {
+          "name": "Atelier Miro",
+          "email": "contact@ateliermiro.ch",
+          "city": "Geneve"
+        },
+        {
+          "name": "North Peak",
+          "email": "team@northpeak.io",
+          "city": "Zurich"
+        }
+      ],
+      "summaryLabel": "Pret a importer",
+      "summaryTitle": "Ajoutez vos clients actuels avant meme votre premiere session.",
+      "summaryCopy": "Chargez votre fichier, verifiez l'aperçu, puis commencez a suivre votre temps avec une base clients deja complete.",
+      "summaryStats": [
+        {"value": "250", "label": "clients max / import"},
+        {"value": "7", "label": "colonnes reconnues"},
+        {"value": "0", "label": "ressaisie manuelle"}
       ]
     },
     "pricing": {
@@ -266,6 +316,7 @@
         "perks": [
           "✓ Time tracking complet",
           "✓ Clients illimites",
+          "✓ Import Excel/CSV des clients",
           "✓ Projets",
           "✓ Generation de factures",
           "✓ QR facture suisse",
@@ -287,11 +338,32 @@
       "items": [
         "Chrono en 1 clic",
         "Export CSV et PDF",
+        "Import Excel et CSV des clients",
         "Alertes anti-oubli",
         "Tableau hebdo",
-        "Suivi des pauses",
-        "Support rapide"
+        "Suivi des pauses"
       ]
+    },
+    "migration": {
+      "eyebrow": "Migration express",
+      "title": "Importez vos clients depuis Excel en quelques clics.",
+      "subtitle": "Si vos clients sont encore geres dans un tableur, Temiqo lit votre fichier Excel ou CSV et cree automatiquement vos fiches clients avec les bonnes informations.",
+      "items": [
+        "Import des fichiers .xlsx, .xls et .csv",
+        "Detection automatique des colonnes nom, email, adresse, code postal, ville et pays",
+        "Creation immediate des clients sans ressaisie manuelle"
+      ],
+      "cta": "Tester l'import client",
+      "demo": {
+        "label": "Exemple de fichier source",
+        "arrow": "Import automatique",
+        "resultTitle": "Resultat dans Temiqo",
+        "resultSubtitle": "Vos clients sont crees et prets a etre relies aux sessions, projets et factures.",
+        "created": "Clients crees",
+        "manual": "Saisie manuelle",
+        "time": "Temps gagne",
+        "timeValue": "< 1 min"
+      }
     },
     "example": {
       "title": "Exemple de gain",
@@ -314,7 +386,7 @@
         },
         {
           "q": "Puis-je importer mes anciennes donnees ?",
-          "a": "Oui, un assistant CSV est disponible des le plan Pro."
+          "a": "Oui, vous pouvez importer un fichier Excel ou CSV pour creer automatiquement vos clients. Les limites de nombre de clients de votre plan restent appliquees."
         }
       ]
     },
@@ -517,7 +589,7 @@
         "emailLabel": "Email",
         "planLabel": "Plan actuel",
         "manageBilling": "Gerer la facturation",
-        "planHint": "Gerez votre abonnement dans le portail de facturation.",
+        "planHint": "Gerez votre abonnement et recuperez vos factures dans le portail de facturation.",
         "currencyLabel": "Devise",
         "currencyHint": "Devise utilisee dans l'application.",
         "hourlyRateLabel": "Taux horaire",
@@ -614,6 +686,46 @@
       "title": "Clients",
       "subtitle": "Gerez vos clients et suivez le temps par client.",
       "addClient": "Ajouter un client",
+      "import": {
+        "cta": "Importer Excel",
+        "title": "Importer des clients",
+        "subtitle": "Chargez un fichier Excel ou CSV et Temiqo cree automatiquement vos clients.",
+        "accepted": "Formats acceptes: Excel (.xlsx, .xls) et CSV",
+        "expectedColumns": "Le fichier doit contenir au minimum une colonne nom.",
+        "columns": "Colonnes reconnues: nom, email, adresse, code postal, ville, pays, notes.",
+        "chooseFile": "Choisir un fichier",
+        "dropzone": "Glissez-deposez votre fichier ici ou cliquez pour le selectionner",
+        "dropHere": "Relachez pour importer le fichier",
+        "parsing": "Lecture du fichier...",
+        "columnFallback": "Colonne",
+        "ready": "Prets a importer",
+        "skipped": "Lignes ignorees",
+        "duplicates": "Doublons dans le fichier",
+        "mappingTitle": "Correspondance des colonnes",
+        "mappingSubtitle": "Temiqo pre-remplit les champs reconnus. Vous pouvez corriger chaque colonne avant l'import.",
+        "detectedColumns": "{count} colonne(s) detectee(s)",
+        "sourceColumn": "Choisir une colonne source",
+        "ignore": "Ignorer ce champ",
+        "required": "Requis",
+        "optional": "Optionnel",
+        "autoDetected": "Detecte auto",
+        "manualMapping": "Mapping manuel",
+        "nameRequiredHint": "Associez une colonne au nom du client pour activer l'import.",
+        "previewTitle": "Apercu avant import",
+        "previewSubtitle": "Temiqo utilise la premiere feuille du fichier et vous montre un extrait avant creation.",
+        "previewEmpty": "Ajoutez un fichier pour previsualiser les clients detectes.",
+        "previewNeedsMapping": "Associez d'abord la colonne du nom du client pour generer l'aperçu.",
+        "moreRows": "+{count} autres lignes",
+        "submit": "Creer les clients",
+        "success": "{count} clients importes. {skipped} ligne(s) ignoree(s).",
+        "limitReached": "Import impossible: il reste {remaining} place(s) sur votre plan, pour {attempted} client(s) a creer.",
+        "noNewClients": "Aucun nouveau client a importer. Tous existent deja ou sont en doublon.",
+        "noValidRows": "Aucun client valide n'a ete detecte dans ce fichier.",
+        "emptyFile": "Le fichier est vide ou ne contient aucune ligne exploitable.",
+        "invalidFormat": "Format non supporte. Importez un fichier Excel ou CSV.",
+        "parseError": "Impossible de lire ce fichier. Verifiez le format ou les en-tetes de colonnes.",
+        "submitError": "L'import des clients a echoue."
+      },
       "editClient": "Modifier le client",
       "deleteClient": "Supprimer le client",
       "deleteConfirm": "Voulez-vous vraiment supprimer ce client ? Les projets associes seront delies.",
@@ -936,10 +1048,10 @@
     },
     "subscriptionPage": {
       "title": "Abonnement",
-      "subtitle": "Gerez votre plan et votre facturation.",
+      "subtitle": "Gerez votre plan, votre facturation et vos factures d'abonnement.",
       "currentPlan": "Plan actuel",
       "upgrade": "Upgrade",
-      "manageBilling": "Gerer la facturation",
+      "manageBilling": "Gerer la facturation et les factures",
       "successMessage": "Votre abonnement a ete mis a jour !",
       "billingToggle": {
         "monthly": "Mensuel",
@@ -968,10 +1080,11 @@
         "pro": {
           "name": "Pro",
           "perks": [
-            "✓ Time tracking complet",
-            "✓ Clients illimites",
-            "✓ Projets",
-            "✓ Generation de factures",
+          "✓ Time tracking complet",
+          "✓ Clients illimites",
+          "✓ Import Excel/CSV des clients",
+          "✓ Projets",
+          "✓ Generation de factures",
             "✓ QR facture suisse",
             "✓ Rappels de paiement",
             "✓ Historique complet des sessions",

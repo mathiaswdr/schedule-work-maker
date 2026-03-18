@@ -44,6 +44,7 @@ export default async function PricingPage() {
   const t = await getTranslations("pricingPage");
   const plans = t.raw("plans") as PricingPlan[];
   const includedItems = t.raw("included.items") as string[];
+  const migrationItems = t.raw("migration.items") as string[];
   const exampleStats = t.raw("example.stats") as StatItem[];
   const faqItems = t.raw("faq.items") as FaqItem[];
 
@@ -160,6 +161,106 @@ export default async function PricingPage() {
                     </span>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto w-full maxW px-6 py-12">
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+            <div>
+              <p className="text-xs uppercase text-ink-muted">
+                {t("migration.eyebrow")}
+              </p>
+              <h2
+                className={`${display.className} mt-4 text-3xl font-semibold text-ink`}
+              >
+                {t("migration.title")}
+              </h2>
+              <p className="mt-3 max-w-2xl text-ink-muted">
+                {t("migration.subtitle")}
+              </p>
+              <div className="mt-6 grid gap-3">
+                {migrationItems.map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-3 rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm text-ink-muted"
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand/10 text-xs font-semibold text-brand">
+                      ✓
+                    </span>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6">
+                <Link
+                  href="/auth/login"
+                  className="inline-flex rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
+                >
+                  {t("migration.cta")}
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-[32px] border border-line bg-white/85 p-6 shadow-[0_30px_80px_-56px_rgba(15,118,110,0.45)]">
+              <div className="rounded-3xl border border-line bg-panel px-5 py-4">
+                <p className="text-xs uppercase text-ink-muted">
+                  {t("migration.demo.label")}
+                </p>
+                <div className="mt-4 space-y-3">
+                  {[
+                    ["Acme Studio", "contact@acme.ch", "Lausanne"],
+                    ["Nord Conseil", "hello@nord.fr", "Lyon"],
+                    ["Atelier 27", "bonjour@atelier27.ch", "Geneve"],
+                  ].map(([name, email, city]) => (
+                    <div
+                      key={name}
+                      className="grid grid-cols-[1.2fr_1fr_0.8fr] gap-3 rounded-2xl border border-line bg-white/80 px-4 py-3 text-sm"
+                    >
+                      <span className="font-medium text-ink">{name}</span>
+                      <span className="truncate text-ink-muted">{email}</span>
+                      <span className="truncate text-ink-muted">{city}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="my-4 flex items-center justify-center">
+                <div className="rounded-full bg-brand/10 px-4 py-2 text-sm font-semibold text-brand">
+                  {t("migration.demo.arrow")}
+                </div>
+              </div>
+
+              <div className="rounded-3xl border border-line bg-white px-5 py-5">
+                <p className="text-sm font-semibold text-ink">
+                  {t("migration.demo.resultTitle")}
+                </p>
+                <p className="mt-2 text-sm text-ink-muted">
+                  {t("migration.demo.resultSubtitle")}
+                </p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-line bg-panel px-4 py-3">
+                    <p className="text-xs uppercase text-ink-muted">
+                      {t("migration.demo.created")}
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-ink">3</p>
+                  </div>
+                  <div className="rounded-2xl border border-line bg-panel px-4 py-3">
+                    <p className="text-xs uppercase text-ink-muted">
+                      {t("migration.demo.manual")}
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-ink">0</p>
+                  </div>
+                  <div className="rounded-2xl border border-line bg-panel px-4 py-3">
+                    <p className="text-xs uppercase text-ink-muted">
+                      {t("migration.demo.time")}
+                    </p>
+                    <p className="mt-2 text-2xl font-semibold text-ink">
+                      {t("migration.demo.timeValue")}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
