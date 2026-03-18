@@ -4,7 +4,13 @@ import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import { stripe } from "@/server/stripe";
 import { z } from "zod";
-import { getStripePriceId, canUpgrade, type PlanId, type BillingPeriod } from "@/lib/plans";
+import {
+  getStripePriceId,
+  canUpgrade,
+  normalizePlanId,
+  type PlanId,
+  type BillingPeriod,
+} from "@/lib/plans";
 
 const CheckoutBody = z.object({
   plan: z.enum(["STARTER", "PRO"]),
@@ -36,7 +42,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Invalid plan.", success: false }, { status: 400 });
     }
 
-    const targetPlan = parsed.data.plan as PlanId;
+    const targetPlan = normalizePlanId(parsed.data.plan) as PlanId;
     const billing = parsed.data.billing as BillingPeriod;
 
     const user = await prisma.user.findUnique({

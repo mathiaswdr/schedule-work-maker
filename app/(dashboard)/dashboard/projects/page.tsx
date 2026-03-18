@@ -36,7 +36,7 @@ export default async function DashboardProjectsPage() {
     : initialProjects;
 
   return (
-    <PlanGate userPlan={userPlan} requiredPlan="STARTER" feature="projects">
+    <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="projects">
       <ProjectsClient
         displayClassName={display.className}
         initialProjects={serializeForClient(paginatedInitialProjects)}

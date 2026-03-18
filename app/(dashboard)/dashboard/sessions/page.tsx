@@ -65,7 +65,7 @@ export default async function DashboardSessionsPage() {
     : initialSessions;
 
   return (
-    <PlanGate userPlan={userPlan} requiredPlan="STARTER" feature="sessions">
+    <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="sessions">
       <SessionsClient
         displayClassName={display.className}
         currency={user?.currency ?? "CHF"}

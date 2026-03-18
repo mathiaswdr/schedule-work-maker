@@ -49,6 +49,7 @@ export function PricingCards({
 }: PricingCardsProps) {
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
   const isYearly = billing === "yearly";
+  const gridClassName = plans.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3";
 
   return (
     <>
@@ -95,7 +96,7 @@ export function PricingCards({
       </div>
 
       {/* Cards grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className={`mx-auto grid max-w-[860px] gap-6 ${gridClassName}`}>
         {plans.map((plan) => {
           const planDef = PLANS.find((p) => p.id === plan.planId);
           const monthlyPrice = planDef?.priceAmount ?? 0;

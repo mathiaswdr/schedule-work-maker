@@ -39,6 +39,7 @@ import { deleteBankAccount } from "@/server/actions/bank-accounts";
 import { Pencil, Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { EASE } from "@/lib/motion-variants";
+import { getPlanDisplayName } from "@/lib/plans";
 
 const CURRENCIES = [
   { code: "CHF", label: "CHF – Franc suisse" },
@@ -558,7 +559,7 @@ export default function SettingsCard({
                         href="/dashboard/subscription"
                         className="rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold text-brand hover:bg-brand/20 transition"
                       >
-                        {plan}
+                        {getPlanDisplayName(plan)}
                       </Link>
                     </motion.div>
                     <motion.div

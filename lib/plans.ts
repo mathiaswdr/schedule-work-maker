@@ -9,6 +9,7 @@ export type PlanDefinition = {
   priceAmount: number;
   yearlyPriceAmount: number;
   highlight: boolean;
+  visible: boolean;
   sortOrder: number;
 };
 
@@ -21,6 +22,7 @@ export const PLANS: PlanDefinition[] = [
     priceAmount: 0,
     yearlyPriceAmount: 0,
     highlight: false,
+    visible: true,
     sortOrder: 0,
   },
   {
@@ -30,23 +32,39 @@ export const PLANS: PlanDefinition[] = [
     stripeYearlyPriceEnvVar: "SUBSCRIPTION_YEAR_PRICE_ID",
     priceAmount: 9.9,
     yearlyPriceAmount: 99,
-    highlight: true,
+    highlight: false,
+    visible: false,
     sortOrder: 1,
   },
   {
     id: "PRO",
     i18nKey: "pro",
-    stripePriceEnvVar: "PRO_SUBSCRIPTION_PRICE_ID",
-    stripeYearlyPriceEnvVar: "PRO_SUBSCRIPTION_YEAR_PRICE_ID",
-    priceAmount: 19,
-    yearlyPriceAmount: 199,
-    highlight: false,
-    sortOrder: 2,
+    stripePriceEnvVar: "SUBSCRIPTION_PRICE_ID",
+    stripeYearlyPriceEnvVar: "SUBSCRIPTION_YEAR_PRICE_ID",
+    priceAmount: 9.9,
+    yearlyPriceAmount: 99,
+    highlight: true,
+    visible: true,
+    sortOrder: 1,
   },
 ];
 
+export function normalizePlanId(plan: string | null | undefined): PlanId {
+  if (plan === "STARTER" || plan === "PRO") return "PRO";
+  return "FREE";
+}
+
+export function getVisiblePlans() {
+  return PLANS.filter((plan) => plan.visible);
+}
+
+export function getPlanDisplayName(plan: string | null | undefined): string {
+  return normalizePlanId(plan) === "PRO" ? "Pro" : "Free";
+}
+
 export function getStripePriceId(planId: PlanId, billing: BillingPeriod = "monthly"): string | null {
-  const plan = PLANS.find((p) => p.id === planId);
+  const normalizedPlanId = normalizePlanId(planId);
+  const plan = PLANS.find((p) => p.id === normalizedPlanId || p.id === planId);
   if (!plan) return null;
   const envVar = billing === "yearly" ? plan.stripeYearlyPriceEnvVar : plan.stripePriceEnvVar;
   if (!envVar) return null;
@@ -54,16 +72,21 @@ export function getStripePriceId(planId: PlanId, billing: BillingPeriod = "month
 }
 
 export function getPlanByStripePrice(priceId: string): PlanId {
-  for (const plan of PLANS) {
-    if (plan.stripePriceEnvVar && process.env[plan.stripePriceEnvVar] === priceId) return plan.id;
-    if (plan.stripeYearlyPriceEnvVar && process.env[plan.stripeYearlyPriceEnvVar] === priceId) return plan.id;
-  }
+  const paidPriceIds = [
+    process.env.SUBSCRIPTION_PRICE_ID,
+    process.env.SUBSCRIPTION_YEAR_PRICE_ID,
+    process.env.PRO_SUBSCRIPTION_PRICE_ID,
+    process.env.PRO_SUBSCRIPTION_YEAR_PRICE_ID,
+  ];
+
+  if (paidPriceIds.includes(priceId)) return "PRO";
+
   return "PRO";
 }
 
 export function canUpgrade(current: string, target: PlanId): boolean {
-  const currentPlan = PLANS.find((p) => p.id === current);
-  const targetPlan = PLANS.find((p) => p.id === target);
+  const currentPlan = PLANS.find((p) => p.id === normalizePlanId(current));
+  const targetPlan = PLANS.find((p) => p.id === normalizePlanId(target));
   if (!currentPlan || !targetPlan) return false;
   return targetPlan.sortOrder > currentPlan.sortOrder;
 }
@@ -88,8 +111,8 @@ export const FEATURE_PLAN_MAP: Record<FeatureKey, PlanId> = {
   invoices: "FREE",
   subscription: "FREE",
   settings: "FREE",
-  sessions: "STARTER",
-  projects: "STARTER",
+  sessions: "PRO",
+  projects: "PRO",
   stats: "PRO",
   expenses: "PRO",
 };
@@ -103,13 +126,13 @@ export const PLAN_LIMITS: Record<PlanId, { clients: number | null; invoicesPerMo
 
 /** Returns true if `userPlan` is equal or higher than `requiredPlan`. */
 export function isPlanSufficient(userPlan: PlanId, requiredPlan: PlanId): boolean {
-  const user = PLANS.find((p) => p.id === userPlan);
-  const required = PLANS.find((p) => p.id === requiredPlan);
+  const user = PLANS.find((p) => p.id === normalizePlanId(userPlan));
+  const required = PLANS.find((p) => p.id === normalizePlanId(requiredPlan));
   if (!user || !required) return false;
   return user.sortOrder >= required.sortOrder;
 }
 
 /** Returns the limits for a given plan. */
 export function getPlanLimits(plan: PlanId) {
-  return PLAN_LIMITS[plan];
+  return PLAN_LIMITS[normalizePlanId(plan)];
 }

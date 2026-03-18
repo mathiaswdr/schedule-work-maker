@@ -6,7 +6,13 @@ import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { EASE, pickVariants } from "@/lib/motion-variants";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { PLANS, canUpgrade, type PlanId, type BillingPeriod } from "@/lib/plans";
+import {
+  canUpgrade,
+  getVisiblePlans,
+  normalizePlanId,
+  type PlanId,
+  type BillingPeriod,
+} from "@/lib/plans";
 
 type SubscriptionClientProps = {
   plan: string;
@@ -23,6 +29,8 @@ export default function SubscriptionClient({
   const shouldReduceMotion = useReducedMotion();
   const searchParams = useSearchParams();
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
+  const currentPlan = normalizePlanId(plan);
+  const visiblePlans = getVisiblePlans();
   const isYearly = billing === "yearly";
 
   useEffect(() => {
@@ -143,11 +151,11 @@ export default function SubscriptionClient({
 
           {/* Plan cards grid */}
           <motion.section variants={v.fadeUp}>
-            <div className="grid gap-6 lg:grid-cols-3">
-              {PLANS.map((planDef) => {
-                const isCurrent = plan === planDef.id;
-                const isUpgrade = canUpgrade(plan, planDef.id);
-                const i18nKey = planDef.i18nKey as "free" | "starter" | "pro";
+            <div className={`mx-auto grid max-w-[860px] gap-6 ${visiblePlans.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
+              {visiblePlans.map((planDef) => {
+                const isCurrent = currentPlan === planDef.id;
+                const isUpgrade = canUpgrade(currentPlan, planDef.id);
+                const i18nKey = planDef.i18nKey as "free" | "pro";
                 const perks = t.raw(`subscriptionPage.plans.${i18nKey}.perks`) as string[];
                 const monthlyPrice = planDef.priceAmount;
                 const yearlyPrice = planDef.yearlyPriceAmount;

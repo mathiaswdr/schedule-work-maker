@@ -135,7 +135,7 @@
       "eyebrow": "Simple pricing",
       "socialProof": "Ideal for developers, designers, consultants and freelancers.",
       "title": "A simple plan for freelancers and small teams.",
-      "subtitle": "Start for free, then upgrade when your business grows.",
+      "subtitle": "Start free, then upgrade to Pro at 9.90 CHF to unlock every feature.",
       "cta": "Choose {plan}",
       "billingToggle": {
         "monthly": "Monthly",
@@ -165,11 +165,11 @@
           ]
         },
         {
-          "name": "Starter",
-          "planId": "STARTER",
+          "name": "Pro",
+          "planId": "PRO",
           "price": "9.90 CHF",
           "suffix": "/user/mo",
-          "desc": "For freelancers and small teams who need real tools.",
+          "desc": "One complete paid plan for freelancers and small teams.",
           "perks": [
             "✓ Full time tracking",
             "✓ Unlimited clients",
@@ -177,28 +177,14 @@
             "✓ Invoice generation",
             "✓ Swiss QR invoice",
             "✓ Payment reminders",
-            "✓ Session history",
-            "✗ Advanced analytics",
-            "✗ Expense tracking",
-            "✗ CSV exports",
-            "✗ Custom invoice templates"
-          ],
-          "highlight": true
-        },
-        {
-          "name": "Pro",
-          "planId": "PRO",
-          "price": "19 CHF",
-          "suffix": "/user/mo",
-          "desc": "Everything in Starter, plus power features.",
-          "perks": [
-            "✓ Everything in Starter",
+            "✓ Full session history",
             "✓ Advanced analytics",
             "✓ Expense tracking",
             "✓ CSV exports",
             "✓ Custom invoice templates",
             "✓ Advanced reporting"
-          ]
+          ],
+          "highlight": true
         }
       ]
     },
@@ -237,7 +223,7 @@
     "hero": {
       "eyebrow": "Pricing",
       "title": "Simple pricing to track your hours without friction.",
-      "subtitle": "Start free, then upgrade when your tracking needs grow.",
+      "subtitle": "Start free, then upgrade to Pro at 9.90 CHF when you want every feature unlocked.",
       "ctaPrimary": "Start free trial",
       "ctaSecondary": "See the demo"
     },
@@ -272,11 +258,11 @@
         ]
       },
       {
-        "name": "Starter",
-        "planId": "STARTER",
+        "name": "Pro",
+        "planId": "PRO",
         "price": "9.90 CHF",
         "suffix": "/user/mo",
-        "desc": "For freelancers and small teams who need real tools.",
+        "desc": "One complete paid plan for freelancers and small teams.",
         "perks": [
           "✓ Full time tracking",
           "✓ Unlimited clients",
@@ -284,34 +270,20 @@
           "✓ Invoice generation",
           "✓ Swiss QR invoice",
           "✓ Payment reminders",
-          "✓ Session history",
-          "✗ Advanced analytics",
-          "✗ Expense tracking",
-          "✗ CSV exports",
-          "✗ Custom invoice templates"
-        ],
-        "highlight": true
-      },
-      {
-        "name": "Pro",
-        "planId": "PRO",
-        "price": "19 CHF",
-        "suffix": "/user/mo",
-        "desc": "Everything in Starter, plus power features.",
-        "perks": [
-          "✓ Everything in Starter",
+          "✓ Full session history",
           "✓ Advanced analytics",
           "✓ Expense tracking",
           "✓ CSV exports",
           "✓ Custom invoice templates",
           "✓ Advanced reporting"
-        ]
+        ],
+        "highlight": true
       }
     ],
     "included": {
       "eyebrow": "Included in every plan",
       "title": "Everything to track start, break and resume without effort.",
-      "subtitle": "Core features stay available on every plan. The difference is depth of insights and client management.",
+      "subtitle": "Free covers the essentials. Pro unlocks every advanced feature without multiplying plan choices.",
       "items": [
         "One-click timer",
         "CSV and PDF export",
@@ -342,7 +314,7 @@
         },
         {
           "q": "Can I import my old data?",
-          "a": "Yes, a CSV assistant is available from the Starter plan."
+          "a": "Yes, a CSV assistant is available from the Pro plan."
         }
       ]
     },
@@ -993,8 +965,8 @@
             "✗ Expense tracking"
           ]
         },
-        "starter": {
-          "name": "Starter",
+        "pro": {
+          "name": "Pro",
           "perks": [
             "✓ Full time tracking",
             "✓ Unlimited clients",
@@ -1002,17 +974,7 @@
             "✓ Invoice generation",
             "✓ Swiss QR invoice",
             "✓ Payment reminders",
-            "✓ Session history",
-            "✗ Advanced analytics",
-            "✗ Expense tracking",
-            "✗ CSV exports",
-            "✗ Custom invoice templates"
-          ]
-        },
-        "pro": {
-          "name": "Pro",
-          "perks": [
-            "✓ Everything in Starter",
+            "✓ Full session history",
             "✓ Advanced analytics",
             "✓ Expense tracking",
             "✓ CSV exports",
@@ -1029,11 +991,11 @@
     "upgrade": "Upgrade to {plan}",
     "sessions": {
       "title": "Session history",
-      "description": "Upgrade to Starter to access your full session history and detailed logs."
+      "description": "Upgrade to Pro to access your full session history and detailed logs."
     },
     "projects": {
       "title": "Projects",
-      "description": "Upgrade to Starter to organize your work sessions by project."
+      "description": "Upgrade to Pro to organize your work sessions by project."
     },
     "stats": {
       "title": "Advanced analytics",

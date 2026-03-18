@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import { canUpgrade, type PlanId, type BillingPeriod } from "@/lib/plans";
+import {
+  canUpgrade,
+  normalizePlanId,
+  type PlanId,
+  type BillingPeriod,
+} from "@/lib/plans";
 
 type PricingCtaProps = {
   planId: PlanId;
@@ -40,8 +45,9 @@ export function PricingCta({
     );
   }
 
-  const isCurrent = userPlan === planId;
-  const isUpgrade = canUpgrade(userPlan, planId);
+  const currentPlan = normalizePlanId(userPlan);
+  const isCurrent = currentPlan === planId;
+  const isUpgrade = canUpgrade(currentPlan, planId);
 
   // Current plan (paid) → manage billing
   if (isCurrent && planId !== "FREE") {

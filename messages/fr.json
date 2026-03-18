@@ -135,7 +135,7 @@
       "eyebrow": "Tarifs simples",
       "socialProof": "Ideal pour developpeurs, designers, consultants et freelances.",
       "title": "Une offre simple pour freelances et petites equipes.",
-      "subtitle": "Commencez gratuitement, puis passez a un plan superieur lorsque votre activite grandit.",
+      "subtitle": "Commencez gratuitement, puis passez au plan Pro a 9.90 CHF pour debloquer toutes les fonctions.",
       "cta": "Choisir {plan}",
       "billingToggle": {
         "monthly": "Mensuel",
@@ -165,11 +165,11 @@
           ]
         },
         {
-          "name": "Starter",
-          "planId": "STARTER",
+          "name": "Pro",
+          "planId": "PRO",
           "price": "9.90 CHF",
           "suffix": "/utilisateur/mois",
-          "desc": "Pour les freelances et petites equipes qui ont besoin de vrais outils.",
+          "desc": "Une seule offre payante, complete, pour les freelances et petites equipes.",
           "perks": [
             "✓ Time tracking complet",
             "✓ Clients illimites",
@@ -177,28 +177,14 @@
             "✓ Generation de factures",
             "✓ QR facture suisse",
             "✓ Rappels de paiement",
-            "✓ Historique des sessions",
-            "✗ Analytics avancees",
-            "✗ Suivi des depenses",
-            "✗ Exports CSV",
-            "✗ Templates de facture personnalises"
-          ],
-          "highlight": true
-        },
-        {
-          "name": "Pro",
-          "planId": "PRO",
-          "price": "19 CHF",
-          "suffix": "/utilisateur/mois",
-          "desc": "Tout de Starter, plus les fonctions avancees.",
-          "perks": [
-            "✓ Tout de Starter",
+            "✓ Historique complet des sessions",
             "✓ Analytics avancees",
             "✓ Suivi des depenses",
             "✓ Exports CSV",
             "✓ Templates de facture personnalises",
             "✓ Reporting avance"
-          ]
+          ],
+          "highlight": true
         }
       ]
     },
@@ -237,7 +223,7 @@
     "hero": {
       "eyebrow": "Tarifs",
       "title": "Pricing simple pour suivre vos heures sans friction.",
-      "subtitle": "Commencez gratuitement, puis passez au niveau superieur quand votre suivi grandit.",
+      "subtitle": "Commencez gratuitement, puis passez au plan Pro a 9.90 CHF quand vous voulez debloquer toutes les fonctions.",
       "ctaPrimary": "Demarrer l'essai gratuit",
       "ctaSecondary": "Voir la demo"
     },
@@ -272,11 +258,11 @@
         ]
       },
       {
-        "name": "Starter",
-        "planId": "STARTER",
+        "name": "Pro",
+        "planId": "PRO",
         "price": "9.90 CHF",
         "suffix": "/utilisateur/mois",
-        "desc": "Pour les freelances et petites equipes qui ont besoin de vrais outils.",
+        "desc": "Une seule offre payante, complete, pour les freelances et petites equipes.",
         "perks": [
           "✓ Time tracking complet",
           "✓ Clients illimites",
@@ -284,34 +270,20 @@
           "✓ Generation de factures",
           "✓ QR facture suisse",
           "✓ Rappels de paiement",
-          "✓ Historique des sessions",
-          "✗ Analytics avancees",
-          "✗ Suivi des depenses",
-          "✗ Exports CSV",
-          "✗ Templates de facture personnalises"
-        ],
-        "highlight": true
-      },
-      {
-        "name": "Pro",
-        "planId": "PRO",
-        "price": "19 CHF",
-        "suffix": "/utilisateur/mois",
-        "desc": "Tout de Starter, plus les fonctions avancees.",
-        "perks": [
-          "✓ Tout de Starter",
+          "✓ Historique complet des sessions",
           "✓ Analytics avancees",
           "✓ Suivi des depenses",
           "✓ Exports CSV",
           "✓ Templates de facture personnalises",
           "✓ Reporting avance"
-        ]
+        ],
+        "highlight": true
       }
     ],
     "included": {
       "eyebrow": "Inclus dans chaque plan",
       "title": "Tout pour suivre debut, pause et reprise sans effort.",
-      "subtitle": "Les fonctions cle restent disponibles quel que soit votre plan. Vous gagnez surtout en profondeur de stats et en gestion de clients.",
+      "subtitle": "Le plan Free couvre l'essentiel. Le plan Pro debloque toutes les fonctions avancees sans multiplier les options.",
       "items": [
         "Chrono en 1 clic",
         "Export CSV et PDF",
@@ -342,7 +314,7 @@
         },
         {
           "q": "Puis-je importer mes anciennes donnees ?",
-          "a": "Oui, un assistant CSV est disponible des le plan Starter."
+          "a": "Oui, un assistant CSV est disponible des le plan Pro."
         }
       ]
     },
@@ -993,8 +965,8 @@
             "✗ Suivi des depenses"
           ]
         },
-        "starter": {
-          "name": "Starter",
+        "pro": {
+          "name": "Pro",
           "perks": [
             "✓ Time tracking complet",
             "✓ Clients illimites",
@@ -1002,17 +974,7 @@
             "✓ Generation de factures",
             "✓ QR facture suisse",
             "✓ Rappels de paiement",
-            "✓ Historique des sessions",
-            "✗ Analytics avancees",
-            "✗ Suivi des depenses",
-            "✗ Exports CSV",
-            "✗ Templates de facture personnalises"
-          ]
-        },
-        "pro": {
-          "name": "Pro",
-          "perks": [
-            "✓ Tout de Starter",
+            "✓ Historique complet des sessions",
             "✓ Analytics avancees",
             "✓ Suivi des depenses",
             "✓ Exports CSV",
@@ -1029,11 +991,11 @@
     "upgrade": "Passer au plan {plan}",
     "sessions": {
       "title": "Historique des sessions",
-      "description": "Passez au plan Starter pour acceder a l'historique complet de vos sessions."
+      "description": "Passez au plan Pro pour acceder a l'historique complet de vos sessions."
     },
     "projects": {
       "title": "Projets",
-      "description": "Passez au plan Starter pour organiser vos sessions par projet."
+      "description": "Passez au plan Pro pour organiser vos sessions par projet."
     },
     "stats": {
       "title": "Analytics avancees",

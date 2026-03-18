@@ -8,7 +8,13 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, LogOut, Receipt, Settings2, Users } from "lucide-react";
 import { EASE, pickVariants } from "@/lib/motion-variants";
-import { type PlanId, type FeatureKey, FEATURE_PLAN_MAP, isPlanSufficient } from "@/lib/plans";
+import {
+  type PlanId,
+  type FeatureKey,
+  FEATURE_PLAN_MAP,
+  getPlanDisplayName,
+  isPlanSufficient,
+} from "@/lib/plans";
 
 const navItems: { href: string; icon: typeof Clock; key: FeatureKey }[] = [
   { href: "/dashboard", icon: Clock, key: "time" },
@@ -28,7 +34,7 @@ const mobileMoreItems = navItems.slice(4);
 function PlanBadge({ requiredPlan }: { requiredPlan: PlanId }) {
   return (
     <span className="ml-auto rounded-full bg-brand/10 px-2 py-0.5 text-[10px] font-semibold leading-none text-brand">
-      {requiredPlan === "PRO" ? "Pro" : "Starter"}
+      {getPlanDisplayName(requiredPlan)}
     </span>
   );
 }
