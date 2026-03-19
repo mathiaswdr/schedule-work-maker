@@ -468,6 +468,8 @@
       "settings": "Parametres",
       "more": "Plus",
       "signOut": "Se deconnecter",
+      "signOutConfirmTitle": "Se deconnecter ?",
+      "signOutConfirmDescription": "Voulez-vous vraiment vous deconnecter de votre compte ?",
       "hint": "Espace demo pret pour votre premier suivi.",
       "profilePrompt": {
         "title": "Completez votre profil",

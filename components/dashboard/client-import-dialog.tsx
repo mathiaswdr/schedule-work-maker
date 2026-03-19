@@ -216,6 +216,29 @@ const inferFieldMappings = (headers: string[]): FieldMapping => {
 const isAcceptedFile = (file: File) =>
   /\.(xlsx|xls|csv)$/i.test(file.name);
 
+const getDecodingScore = (value: string) => {
+  const mojibakeCount =
+    value.match(/Ã.|Â.|â.|�/g)?.length ?? 0;
+  const accentedCount =
+    value.match(/[éèàùçêëîïôöûüÉÈÀÙÇÊËÎÏÔÖÛÜ]/g)?.length ?? 0;
+
+  return accentedCount * 2 - mojibakeCount * 6;
+};
+
+const decodeCsvBuffer = (buffer: ArrayBuffer) => {
+  const candidates = ["utf-8", "windows-1252", "iso-8859-1"].map((encoding) => {
+    const text = new TextDecoder(encoding).decode(buffer);
+    return {
+      encoding,
+      text,
+      score: getDecodingScore(text),
+    };
+  });
+
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0]?.text ?? "";
+};
+
 const getFieldLabel = (t: ReturnType<typeof useTranslations>, field: ImportField) => {
   switch (field) {
     case "name":
@@ -282,7 +305,9 @@ export default function ClientImportDialog({
       try {
         const XLSX = await import("xlsx");
         const buffer = await file.arrayBuffer();
-        const workbook = XLSX.read(buffer, { type: "array" });
+        const workbook = file.name.toLocaleLowerCase().endsWith(".csv")
+          ? XLSX.read(decodeCsvBuffer(buffer), { type: "string" })
+          : XLSX.read(buffer, { type: "array" });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
 
         if (!firstSheet) {
@@ -484,7 +509,7 @@ export default function ClientImportDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="rounded-3xl border-line sm:max-w-4xl">
+      <DialogContent className="max-h-[calc(100vh-2rem)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-3xl border-line sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{t("clients.import.title")}</DialogTitle>
           <DialogDescription className="text-ink-muted">
@@ -492,7 +517,7 @@ export default function ClientImportDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5">
+        <div className="min-h-0 space-y-5 overflow-y-auto pr-1">
           <div className="rounded-3xl border border-line bg-panel/70 p-5">
             <input
               ref={inputRef}

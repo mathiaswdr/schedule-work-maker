@@ -468,6 +468,8 @@
       "settings": "Settings",
       "more": "More",
       "signOut": "Sign out",
+      "signOutConfirmTitle": "Sign out?",
+      "signOutConfirmDescription": "Do you really want to sign out of your account?",
       "hint": "Demo workspace ready for your first session.",
       "profilePrompt": {
         "title": "Complete your profile",

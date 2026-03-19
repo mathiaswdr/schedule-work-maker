@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, LogOut, Receipt, Settings2, Users } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { EASE, pickVariants } from "@/lib/motion-variants";
 import {
   type PlanId,
@@ -42,8 +43,10 @@ function PlanBadge({ requiredPlan }: { requiredPlan: PlanId }) {
 export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
   const pathname = usePathname();
   const t = useTranslations("dashboard");
+  const tc = useTranslations("common");
   const shouldReduceMotion = useReducedMotion();
   const [moreOpen, setMoreOpen] = useState(false);
+  const { confirm, ConfirmDialogElement } = useConfirm();
 
   const isMoreActive = mobileMoreItems.some((item) =>
     item.href === "/dashboard"
@@ -63,8 +66,25 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
     return !isPlanSufficient(userPlan, required);
   };
 
+  const handleSignOut = async () => {
+    const confirmed = await confirm({
+      title: t("sidebar.signOutConfirmTitle"),
+      description: t("sidebar.signOutConfirmDescription"),
+      confirmLabel: t("sidebar.signOut"),
+      cancelLabel: tc("cancel"),
+      variant: "default",
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    await signOut({ callbackUrl: "/" });
+  };
+
   return (
     <>
+      {ConfirmDialogElement}
       {/* ========== DESKTOP SIDEBAR ========== */}
       <aside className="hidden w-64 lg:block">
         <motion.div
@@ -124,7 +144,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
 
             <button
               type="button"
-              onClick={() => signOut({ callbackUrl: "/" })}
+              onClick={handleSignOut}
               className="flex items-center gap-3 rounded-2xl border border-transparent px-3 py-2 text-sm font-medium text-ink-muted transition hover:border-line hover:bg-white/60 hover:text-ink"
             >
               <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-ink-soft text-ink">
@@ -191,7 +211,10 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                 })}
                 <button
                   type="button"
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={async () => {
+                    setMoreOpen(false);
+                    await handleSignOut();
+                  }}
                   className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-ink-muted transition-colors hover:bg-brand/5 hover:text-ink"
                 >
                   <LogOut className="h-4 w-4" />
