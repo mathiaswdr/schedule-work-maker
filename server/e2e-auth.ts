@@ -1,8 +1,4 @@
-const EMAIL_ENV_KEYS = [
-  "EMAIL_SERVER_HOST",
-  "EMAIL_SERVER_PORT",
-  "EMAIL_FROM",
-] as const;
+const RESEND_ENV_KEYS = ["AUTH_RESEND_KEY", "AUTH_RESEND_FROM"] as const;
 
 type MagicLinkStore = Map<string, string>;
 
@@ -28,7 +24,7 @@ export const isMagicLinkCaptureEnabled =
 
 export const isEmailAuthEnabled =
   isMagicLinkCaptureEnabled ||
-  EMAIL_ENV_KEYS.every((key) => {
+  RESEND_ENV_KEYS.every((key) => {
     const value = process.env[key];
     return typeof value === "string" && value.length > 0;
   });

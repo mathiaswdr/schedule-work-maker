@@ -14,6 +14,8 @@ test("logout works", async ({ page, request }, testInfo) => {
   await expect(page.getByRole("button", { name: "Sign out" })).toBeVisible();
 
   await page.getByRole("button", { name: "Sign out" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("dialog").getByRole("button", { name: "Sign out" }).click();
 
   await expect(page).toHaveURL("/");
   await expect(page.getByRole("link", { name: "Sign in" }).first()).toBeVisible();

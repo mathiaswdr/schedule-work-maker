@@ -109,7 +109,7 @@ export const deleteAccount = action
       !!process.env.CLOUDINARY_API_SECRET;
 
     if (hasCloudinaryConfig) {
-      const cloudinaryPrefix = `temiqo/${user.id}`;
+      const cloudinaryPrefix = `kronoma/${user.id}`;
 
       try {
         await Promise.all(

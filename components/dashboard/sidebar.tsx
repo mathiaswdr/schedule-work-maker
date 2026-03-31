@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { BarChart3, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, LogOut, Receipt, Settings2, Users } from "lucide-react";
+import { BarChart3, ChevronDown, Clock, CreditCard, Ellipsis, FileText, FolderKanban, History, LogOut, Receipt, Settings2, Users } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { EASE, pickVariants } from "@/lib/motion-variants";
 import {
@@ -31,6 +31,10 @@ const navItems: { href: string; icon: typeof Clock; key: FeatureKey }[] = [
 
 const mobileMainItems = navItems.slice(0, 4);
 const mobileMoreItems = navItems.slice(4);
+const statsChildren = [
+  { href: "/dashboard/stats/productivity", labelKey: "statsProductivity" },
+  { href: "/dashboard/stats/billing", labelKey: "statsBilling" },
+] as const;
 
 function PlanBadge({ requiredPlan }: { requiredPlan: PlanId }) {
   return (
@@ -46,7 +50,19 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
   const tc = useTranslations("common");
   const shouldReduceMotion = useReducedMotion();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(pathname.startsWith("/dashboard/stats"));
+  const [mobileStatsOpen, setMobileStatsOpen] = useState(
+    pathname.startsWith("/dashboard/stats")
+  );
   const { confirm, ConfirmDialogElement } = useConfirm();
+  const isStatsSectionActive = pathname.startsWith("/dashboard/stats");
+
+  useEffect(() => {
+    if (isStatsSectionActive) {
+      setStatsOpen(true);
+      setMobileStatsOpen(true);
+    }
+  }, [isStatsSectionActive]);
 
   const isMoreActive = mobileMoreItems.some((item) =>
     item.href === "/dashboard"
@@ -112,6 +128,73 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
               const Icon = item.icon;
               const active = isActive(item.href);
               const locked = isLocked(item.key);
+
+              if (item.key === "stats") {
+                return (
+                  <div key={item.href} className="space-y-2">
+                    <motion.button
+                      type="button"
+                      variants={v.sidebarItem}
+                      onClick={() => setStatsOpen((prev) => !prev)}
+                      className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-2 text-sm font-medium transition ${
+                        isStatsSectionActive
+                          ? "border-line-strong bg-white text-ink shadow-[0_20px_40px_-32px_rgba(15,118,110,0.45)]"
+                          : "border-transparent text-ink-muted hover:border-line hover:bg-white/60"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-9 w-9 items-center justify-center rounded-2xl ${
+                          isStatsSectionActive
+                            ? "bg-brand/10 text-brand"
+                            : "bg-ink-soft text-ink"
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span>{t(`sidebar.${item.key}`)}</span>
+                      {locked && (
+                        <PlanBadge requiredPlan={FEATURE_PLAN_MAP[item.key]} />
+                      )}
+                      <motion.span
+                        animate={{ rotate: statsOpen ? 180 : 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="ml-1"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </motion.span>
+                    </motion.button>
+
+                    <AnimatePresence initial={false}>
+                      {statsOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="space-y-2 overflow-hidden pl-4"
+                        >
+                          {statsChildren.map((child) => {
+                            const childActive = pathname.startsWith(child.href);
+                            return (
+                              <Link
+                                key={child.href}
+                                href={child.href}
+                                prefetch={false}
+                                className={`block rounded-2xl border px-3 py-2 text-sm transition ${
+                                  childActive
+                                    ? "border-line-strong bg-white text-ink"
+                                    : "border-transparent bg-white/50 text-ink-muted hover:border-line hover:bg-white/70"
+                                }`}
+                              >
+                                {t(`sidebar.${child.labelKey}`)}
+                              </Link>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              }
 
               return (
                 <Link
@@ -189,6 +272,65 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                   const Icon = item.icon;
                   const active = isActive(item.href);
                   const locked = isLocked(item.key);
+
+                  if (item.key === "stats") {
+                    return (
+                      <div key={item.href} className="border-t border-line/60 first:border-t-0">
+                        <button
+                          type="button"
+                          onClick={() => setMobileStatsOpen((prev) => !prev)}
+                          className={`flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                            isStatsSectionActive
+                              ? "bg-brand/10 text-brand"
+                              : "text-ink-muted hover:bg-brand/5 hover:text-ink"
+                          }`}
+                        >
+                          <Icon className={`h-4 w-4 ${isStatsSectionActive ? "text-brand" : ""}`} />
+                          <span>{t(`sidebar.${item.key}`)}</span>
+                          {locked && <PlanBadge requiredPlan={FEATURE_PLAN_MAP[item.key]} />}
+                          <motion.span
+                            animate={{ rotate: mobileStatsOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="ml-auto"
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </motion.span>
+                        </button>
+                        <AnimatePresence initial={false}>
+                          {mobileStatsOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="overflow-hidden px-4 pb-3 pl-11"
+                            >
+                              <div className="space-y-2">
+                                {statsChildren.map((child) => {
+                                  const childActive = pathname.startsWith(child.href);
+                                  return (
+                                    <Link
+                                      key={child.href}
+                                      href={child.href}
+                                      prefetch={false}
+                                      onClick={() => setMoreOpen(false)}
+                                      className={`block rounded-2xl px-3 py-2 text-sm transition-colors ${
+                                        childActive
+                                          ? "bg-brand/10 text-brand"
+                                          : "text-ink-muted hover:bg-brand/5 hover:text-ink"
+                                      }`}
+                                    >
+                                      {t(`sidebar.${child.labelKey}`)}
+                                    </Link>
+                                  );
+                                })}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  }
+
                   return (
                     <Link
                       key={item.href}

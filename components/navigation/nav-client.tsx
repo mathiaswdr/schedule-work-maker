@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { Cormorant_Garamond } from "next/font/google";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,6 +13,12 @@ import { EASE } from "@/lib/motion-variants";
 
 // Offset en pixels pour le scroll vers les ancres (positif = plus bas, negatif = plus haut)
 const ANCHOR_SCROLL_OFFSET = -40;
+
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["700"],
+  display: "swap",
+});
 
 type NavLinkItem = {
   href: string;
@@ -87,9 +94,10 @@ export default function NavClient({ user }: NavClientProps) {
             {/* Logo */}
             <Link
               href="/"
-              className="text-lg font-bold text-neutral-900"
+              aria-label="Kronoma"
+              className={`${cormorantGaramond.className} text-[1.7rem] font-bold leading-none tracking-[-0.04em] text-neutral-900 antialiased sm:text-[1.85rem]`}
             >
-              <span>Temiqo</span>
+              <span>Kronoma</span>
             </Link>
 
             {/* Desktop links */}

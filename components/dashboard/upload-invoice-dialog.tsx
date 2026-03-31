@@ -237,7 +237,7 @@ export default function UploadInvoiceDialog({
     const payload = {
       fileUrl,
       clientId,
-      projectId: projectId || null,
+      projectId: projectId && projectId !== "none" ? projectId : null,
       displayNumber: displayNumber || undefined,
       total: parseFloat(total),
       issueDate,

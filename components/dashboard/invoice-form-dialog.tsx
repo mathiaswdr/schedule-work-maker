@@ -59,10 +59,35 @@ type InvoiceData = {
   }[];
 };
 
+export type InvoiceDraftDefaults = {
+  clientId?: string | null;
+  projectId?: string | null;
+  location?: string | null;
+  title?: string | null;
+  subject?: string | null;
+  bankName?: string | null;
+  iban?: string | null;
+  bic?: string | null;
+  paymentTerms?: string | null;
+  issueDate?: string | null;
+  dueDate?: string | null;
+  notes?: string | null;
+  taxRate?: number | null;
+  templateType?: string | null;
+  customTemplateId?: string | null;
+  items?: {
+    category?: string | null;
+    description: string;
+    quantity: number;
+    unitPrice: number;
+  }[];
+};
+
 type InvoiceFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   invoice?: InvoiceData | null;
+  draft?: InvoiceDraftDefaults | null;
   onSuccess: () => void;
 };
 
@@ -70,6 +95,7 @@ export default function InvoiceFormDialog({
   open,
   onOpenChange,
   invoice,
+  draft,
   onSuccess,
 }: InvoiceFormDialogProps) {
   const t = useTranslations("dashboard.invoices");
@@ -162,6 +188,32 @@ export default function InvoiceFormDialog({
       setNotes(invoice.notes || "");
       setTemplateType(invoice.templateType || "CLASSIC");
       // setCustomTemplateId(invoice.customTemplateId || null);
+    } else if (draft) {
+      setClientId(draft.clientId || "");
+      setProjectId(draft.projectId || "");
+      setIssueDate(draft.issueDate?.slice(0, 10) || new Date().toISOString().slice(0, 10));
+      setDueDate(draft.dueDate?.slice(0, 10) || "");
+      setLocation(draft.location || "");
+      setTitle(draft.title || "");
+      setSubject(draft.subject || "");
+      setBankName(draft.bankName || "");
+      setIban(draft.iban || "");
+      setBic(draft.bic || "");
+      setPaymentTerms(draft.paymentTerms || "");
+      setSelectedBankAccountId("");
+      setItems(
+        draft.items?.length
+          ? draft.items.map((item) => ({
+              category: item.category || "",
+              description: item.description,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+            }))
+          : [{ category: "", description: "", quantity: 1, unitPrice: 0 }]
+      );
+      setTaxRate(draft.taxRate ?? 0);
+      setNotes(draft.notes || "");
+      setTemplateType(draft.templateType || "CLASSIC");
     } else {
       setClientId("");
       setProjectId("");
@@ -181,7 +233,7 @@ export default function InvoiceFormDialog({
       setTemplateType("CLASSIC");
       // setCustomTemplateId(null);
     }
-  }, [open, invoice]);
+  }, [open, invoice, draft]);
 
   // Pre-select default bank account for new invoices
   useEffect(() => {

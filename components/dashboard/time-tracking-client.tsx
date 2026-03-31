@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { pickVariants } from "@/lib/motion-variants";
-import { ChevronDown, Pause, Pencil, Play, RefreshCw, Square, Trash2 } from "lucide-react";
+import { ChevronDown, FileText, Pause, Pencil, Play, RefreshCw, Square, Trash2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { deleteWorkSession } from "@/server/actions/work-session-update";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -12,6 +12,9 @@ import { toast } from "sonner";
 import TimeCard from "@/components/dashboard/time-card";
 import LiveTimer from "@/components/dashboard/live-timer";
 import SessionEditDialog from "@/components/dashboard/session-edit-dialog";
+import InvoiceFormDialog, {
+  type InvoiceDraftDefaults,
+} from "@/components/dashboard/invoice-form-dialog";
 import {
   Select,
   SelectContent,
@@ -76,6 +79,7 @@ type TimerAction = "start" | "pause" | "resume" | "end";
 
 type TimeTrackingClientProps = {
   displayClassName: string;
+  defaultHourlyRate?: number;
   initialData?: ApiResponse;
   initialClients?: ClientOption[];
   initialProjects?: ProjectOption[];
@@ -110,6 +114,7 @@ const getSessionDurationMs = (s: { startedAt: string; endedAt: string | null; br
 
 export default function TimeTrackingClient({
   displayClassName,
+  defaultHourlyRate = 0,
   initialData,
   initialClients,
   initialProjects,
@@ -133,6 +138,8 @@ export default function TimeTrackingClient({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<NonNullable<SessionItem> | null>(null);
   const [timelineExpanded, setTimelineExpanded] = useState(false);
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [lastEndedSession, setLastEndedSession] = useState<NonNullable<SessionItem> | null>(null);
 
   const timeFormatter = useMemo(() => {
     return new Intl.DateTimeFormat(locale, {
@@ -228,6 +235,12 @@ export default function TimeTrackingClient({
       if (response.ok) {
         const payload = (await response.json()) as ApiResponse;
         setData(payload);
+        if (action === "end") {
+          setLastEndedSession(payload.recentSessions[0] ?? null);
+        }
+        if (action === "start") {
+          setLastEndedSession(null);
+        }
       } else {
         await fetchStatus();
       }
@@ -378,6 +391,43 @@ export default function TimeTrackingClient({
     }
     return null;
   }, [session, isActionLoading, t]);
+
+  const invoiceDraft = useMemo<InvoiceDraftDefaults | null>(() => {
+    if (!lastEndedSession) return null;
+
+    const endedAt = lastEndedSession.endedAt
+      ? new Date(lastEndedSession.endedAt)
+      : new Date();
+    const sessionDateLabel = new Intl.DateTimeFormat(locale, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(endedAt);
+    const quantity = Number(
+      (getSessionDurationMs(lastEndedSession) / 3600000).toFixed(2)
+    );
+    const descriptionBase = t("timer.generatedInvoiceItem", {
+      date: sessionDateLabel,
+    });
+    const description = lastEndedSession.project
+      ? `${descriptionBase} - ${lastEndedSession.project.name}`
+      : descriptionBase;
+
+    return {
+      clientId: lastEndedSession.client?.id ?? null,
+      projectId: lastEndedSession.project?.id ?? null,
+      issueDate: endedAt.toISOString(),
+      title: t("timer.generatedInvoiceTitle"),
+      subject: lastEndedSession.project?.name ?? undefined,
+      items: [
+        {
+          description,
+          quantity: quantity > 0 ? quantity : 1,
+          unitPrice: defaultHourlyRate > 0 ? defaultHourlyRate : 0,
+        },
+      ],
+    };
+  }, [defaultHourlyRate, lastEndedSession, locale, t]);
 
   const v = pickVariants(shouldReduceMotion);
   const refreshTooltip = t("timer.refreshTooltip");
@@ -748,6 +798,32 @@ export default function TimeTrackingClient({
                 {t("timer.hint", { minutes: 6 })}
               </p>
             )}
+
+            {!session && invoiceDraft && (
+              <motion.div
+                variants={v.fadeUp}
+                className="mt-6 rounded-3xl border border-line bg-white/80 p-4"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-ink">
+                      {t("timer.generateInvoice")}
+                    </p>
+                    <p className="mt-1 text-xs text-ink-muted">
+                      {t("timer.generateInvoiceHint")}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setInvoiceDialogOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
+                  >
+                    <FileText className="h-4 w-4" />
+                    {t("timer.generateInvoice")}
+                  </button>
+                </div>
+              </motion.div>
+            )}
           </div>
 
           {/* ========== DESKTOP LAYOUT ========== */}
@@ -952,6 +1028,28 @@ export default function TimeTrackingClient({
                 <p className="mt-4 text-xs text-ink-muted">
                   {t("timer.hint", { minutes: 6 })}
                 </p>
+                {!session && invoiceDraft && (
+                  <div className="mt-5 rounded-3xl border border-line bg-white/80 p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-ink">
+                          {t("timer.generateInvoice")}
+                        </p>
+                        <p className="mt-1 text-xs text-ink-muted">
+                          {t("timer.generateInvoiceHint")}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setInvoiceDialogOpen(true)}
+                        className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
+                      >
+                        <FileText className="h-4 w-4" />
+                        {t("timer.generateInvoice")}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1095,6 +1193,14 @@ export default function TimeTrackingClient({
           currentStatus={editingSession.status}
         />
       )}
+      <InvoiceFormDialog
+        open={invoiceDialogOpen}
+        onOpenChange={setInvoiceDialogOpen}
+        draft={invoiceDraft}
+        onSuccess={() => {
+          setLastEndedSession(null);
+        }}
+      />
       {ConfirmDialogElement}
     </main>
   );

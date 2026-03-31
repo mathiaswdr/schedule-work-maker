@@ -17,7 +17,7 @@ const display = DM_Serif_Display({
 export default async function DashboardPage() {
   const userId = await getSessionUserId();
 
-  const [session, summary, recentSessions, clients, projects] = await Promise.all([
+  const [session, summary, recentSessions, clients, projects, user] = await Promise.all([
     getActiveSession(userId),
     getWorkSummary(userId),
     getRecentSessions(userId),
@@ -35,11 +35,16 @@ export default async function DashboardPage() {
         client: { select: { id: true, name: true, color: true } },
       },
     }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { hourlyRate: true },
+    }),
   ]);
 
   return (
     <TimeTrackingClient
       displayClassName={display.className}
+      defaultHourlyRate={user?.hourlyRate ?? 0}
       initialData={serializeForClient({ session, summary, recentSessions })}
       initialClients={serializeForClient(clients)}
       initialProjects={serializeForClient(projects)}

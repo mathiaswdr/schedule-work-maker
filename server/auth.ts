@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Google from "next-auth/providers/google";
 import Email from "next-auth/providers/email";
+import Resend from "next-auth/providers/resend";
 import type { Provider } from "next-auth/providers";
 import { UserPlan } from "@prisma/client";
 
@@ -27,31 +28,20 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
 if (isEmailAuthEnabled) {
   providers.push(
-    Email({
-      id: "email",
-      name: "Email",
-      from: process.env.EMAIL_FROM ?? "Temiqo <no-reply@temiqo.local>",
-      server: isMagicLinkCaptureEnabled
-        ? { jsonTransport: true }
-        : {
-            host: process.env.EMAIL_SERVER_HOST!,
-            port: Number(process.env.EMAIL_SERVER_PORT),
-            auth:
-              process.env.EMAIL_SERVER_USER && process.env.EMAIL_SERVER_PASSWORD
-                ? {
-                    user: process.env.EMAIL_SERVER_USER,
-                    pass: process.env.EMAIL_SERVER_PASSWORD,
-                  }
-                : undefined,
+    isMagicLinkCaptureEnabled
+      ? Email({
+          id: "email",
+          name: "Email",
+          from: process.env.AUTH_RESEND_FROM ?? "Kronoma <no-reply@kronoma.local>",
+          server: { jsonTransport: true },
+          async sendVerificationRequest({ identifier, url }) {
+            storeMagicLink(identifier, url);
           },
-      ...(isMagicLinkCaptureEnabled
-        ? {
-            async sendVerificationRequest({ identifier, url }) {
-              storeMagicLink(identifier, url);
-            },
-          }
-        : {}),
-    })
+        })
+      : Resend({
+          from: process.env.AUTH_RESEND_FROM!,
+          apiKey: process.env.AUTH_RESEND_KEY!,
+        })
   );
 }
 

@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("homepage loads correctly", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page).toHaveTitle(/Temiqo/i);
+  await expect(page).toHaveTitle(/Kronoma/i);
   await expect(
     page.getByRole("heading", { level: 1, name: /Track your hours\./i })
   ).toBeVisible();

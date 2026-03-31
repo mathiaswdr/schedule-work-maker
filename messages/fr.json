@@ -23,11 +23,11 @@
       "login": "Connexion"
     },
     "languageLabel": "Langue",
-    "copy": "Temiqo. Suivi du temps et facturation freelance."
+    "copy": "Kronoma. Suivi du temps et facturation freelance."
   },
   "auth": {
     "title": "Welcome back",
-    "subtitle": "Bienvenue sur Temiqo. Connectez-vous avec un social ou un lien magique.",
+    "subtitle": "Bienvenue sur Kronoma. Connectez-vous avec un social ou un lien magique.",
     "backLabel": "Creer un nouveau compte",
     "emailLabel": "Email",
     "emailPlaceholder": "nom@entreprise.com",
@@ -48,7 +48,7 @@
       "badge": "Logiciel de suivi du temps pour freelances",
       "title": "Suivez vos heures.\nGenerez vos factures.",
       "titleAccent": "Soyez paye.",
-      "subtitle": "Temiqo est un logiciel simple de suivi du temps pour freelances et petites equipes. Suivez vos heures, gerez vos projets et generez des factures avec QR facture suisse en quelques clics.",
+      "subtitle": "Kronoma est un logiciel simple de suivi du temps pour freelances et petites equipes. Suivez vos heures, gerez vos projets et generez des factures avec QR facture suisse en quelques clics.",
       "ctaPrimary": "Commencer gratuitement",
       "ctaSecondary": "En savoir plus",
       "bullets": [
@@ -81,7 +81,7 @@
     "features": {
       "eyebrow": "Fonctions cle",
       "title": "Un suivi du temps simple pour freelances et equipes.",
-      "subtitle": "Temiqo est un logiciel de suivi du temps concu pour freelances et petites equipes qui souhaitent suivre leurs heures et generer des factures compatibles QR facture suisse.",
+      "subtitle": "Kronoma est un logiciel de suivi du temps concu pour freelances et petites equipes qui souhaitent suivre leurs heures et generer des factures compatibles QR facture suisse.",
       "cards": [
         {
           "title": "Suivi du temps simple",
@@ -138,13 +138,13 @@
     "importCta": {
       "eyebrow": "Import express",
       "title": "Commencez rapidement en important votre fichier Excel clients.",
-      "subtitle": "Importez votre fichier Excel, XLS ou CSV avec tous vos clients actuels et retrouvez-les directement dans Temiqo, sans ressaisie manuelle.",
+      "subtitle": "Importez votre fichier Excel, XLS ou CSV avec tous vos clients actuels et retrouvez-les directement dans Kronoma, sans ressaisie manuelle.",
       "ctaPrimary": "Importer mes clients",
       "ctaSecondary": "Voir les tarifs",
       "benefits": [
         "Importez vos clients existants en quelques minutes",
         "Les colonnes principales sont reconnues automatiquement",
-        "Passez d'Excel a Temiqo sans repartir de zero"
+        "Passez d'Excel a Kronoma sans repartir de zero"
       ],
       "acceptedLabel": "Formats acceptes",
       "acceptedFormats": [".xlsx", ".xls", ".csv"],
@@ -245,11 +245,11 @@
       "items": [
         {
           "q": "Peut-on generer une QR facture suisse ?",
-          "a": "Oui, Temiqo permet de generer des factures compatibles QR facture suisse."
+          "a": "Oui, Kronoma permet de generer des factures compatibles QR facture suisse."
         },
         {
           "q": "Est-ce un logiciel de suivi du temps pour freelances ?",
-          "a": "Oui, Temiqo est concu pour freelances et petites equipes qui souhaitent suivre leurs heures simplement."
+          "a": "Oui, Kronoma est concu pour freelances et petites equipes qui souhaitent suivre leurs heures simplement."
         },
         {
           "q": "Puis-je suivre mes heures par client ?",
@@ -264,7 +264,7 @@
     "closing": {
       "eyebrow": "Pret a commencer",
       "title": "Transformez vos heures en factures.",
-      "subtitle": "Commencez gratuitement avec Temiqo et simplifiez votre gestion du temps.",
+      "subtitle": "Commencez gratuitement avec Kronoma et simplifiez votre gestion du temps.",
       "ctaPrimary": "Commencer gratuitement",
       "ctaSecondary": "Voir la demo"
     }
@@ -347,7 +347,7 @@
     "migration": {
       "eyebrow": "Migration express",
       "title": "Importez vos clients depuis Excel en quelques clics.",
-      "subtitle": "Si vos clients sont encore geres dans un tableur, Temiqo lit votre fichier Excel ou CSV et cree automatiquement vos fiches clients avec les bonnes informations.",
+      "subtitle": "Si vos clients sont encore geres dans un tableur, Kronoma lit votre fichier Excel ou CSV et cree automatiquement vos fiches clients avec les bonnes informations.",
       "items": [
         "Import des fichiers .xlsx, .xls et .csv",
         "Detection automatique des colonnes nom, email, adresse, code postal, ville et pays",
@@ -357,7 +357,7 @@
       "demo": {
         "label": "Exemple de fichier source",
         "arrow": "Import automatique",
-        "resultTitle": "Resultat dans Temiqo",
+        "resultTitle": "Resultat dans Kronoma",
         "resultSubtitle": "Vos clients sont crees et prets a etre relies aux sessions, projets et factures.",
         "created": "Clients crees",
         "manual": "Saisie manuelle",
@@ -402,7 +402,7 @@
     "hero": {
       "eyebrow": "A propos",
       "title": "Nous aidons les equipes a rendre le temps visible.",
-      "subtitle": "Temiqo est ne d'un besoin simple: arreter les tableurs et donner aux equipes une vision nette de leurs vraies heures. Nous construisons un outil qui respecte le rythme de chacun, avec des stats claires et des rapports propres.",
+      "subtitle": "Kronoma est ne d'un besoin simple: arreter les tableurs et donner aux equipes une vision nette de leurs vraies heures. Nous construisons un outil qui respecte le rythme de chacun, avec des stats claires et des rapports propres.",
       "ctaPrimary": "Essai gratuit",
       "ctaSecondary": "Voir les tarifs"
     },
@@ -437,7 +437,7 @@
     "story": {
       "eyebrow": "Notre histoire",
       "title": "De la feuille de calcul a une suite claire.",
-      "subtitle": "Nous avons lance Temiqo en 2023 pour remplacer un systeme de suivi manuel utilise par une equipe hybride. Depuis, le produit a evolue avec des rythmes differents, des fuseaux horaires et des contraintes de paie.",
+      "subtitle": "Nous avons lance Kronoma en 2023 pour remplacer un systeme de suivi manuel utilise par une equipe hybride. Depuis, le produit a evolue avec des rythmes differents, des fuseaux horaires et des contraintes de paie.",
       "timeline": [
         "2023 - Lancement beta avec 4 equipes pilotes.",
         "2024 - Export paie et rapports mensuels.",
@@ -445,7 +445,7 @@
       ]
     },
     "closing": {
-      "eyebrow": "Rejoignez Temiqo",
+      "eyebrow": "Rejoignez Kronoma",
       "title": "Pret a rendre vos heures visibles ?",
       "subtitle": "Lancez un essai gratuit et voyez vos stats des la premiere semaine.",
       "ctaPrimary": "Essai gratuit",
@@ -455,7 +455,7 @@
   "dashboard": {
     "eyebrow": "Dashboard",
     "sidebar": {
-      "title": "Temiqo",
+      "title": "Kronoma",
       "subtitle": "Espace",
       "time": "Suivi du temps",
       "sessions": "Sessions",
@@ -463,6 +463,8 @@
       "projects": "Projets",
       "invoices": "Factures",
       "stats": "Statistiques",
+      "statsProductivity": "Productivite",
+      "statsBilling": "Facturation",
       "expenses": "Frais pros",
       "subscription": "Abonnement",
       "settings": "Parametres",
@@ -508,7 +510,11 @@
       "selectClient": "Choisir un client",
       "selectProject": "Choisir un projet",
       "noClient": "Aucun client",
-      "noProject": "Aucun projet"
+      "noProject": "Aucun projet",
+      "generateInvoice": "Generer facture",
+      "generateInvoiceHint": "La derniere session est pre-remplie avec le client, le projet et la duree.",
+      "generatedInvoiceTitle": "Prestation facturee",
+      "generatedInvoiceItem": "Session de travail du {date}"
     },
     "timeline": {
       "title": "Timeline du jour",
@@ -523,8 +529,8 @@
       "week": "Semaine {week}"
     },
     "statsPage": {
-      "title": "Statistiques",
-      "subtitle": "Vue hebdo, tendances et export CSV pret.",
+      "title": "Statistiques de productivite",
+      "subtitle": "Suivez votre temps, votre focus et vos tendances de travail.",
       "weekLabel": "Semaine {week}",
       "cards": {
         "productivity": "Productivite",
@@ -573,6 +579,85 @@
         "sessions": "Jours actifs",
         "sessionsValue": "{count} jours suivis"
       }
+    },
+    "billingStatsPage": {
+      "title": "Statistiques de facturation",
+      "subtitle": "Suivez votre chiffre d'affaires, vos meilleurs clients et l'etat de vos factures.",
+      "cards": {
+        "thisMonth": "Facture ce mois",
+        "thisYear": "Facture cette annee",
+        "totalInvoiced": "Total facture",
+        "totalPaid": "Total encaisse",
+        "totalPending": "Reste a encaisser",
+        "averageInvoice": "Facture moyenne",
+        "averageInvoiceHint": "Base sur {count} factures",
+        "clientsBilled": "{count} clients factures"
+      },
+      "charts": {
+        "daily": "14 derniers jours",
+        "dailyHint": "Vision journaliere du chiffre d'affaires",
+        "monthly": "12 derniers mois",
+        "monthlyHint": "Evolution mensuelle de la facturation",
+        "yearly": "Par annee",
+        "yearlyHint": "Historique sur les 5 dernieres annees"
+      },
+      "clientChart": {
+        "title": "Repartition des paiements par client",
+        "subtitle": "Visualisez quels clients ont regle le plus sur la periode choisie.",
+        "centerLabel": "Encaisse",
+        "paidOnly": "du total encaisse",
+        "empty": "Aucun paiement client sur cette periode.",
+        "startDate": "Date de debut",
+        "endDate": "Date de fin",
+        "periods": {
+          "today": "Aujourd'hui",
+          "7d": "7 jours",
+          "30d": "30 jours",
+          "90d": "90 jours",
+          "thisYear": "Cette annee",
+          "pastYear": "Annee precedente",
+          "custom": "Intervalle custom"
+        }
+      },
+      "export": {
+        "title": "Exporter les details de facturation",
+        "subtitle": "Telechargez les lignes de facturation de la periode choisie en CSV.",
+        "button": "Exporter CSV",
+        "hint": "Le fichier contient la date, le client, le statut et le montant de chaque facture.",
+        "rows": "{count} lignes exportables",
+        "startDate": "Date de debut",
+        "endDate": "Date de fin",
+        "columns": {
+          "date": "Date",
+          "client": "Client",
+          "project": "Projet",
+          "status": "Statut",
+          "paymentState": "Etat du paiement",
+          "amount": "Montant",
+          "currency": "Devise"
+        },
+        "paymentStates": {
+          "collected": "Encaisse",
+          "pending": "En attente"
+        }
+      },
+      "lists": {
+        "status": "Repartition par statut",
+        "statusHint": "Montants et volume par etat de facture",
+        "topClients": "Top clients",
+        "topClientsHint": "Clients qui representent le plus de chiffre d'affaires",
+        "topProjects": "Top projets",
+        "topProjectsHint": "Projets les plus factures",
+        "empty": "Pas encore assez de factures pour afficher cette statistique."
+      },
+      "labels": {
+        "invoices": "{count} factures",
+        "noClient": "Sans client",
+        "noProject": "Sans projet"
+      },
+      "clientMeta": "{count} factures, {paid} encaisses",
+      "projectMeta": "{count} factures, {paid} encaisses",
+      "paidHint": "{amount} restent en attente d'encaissement"
     },
     "settingsPage": {
       "title": "Parametres",
@@ -691,7 +776,7 @@
       "import": {
         "cta": "Importer Excel",
         "title": "Importer des clients",
-        "subtitle": "Chargez un fichier Excel ou CSV et Temiqo cree automatiquement vos clients.",
+        "subtitle": "Chargez un fichier Excel ou CSV et Kronoma cree automatiquement vos clients.",
         "accepted": "Formats acceptes: Excel (.xlsx, .xls) et CSV",
         "expectedColumns": "Le fichier doit contenir au minimum une colonne nom.",
         "columns": "Colonnes reconnues: nom, email, adresse, code postal, ville, pays, notes.",
@@ -704,7 +789,7 @@
         "skipped": "Lignes ignorees",
         "duplicates": "Doublons dans le fichier",
         "mappingTitle": "Correspondance des colonnes",
-        "mappingSubtitle": "Temiqo pre-remplit les champs reconnus. Vous pouvez corriger chaque colonne avant l'import.",
+        "mappingSubtitle": "Kronoma pre-remplit les champs reconnus. Vous pouvez corriger chaque colonne avant l'import.",
         "detectedColumns": "{count} colonne(s) detectee(s)",
         "sourceColumn": "Choisir une colonne source",
         "ignore": "Ignorer ce champ",
@@ -714,7 +799,7 @@
         "manualMapping": "Mapping manuel",
         "nameRequiredHint": "Associez une colonne au nom du client pour activer l'import.",
         "previewTitle": "Apercu avant import",
-        "previewSubtitle": "Temiqo utilise la premiere feuille du fichier et vous montre un extrait avant creation.",
+        "previewSubtitle": "Kronoma utilise la premiere feuille du fichier et vous montre un extrait avant creation.",
         "previewEmpty": "Ajoutez un fichier pour previsualiser les clients detectes.",
         "previewNeedsMapping": "Associez d'abord la colonne du nom du client pour generer l'aperçu.",
         "moreRows": "+{count} autres lignes",

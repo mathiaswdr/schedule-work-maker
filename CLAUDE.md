@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Temiqo (package name: "temiqo") — a work time-tracking SaaS built with Next.js 14 App Router, TypeScript, Prisma/PostgreSQL, and Stripe payments.
+Kronoma (package name: "kronoma") — a work time-tracking SaaS built with Next.js 14 App Router, TypeScript, Prisma/PostgreSQL, and Stripe payments.
 
 ## Commands
 

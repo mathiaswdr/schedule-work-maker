@@ -23,11 +23,11 @@
       "login": "Sign in"
     },
     "languageLabel": "Language",
-    "copy": "Temiqo. Time tracking and freelance invoicing."
+    "copy": "Kronoma. Time tracking and freelance invoicing."
   },
   "auth": {
     "title": "Welcome back",
-    "subtitle": "Welcome to Temiqo. Sign in with social or a magic link.",
+    "subtitle": "Welcome to Kronoma. Sign in with social or a magic link.",
     "backLabel": "Create a new account",
     "emailLabel": "Email",
     "emailPlaceholder": "name@company.com",
@@ -48,7 +48,7 @@
       "badge": "Time tracking software for freelancers",
       "title": "Track your hours.\nGenerate your invoices.",
       "titleAccent": "Get paid.",
-      "subtitle": "Temiqo is a simple time tracking software for freelancers and small teams. Track your hours, manage your projects and generate invoices with Swiss QR invoice in a few clicks.",
+      "subtitle": "Kronoma is a simple time tracking software for freelancers and small teams. Track your hours, manage your projects and generate invoices with Swiss QR invoice in a few clicks.",
       "ctaPrimary": "Start for free",
       "ctaSecondary": "Learn more",
       "bullets": [
@@ -81,7 +81,7 @@
     "features": {
       "eyebrow": "Key features",
       "title": "Simple time tracking for freelancers and teams.",
-      "subtitle": "Temiqo is a time tracking software built for freelancers and small teams who want to track their hours and generate Swiss QR invoices.",
+      "subtitle": "Kronoma is a time tracking software built for freelancers and small teams who want to track their hours and generate Swiss QR invoices.",
       "cards": [
         {
           "title": "Simple time tracking",
@@ -138,13 +138,13 @@
     "importCta": {
       "eyebrow": "Fast import",
       "title": "Start quickly by importing your client Excel file.",
-      "subtitle": "Import your Excel, XLS or CSV file with all your current clients and find them directly in Temiqo, without manual re-entry.",
+      "subtitle": "Import your Excel, XLS or CSV file with all your current clients and find them directly in Kronoma, without manual re-entry.",
       "ctaPrimary": "Import my clients",
       "ctaSecondary": "See pricing",
       "benefits": [
         "Import your existing clients in just a few minutes",
         "The main columns are recognized automatically",
-        "Move from Excel to Temiqo without starting from scratch"
+        "Move from Excel to Kronoma without starting from scratch"
       ],
       "acceptedLabel": "Accepted formats",
       "acceptedFormats": [".xlsx", ".xls", ".csv"],
@@ -245,11 +245,11 @@
       "items": [
         {
           "q": "Can I generate a Swiss QR invoice?",
-          "a": "Yes, Temiqo lets you generate invoices compatible with Swiss QR invoice standards."
+          "a": "Yes, Kronoma lets you generate invoices compatible with Swiss QR invoice standards."
         },
         {
           "q": "Is this a time tracking software for freelancers?",
-          "a": "Yes, Temiqo is built for freelancers and small teams who want to track their hours simply."
+          "a": "Yes, Kronoma is built for freelancers and small teams who want to track their hours simply."
         },
         {
           "q": "Can I track my hours by client?",
@@ -264,7 +264,7 @@
     "closing": {
       "eyebrow": "Ready to start",
       "title": "Turn your hours into invoices.",
-      "subtitle": "Start for free with Temiqo and simplify your time management.",
+      "subtitle": "Start for free with Kronoma and simplify your time management.",
       "ctaPrimary": "Start for free",
       "ctaSecondary": "See the demo"
     }
@@ -347,7 +347,7 @@
     "migration": {
       "eyebrow": "Fast migration",
       "title": "Import your clients from Excel in a few clicks.",
-      "subtitle": "If your clients still live in a spreadsheet, Temiqo reads the Excel or CSV file and automatically creates client records with the right details.",
+      "subtitle": "If your clients still live in a spreadsheet, Kronoma reads the Excel or CSV file and automatically creates client records with the right details.",
       "items": [
         "Import .xlsx, .xls and .csv files",
         "Automatic detection for name, email, address, postal code, city and country columns",
@@ -357,7 +357,7 @@
       "demo": {
         "label": "Example source file",
         "arrow": "Automatic import",
-        "resultTitle": "Result in Temiqo",
+        "resultTitle": "Result in Kronoma",
         "resultSubtitle": "Your clients are created and ready to be linked to sessions, projects, and invoices.",
         "created": "Clients created",
         "manual": "Manual entry",
@@ -402,7 +402,7 @@
     "hero": {
       "eyebrow": "About",
       "title": "We help teams make time visible.",
-      "subtitle": "Temiqo was born from a simple need: stop spreadsheets and give teams a clear view of their real hours. We build a tool that respects each rhythm, with clear stats and clean reports.",
+      "subtitle": "Kronoma was born from a simple need: stop spreadsheets and give teams a clear view of their real hours. We build a tool that respects each rhythm, with clear stats and clean reports.",
       "ctaPrimary": "Free trial",
       "ctaSecondary": "See pricing"
     },
@@ -437,7 +437,7 @@
     "story": {
       "eyebrow": "Our story",
       "title": "From spreadsheet to a clear suite.",
-      "subtitle": "We launched Temiqo in 2023 to replace a manual tracker used by a hybrid team. Since then, the product evolved with different rhythms, time zones and payroll constraints.",
+      "subtitle": "We launched Kronoma in 2023 to replace a manual tracker used by a hybrid team. Since then, the product evolved with different rhythms, time zones and payroll constraints.",
       "timeline": [
         "2023 - Beta launch with 4 pilot teams.",
         "2024 - Payroll export and monthly reports.",
@@ -445,7 +445,7 @@
       ]
     },
     "closing": {
-      "eyebrow": "Join Temiqo",
+      "eyebrow": "Join Kronoma",
       "title": "Ready to make your hours visible?",
       "subtitle": "Start a free trial and see your stats from week one.",
       "ctaPrimary": "Free trial",
@@ -455,7 +455,7 @@
   "dashboard": {
     "eyebrow": "Dashboard",
     "sidebar": {
-      "title": "Temiqo",
+      "title": "Kronoma",
       "subtitle": "Workspace",
       "time": "Time tracking",
       "sessions": "Sessions",
@@ -463,6 +463,8 @@
       "projects": "Projects",
       "invoices": "Invoices",
       "stats": "Statistics",
+      "statsProductivity": "Productivity",
+      "statsBilling": "Billing",
       "expenses": "Expenses",
       "subscription": "Subscription",
       "settings": "Settings",
@@ -508,7 +510,11 @@
       "selectClient": "Select a client",
       "selectProject": "Select a project",
       "noClient": "No client",
-      "noProject": "No project"
+      "noProject": "No project",
+      "generateInvoice": "Generate invoice",
+      "generateInvoiceHint": "The latest session is pre-filled with its client, project, and duration.",
+      "generatedInvoiceTitle": "Billed work session",
+      "generatedInvoiceItem": "Work session from {date}"
     },
     "timeline": {
       "title": "Today's timeline",
@@ -523,8 +529,8 @@
       "week": "Week {week}"
     },
     "statsPage": {
-      "title": "Statistics",
-      "subtitle": "Weekly overview, focus trends, and export-ready insights.",
+      "title": "Productivity statistics",
+      "subtitle": "Track your time, focus quality, and work rhythm in one place.",
       "weekLabel": "Week {week}",
       "cards": {
         "productivity": "Productivity",
@@ -573,6 +579,85 @@
         "sessions": "Active days",
         "sessionsValue": "{count} days tracked"
       }
+    },
+    "billingStatsPage": {
+      "title": "Billing statistics",
+      "subtitle": "Track your revenue, top clients, and invoice status distribution.",
+      "cards": {
+        "thisMonth": "Billed this month",
+        "thisYear": "Billed this year",
+        "totalInvoiced": "Total invoiced",
+        "totalPaid": "Total paid",
+        "totalPending": "Still pending",
+        "averageInvoice": "Average invoice",
+        "averageInvoiceHint": "Based on {count} invoices",
+        "clientsBilled": "{count} billed clients"
+      },
+      "charts": {
+        "daily": "Last 14 days",
+        "dailyHint": "Daily view of invoiced revenue",
+        "monthly": "Last 12 months",
+        "monthlyHint": "Monthly billing evolution",
+        "yearly": "By year",
+        "yearlyHint": "Revenue history over the last 5 years"
+      },
+      "clientChart": {
+        "title": "Client payment split",
+        "subtitle": "See which clients paid the most over the selected period.",
+        "centerLabel": "Collected",
+        "paidOnly": "of collected total",
+        "empty": "No client payments found for this period.",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "periods": {
+          "today": "Today",
+          "7d": "7 days",
+          "30d": "30 days",
+          "90d": "90 days",
+          "thisYear": "This year",
+          "pastYear": "Past year",
+          "custom": "Custom range"
+        }
+      },
+      "export": {
+        "title": "Export billing details",
+        "subtitle": "Download invoice rows for the selected period as CSV.",
+        "button": "Export CSV",
+        "hint": "The file includes the date, client, status, and amount of each invoice.",
+        "rows": "{count} exportable rows",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "columns": {
+          "date": "Date",
+          "client": "Client",
+          "project": "Project",
+          "status": "Status",
+          "paymentState": "Payment state",
+          "amount": "Amount",
+          "currency": "Currency"
+        },
+        "paymentStates": {
+          "collected": "Collected",
+          "pending": "Pending"
+        }
+      },
+      "lists": {
+        "status": "Status breakdown",
+        "statusHint": "Amounts and volume by invoice state",
+        "topClients": "Top clients",
+        "topClientsHint": "Clients contributing the most revenue",
+        "topProjects": "Top projects",
+        "topProjectsHint": "Most billed projects",
+        "empty": "Not enough invoices yet to display this statistic."
+      },
+      "labels": {
+        "invoices": "{count} invoices",
+        "noClient": "No client",
+        "noProject": "No project"
+      },
+      "clientMeta": "{count} invoices, {paid} collected",
+      "projectMeta": "{count} invoices, {paid} collected",
+      "paidHint": "{amount} are still pending collection"
     },
     "settingsPage": {
       "title": "Settings",
@@ -691,7 +776,7 @@
       "import": {
         "cta": "Import Excel",
         "title": "Import clients",
-        "subtitle": "Upload an Excel or CSV file and Temiqo will automatically create your clients.",
+        "subtitle": "Upload an Excel or CSV file and Kronoma will automatically create your clients.",
         "accepted": "Accepted formats: Excel (.xlsx, .xls) and CSV",
         "expectedColumns": "The file must include at least a name column.",
         "columns": "Recognized columns: name, email, address, postal code, city, country, notes.",
@@ -704,7 +789,7 @@
         "skipped": "Skipped rows",
         "duplicates": "Duplicates in file",
         "mappingTitle": "Column mapping",
-        "mappingSubtitle": "Temiqo pre-fills recognized fields. You can adjust each column before import.",
+        "mappingSubtitle": "Kronoma pre-fills recognized fields. You can adjust each column before import.",
         "detectedColumns": "{count} column(s) detected",
         "sourceColumn": "Choose source column",
         "ignore": "Ignore this field",
@@ -714,7 +799,7 @@
         "manualMapping": "Manual mapping",
         "nameRequiredHint": "Map a client name column to enable import.",
         "previewTitle": "Preview before import",
-        "previewSubtitle": "Temiqo uses the first sheet in the file and shows a sample before creation.",
+        "previewSubtitle": "Kronoma uses the first sheet in the file and shows a sample before creation.",
         "previewEmpty": "Add a file to preview detected clients.",
         "previewNeedsMapping": "Map the client name column first to generate the preview.",
         "moreRows": "+{count} more rows",

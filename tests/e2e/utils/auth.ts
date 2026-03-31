@@ -11,7 +11,7 @@ const slugify = (value: string) =>
     .slice(0, 40) || "user";
 
 export const createTestEmail = (seed: string) =>
-  `e2e+${slugify(seed)}-${Date.now()}@temiqo.local`;
+  `e2e+${slugify(seed)}-${Date.now()}@kronoma.local`;
 
 async function waitForMagicLink(
   request: APIRequestContext,

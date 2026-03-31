@@ -10,8 +10,8 @@ import { Analytics } from "@vercel/analytics/next"
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Temiqo",
-  description: "Temiqo, time tracking and freelance invoicing.",
+  title: "Kronoma",
+  description: "Kronoma, time tracking and freelance invoicing.",
 };
 
 export default async function RootLayout({
