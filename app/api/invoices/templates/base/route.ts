@@ -10,6 +10,11 @@ import {
   WidthType,
   BorderStyle,
 } from "docx";
+import { cookies } from "next/headers";
+import {
+  getInvoiceTemplateMessages,
+  normalizeInvoiceLocale,
+} from "@/lib/invoice-i18n";
 
 const FONT = "Calibri";
 
@@ -27,7 +32,8 @@ const noBorder = {
   right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
 } as const;
 
-function buildBaseTemplate(): Document {
+function buildBaseTemplate(locale?: string | null): Document {
+  const messages = getInvoiceTemplateMessages(locale);
   const children: (Paragraph | Table)[] = [];
 
   // Company name
@@ -49,7 +55,7 @@ function buildBaseTemplate(): Document {
   children.push(new Paragraph({ children: [new TextRun({ text: "{{senderAddress}}", color: "666666", size: 18, font: FONT })] }));
   children.push(new Paragraph({ children: [new TextRun({ text: "{{senderEmail}}", color: "666666", size: 18, font: FONT })] }));
   children.push(new Paragraph({ children: [new TextRun({ text: "{{senderPhone}}", color: "666666", size: 18, font: FONT })] }));
-  children.push(new Paragraph({ children: [new TextRun({ text: "SIRET: {{senderSiret}}", color: "666666", size: 18, font: FONT })] }));
+  children.push(new Paragraph({ children: [new TextRun({ text: `${messages.labels.siret}: {{senderSiret}}`, color: "666666", size: 18, font: FONT })] }));
   children.push(new Paragraph({ spacing: { after: 200 } }));
 
   // Location + Dates
@@ -65,14 +71,14 @@ function buildBaseTemplate(): Document {
   children.push(
     new Paragraph({
       children: [
-        new TextRun({ text: "Echeance: {{dueDate}}", color: "888888", size: 20, font: FONT }),
+        new TextRun({ text: `${messages.labels.due}: {{dueDate}}`, color: "888888", size: 20, font: FONT }),
       ],
       spacing: { after: 200 },
     })
   );
 
   // Client
-  children.push(new Paragraph({ children: [new TextRun({ text: "FACTURER A", color: "888888", size: 16, bold: true, font: FONT })], spacing: { before: 100 } }));
+  children.push(new Paragraph({ children: [new TextRun({ text: messages.labels.billTo, color: "888888", size: 16, bold: true, font: FONT })], spacing: { before: 100 } }));
   children.push(new Paragraph({ children: [new TextRun({ text: "{{clientName}}", bold: true, size: 22, font: FONT })] }));
   children.push(new Paragraph({ children: [new TextRun({ text: "{{clientAddress}}", color: "666666", size: 18, font: FONT })] }));
   children.push(new Paragraph({ children: [new TextRun({ text: "{{clientPostalCode}} {{clientCity}}", color: "666666", size: 18, font: FONT })] }));
@@ -83,10 +89,10 @@ function buildBaseTemplate(): Document {
   // Items table header
   const headerRow = new TableRow({
     children: [
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Description", bold: true, size: 18, font: FONT })] })], width: { size: 50, type: WidthType.PERCENTAGE }, borders: lightBorder }),
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Qte", bold: true, size: 18, font: FONT })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE }, borders: lightBorder }),
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Prix", bold: true, size: 18, font: FONT })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE }, borders: lightBorder }),
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Montant", bold: true, size: 18, font: FONT })], alignment: AlignmentType.RIGHT })], width: { size: 20, type: WidthType.PERCENTAGE }, borders: lightBorder }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: messages.labels.description, bold: true, size: 18, font: FONT })] })], width: { size: 50, type: WidthType.PERCENTAGE }, borders: lightBorder }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: messages.labels.quantity, bold: true, size: 18, font: FONT })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE }, borders: lightBorder }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: messages.labels.price, bold: true, size: 18, font: FONT })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE }, borders: lightBorder }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: messages.labels.amount, bold: true, size: 18, font: FONT })], alignment: AlignmentType.RIGHT })], width: { size: 20, type: WidthType.PERCENTAGE }, borders: lightBorder }),
     ],
   });
 
@@ -131,19 +137,19 @@ function buildBaseTemplate(): Document {
   children.push(new Paragraph({ spacing: { before: 200 } }));
   children.push(
     new Paragraph({
-      children: [new TextRun({ text: "Sous-total: {{subtotal}}", size: 20, font: FONT })],
+      children: [new TextRun({ text: `${messages.labels.subtotal}: {{subtotal}}`, size: 20, font: FONT })],
       alignment: AlignmentType.RIGHT,
     })
   );
   children.push(
     new Paragraph({
-      children: [new TextRun({ text: "TVA ({{taxRate}}%): {{taxAmount}}", color: "888888", size: 20, font: FONT })],
+      children: [new TextRun({ text: `${messages.labels.tax} ({{taxRate}}%): {{taxAmount}}`, color: "888888", size: 20, font: FONT })],
       alignment: AlignmentType.RIGHT,
     })
   );
   children.push(
     new Paragraph({
-      children: [new TextRun({ text: "Total: {{total}}", bold: true, size: 28, font: FONT })],
+      children: [new TextRun({ text: `${messages.labels.total}: {{total}}`, bold: true, size: 28, font: FONT })],
       alignment: AlignmentType.RIGHT,
       spacing: { before: 100 },
     })
@@ -151,7 +157,7 @@ function buildBaseTemplate(): Document {
 
   // Notes
   children.push(new Paragraph({ spacing: { before: 400 } }));
-  children.push(new Paragraph({ children: [new TextRun({ text: "Notes", bold: true, color: "888888", size: 18, font: FONT })] }));
+  children.push(new Paragraph({ children: [new TextRun({ text: messages.labels.notes, bold: true, color: "888888", size: 18, font: FONT })] }));
   children.push(new Paragraph({ children: [new TextRun({ text: "{{notes}}", color: "555555", size: 18, font: FONT })] }));
 
   // Payment terms
@@ -170,8 +176,8 @@ function buildBaseTemplate(): Document {
   // Banking info
   children.push(new Paragraph({ spacing: { before: 400 } }));
   children.push(new Paragraph({ children: [new TextRun({ text: "{{bankName}}", bold: true, size: 18, font: FONT })] }));
-  children.push(new Paragraph({ children: [new TextRun({ text: "IBAN: {{iban}}", size: 18, font: FONT })] }));
-  children.push(new Paragraph({ children: [new TextRun({ text: "BIC/SWIFT: {{bic}}", size: 18, font: FONT })] }));
+  children.push(new Paragraph({ children: [new TextRun({ text: `${messages.labels.iban}: {{iban}}`, size: 18, font: FONT })] }));
+  children.push(new Paragraph({ children: [new TextRun({ text: `${messages.labels.bicSwift}: {{bic}}`, size: 18, font: FONT })] }));
 
   return new Document({
     styles: {
@@ -186,15 +192,23 @@ function buildBaseTemplate(): Document {
   });
 }
 
-export async function GET() {
-  const doc = buildBaseTemplate();
+export async function GET(request: Request) {
+  const cookieStore = await cookies();
+  const requestLocale = new URL(request.url).searchParams.get("locale");
+  const locale = normalizeInvoiceLocale(
+    requestLocale ??
+      cookieStore.get("NEXT_LOCALE")?.value ??
+      request.headers.get("accept-language")
+  );
+  const doc = buildBaseTemplate(locale);
   const buffer = await Packer.toBuffer(doc);
+  const messages = getInvoiceTemplateMessages(locale);
 
   return new Response(buffer, {
     headers: {
       "Content-Type":
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "Content-Disposition": 'attachment; filename="template-base.docx"',
+      "Content-Disposition": `attachment; filename="${messages.baseTemplateFilename}"`,
     },
   });
 }

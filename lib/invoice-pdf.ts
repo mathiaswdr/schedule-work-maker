@@ -7,6 +7,12 @@ import {
   StyleSheet,
   renderToBuffer,
 } from "@react-pdf/renderer";
+import {
+  formatInvoiceDate,
+  getInvoiceTemplateMessages,
+  type InvoiceLocale,
+  normalizeInvoiceLocale,
+} from "./invoice-i18n";
 
 export type InvoiceData = {
   displayNumber: string;
@@ -51,11 +57,6 @@ export type InvoiceData = {
 };
 
 const fmt = (n: number) => n.toFixed(2);
-const fmtDate = (d: Date | string | null) => {
-  if (!d) return "—";
-  const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleDateString("fr-FR");
-};
 
 // ─── Classic Template ───
 
@@ -83,8 +84,15 @@ const classicStyles = StyleSheet.create({
   footer: { position: "absolute", bottom: 30, left: 40, right: 40, fontSize: 8, color: "#AAA", textAlign: "center" },
 });
 
-function ClassicTemplate({ invoice }: { invoice: InvoiceData }) {
+function ClassicTemplate({
+  invoice,
+  locale,
+}: {
+  invoice: InvoiceData;
+  locale: InvoiceLocale;
+}) {
   const groups = groupByCategory(invoice.items);
+  const messages = getInvoiceTemplateMessages(locale);
   return React.createElement(
     Document,
     null,
@@ -98,7 +106,11 @@ function ClassicTemplate({ invoice }: { invoice: InvoiceData }) {
         React.createElement(
           View,
           null,
-          React.createElement(Text, { style: classicStyles.title }, invoice.senderName || "Invoice"),
+          React.createElement(
+            Text,
+            { style: classicStyles.title },
+            invoice.senderName || messages.fallbackTitle
+          ),
           React.createElement(Text, { style: classicStyles.subtitle }, invoice.displayNumber),
           invoice.title && React.createElement(Text, { style: { fontSize: 12, fontFamily: "Helvetica-Bold", marginTop: 6 } }, invoice.title),
           invoice.subject && React.createElement(Text, { style: { fontSize: 10, color: "#666", marginTop: 2 } }, invoice.subject)
@@ -106,14 +118,14 @@ function ClassicTemplate({ invoice }: { invoice: InvoiceData }) {
         React.createElement(
           View,
           { style: { alignItems: "flex-end" } },
-          React.createElement(Text, { style: classicStyles.label }, "DATE"),
-          React.createElement(Text, null, fmtDate(invoice.issueDate)),
+          React.createElement(Text, { style: classicStyles.label }, messages.labels.date),
+          React.createElement(Text, null, formatInvoiceDate(invoice.issueDate, locale)),
           invoice.dueDate &&
             React.createElement(
               View,
               { style: { marginTop: 6 } },
-              React.createElement(Text, { style: classicStyles.label }, "DUE"),
-              React.createElement(Text, null, fmtDate(invoice.dueDate))
+              React.createElement(Text, { style: classicStyles.label }, messages.labels.due),
+              React.createElement(Text, null, formatInvoiceDate(invoice.dueDate, locale))
             )
         )
       ),
@@ -125,20 +137,25 @@ function ClassicTemplate({ invoice }: { invoice: InvoiceData }) {
           React.createElement(Text, { style: { fontSize: 9, color: "#666" } }, invoice.senderAddress),
           invoice.senderEmail && React.createElement(Text, { style: { fontSize: 9, color: "#666" } }, invoice.senderEmail),
           invoice.senderPhone && React.createElement(Text, { style: { fontSize: 9, color: "#666" } }, invoice.senderPhone),
-          invoice.senderSiret && React.createElement(Text, { style: { fontSize: 9, color: "#666" } }, `SIRET: ${invoice.senderSiret}`)
+          invoice.senderSiret &&
+            React.createElement(
+              Text,
+              { style: { fontSize: 9, color: "#666" } },
+              `${messages.labels.siret}: ${invoice.senderSiret}`
+            )
         ),
       // Location + Date
       invoice.location &&
         React.createElement(
           Text,
           { style: { fontSize: 9, color: "#666", marginBottom: 10 } },
-          `${invoice.location}, ${fmtDate(invoice.issueDate)}`
+          `${invoice.location}, ${formatInvoiceDate(invoice.issueDate, locale)}`
         ),
       // Client
       React.createElement(
         View,
         { style: classicStyles.clientBlock },
-        React.createElement(Text, { style: classicStyles.label }, "BILL TO"),
+        React.createElement(Text, { style: classicStyles.label }, messages.labels.billTo),
         React.createElement(Text, { style: { fontFamily: "Helvetica-Bold" } }, invoice.clientName || "—"),
         invoice.clientAddress && React.createElement(Text, { style: { color: "#666" } }, invoice.clientAddress),
         (invoice.clientPostalCode || invoice.clientCity) &&
@@ -150,10 +167,10 @@ function ClassicTemplate({ invoice }: { invoice: InvoiceData }) {
       React.createElement(
         View,
         { style: classicStyles.tableHeader },
-        React.createElement(Text, { style: [classicStyles.colDesc, classicStyles.label] }, "DESCRIPTION"),
-        React.createElement(Text, { style: [classicStyles.colQty, classicStyles.label] }, "QTY"),
-        React.createElement(Text, { style: [classicStyles.colPrice, classicStyles.label] }, "PRICE"),
-        React.createElement(Text, { style: [classicStyles.colAmount, classicStyles.label] }, "AMOUNT")
+        React.createElement(Text, { style: [classicStyles.colDesc, classicStyles.label] }, messages.labels.description),
+        React.createElement(Text, { style: [classicStyles.colQty, classicStyles.label] }, messages.labels.quantity),
+        React.createElement(Text, { style: [classicStyles.colPrice, classicStyles.label] }, messages.labels.price),
+        React.createElement(Text, { style: [classicStyles.colAmount, classicStyles.label] }, messages.labels.amount)
       ),
       // Items
       ...groups.flatMap((g) => [
@@ -178,20 +195,24 @@ function ClassicTemplate({ invoice }: { invoice: InvoiceData }) {
         React.createElement(
           View,
           { style: classicStyles.totalRow },
-          React.createElement(Text, { style: classicStyles.totalLabel }, "Subtotal"),
+          React.createElement(Text, { style: classicStyles.totalLabel }, messages.labels.subtotal),
           React.createElement(Text, { style: classicStyles.totalValue }, fmt(invoice.subtotal))
         ),
         (invoice.taxRate ?? 0) > 0 &&
           React.createElement(
             View,
             { style: classicStyles.totalRow },
-            React.createElement(Text, { style: classicStyles.totalLabel }, `Tax (${invoice.taxRate}%)`),
+            React.createElement(
+              Text,
+              { style: classicStyles.totalLabel },
+              `${messages.labels.tax} (${invoice.taxRate}%)`
+            ),
             React.createElement(Text, { style: classicStyles.totalValue }, fmt(invoice.taxAmount))
           ),
         React.createElement(
           View,
           { style: [classicStyles.totalRow, { borderTopWidth: 1, borderTopColor: "#E5E7EB", paddingTop: 6 }] },
-          React.createElement(Text, { style: classicStyles.totalLabel }, "Total"),
+          React.createElement(Text, { style: classicStyles.totalLabel }, messages.labels.total),
           React.createElement(Text, { style: [classicStyles.totalValue, classicStyles.grandTotal] }, fmt(invoice.total))
         )
       ),
@@ -200,7 +221,7 @@ function ClassicTemplate({ invoice }: { invoice: InvoiceData }) {
         React.createElement(
           View,
           { style: classicStyles.notes },
-          React.createElement(Text, { style: [classicStyles.label, { marginBottom: 4 }] }, "NOTES"),
+          React.createElement(Text, { style: [classicStyles.label, { marginBottom: 4 }] }, messages.labels.notes),
           React.createElement(Text, null, invoice.notes)
         ),
       // Payment terms
@@ -216,8 +237,18 @@ function ClassicTemplate({ invoice }: { invoice: InvoiceData }) {
           View,
           { style: { marginTop: 20 } },
           invoice.bankName && React.createElement(Text, { style: { fontFamily: "Helvetica-Bold", fontSize: 9 } }, invoice.bankName),
-          invoice.iban && React.createElement(Text, { style: { fontSize: 9 } }, `IBAN: ${invoice.iban}`),
-          invoice.bic && React.createElement(Text, { style: { fontSize: 9 } }, `BIC/SWIFT: ${invoice.bic}`)
+          invoice.iban &&
+            React.createElement(
+              Text,
+              { style: { fontSize: 9 } },
+              `${messages.labels.iban}: ${invoice.iban}`
+            ),
+          invoice.bic &&
+            React.createElement(
+              Text,
+              { style: { fontSize: 9 } },
+              `${messages.labels.bicSwift}: ${invoice.bic}`
+            )
         ),
       // Footer
       invoice.senderVatMention &&
@@ -254,8 +285,15 @@ const modernStyles = StyleSheet.create({
   footer: { position: "absolute", bottom: 30, left: 30, right: 30, fontSize: 8, color: "#AAA", textAlign: "center" },
 });
 
-function ModernTemplate({ invoice }: { invoice: InvoiceData }) {
+function ModernTemplate({
+  invoice,
+  locale,
+}: {
+  invoice: InvoiceData;
+  locale: InvoiceLocale;
+}) {
   const groups = groupByCategory(invoice.items);
+  const messages = getInvoiceTemplateMessages(locale);
   let rowIndex = 0;
   return React.createElement(
     Document,
@@ -267,7 +305,11 @@ function ModernTemplate({ invoice }: { invoice: InvoiceData }) {
       React.createElement(
         View,
         { style: modernStyles.banner },
-        React.createElement(Text, { style: modernStyles.bannerTitle }, invoice.senderName || "Invoice"),
+        React.createElement(
+          Text,
+          { style: modernStyles.bannerTitle },
+          invoice.senderName || messages.fallbackTitle
+        ),
         React.createElement(Text, { style: modernStyles.bannerSub }, invoice.displayNumber),
         invoice.title && React.createElement(Text, { style: { fontSize: 14, color: "#fff", fontFamily: "Helvetica-Bold", marginTop: 6 } }, invoice.title),
         invoice.subject && React.createElement(Text, { style: { fontSize: 10, color: "#A7F3D0", marginTop: 2 } }, invoice.subject)
@@ -282,14 +324,14 @@ function ModernTemplate({ invoice }: { invoice: InvoiceData }) {
           React.createElement(
             View,
             { style: modernStyles.infoCard },
-            React.createElement(Text, { style: modernStyles.label }, "FROM"),
+            React.createElement(Text, { style: modernStyles.label }, messages.labels.from),
             React.createElement(Text, { style: { fontFamily: "Helvetica-Bold" } }, invoice.senderName || "—"),
             invoice.senderEmail && React.createElement(Text, { style: { color: "#666", marginTop: 2 } }, invoice.senderEmail)
           ),
           React.createElement(
             View,
             { style: modernStyles.infoCard },
-            React.createElement(Text, { style: modernStyles.label }, "BILL TO"),
+            React.createElement(Text, { style: modernStyles.label }, messages.labels.billTo),
             React.createElement(Text, { style: { fontFamily: "Helvetica-Bold" } }, invoice.clientName || "—"),
             invoice.clientAddress && React.createElement(Text, { style: { color: "#666", marginTop: 2 } }, invoice.clientAddress),
             (invoice.clientPostalCode || invoice.clientCity) &&
@@ -300,20 +342,33 @@ function ModernTemplate({ invoice }: { invoice: InvoiceData }) {
           React.createElement(
             View,
             { style: modernStyles.infoCard },
-            React.createElement(Text, { style: modernStyles.label }, invoice.location ? "LOCATION & DATE" : "DATE"),
+            React.createElement(
+              Text,
+              { style: modernStyles.label },
+              invoice.location ? messages.labels.locationAndDate : messages.labels.date
+            ),
             invoice.location && React.createElement(Text, null, invoice.location),
-            React.createElement(Text, { style: invoice.location ? { color: "#666", marginTop: 2 } : undefined }, fmtDate(invoice.issueDate)),
-            invoice.dueDate && React.createElement(Text, { style: { color: "#666", marginTop: 2 } }, `Due: ${fmtDate(invoice.dueDate)}`)
+            React.createElement(
+              Text,
+              { style: invoice.location ? { color: "#666", marginTop: 2 } : undefined },
+              formatInvoiceDate(invoice.issueDate, locale)
+            ),
+            invoice.dueDate &&
+              React.createElement(
+                Text,
+                { style: { color: "#666", marginTop: 2 } },
+                `${messages.labels.due}: ${formatInvoiceDate(invoice.dueDate, locale)}`
+              )
           )
         ),
         // Table header
         React.createElement(
           View,
           { style: modernStyles.tableHeader },
-          React.createElement(Text, { style: [modernStyles.colDesc, modernStyles.thText] }, "DESCRIPTION"),
-          React.createElement(Text, { style: [modernStyles.colQty, modernStyles.thText] }, "QTY"),
-          React.createElement(Text, { style: [modernStyles.colPrice, modernStyles.thText] }, "PRICE"),
-          React.createElement(Text, { style: [modernStyles.colAmount, modernStyles.thText] }, "AMOUNT")
+          React.createElement(Text, { style: [modernStyles.colDesc, modernStyles.thText] }, messages.labels.description),
+          React.createElement(Text, { style: [modernStyles.colQty, modernStyles.thText] }, messages.labels.quantity),
+          React.createElement(Text, { style: [modernStyles.colPrice, modernStyles.thText] }, messages.labels.price),
+          React.createElement(Text, { style: [modernStyles.colAmount, modernStyles.thText] }, messages.labels.amount)
         ),
         // Items
         ...groups.flatMap((g) => [
@@ -339,20 +394,24 @@ function ModernTemplate({ invoice }: { invoice: InvoiceData }) {
           React.createElement(
             View,
             { style: modernStyles.totalRow },
-            React.createElement(Text, { style: modernStyles.totalLabel }, "Subtotal"),
+            React.createElement(Text, { style: modernStyles.totalLabel }, messages.labels.subtotal),
             React.createElement(Text, { style: modernStyles.totalValue }, fmt(invoice.subtotal))
           ),
           (invoice.taxRate ?? 0) > 0 &&
             React.createElement(
               View,
               { style: modernStyles.totalRow },
-              React.createElement(Text, { style: modernStyles.totalLabel }, `Tax (${invoice.taxRate}%)`),
+              React.createElement(
+                Text,
+                { style: modernStyles.totalLabel },
+                `${messages.labels.tax} (${invoice.taxRate}%)`
+              ),
               React.createElement(Text, { style: modernStyles.totalValue }, fmt(invoice.taxAmount))
             ),
           React.createElement(
             View,
             { style: [modernStyles.totalRow, { borderTopWidth: 1, borderTopColor: "#0F766E", paddingTop: 6 }] },
-            React.createElement(Text, { style: modernStyles.totalLabel }, "Total"),
+            React.createElement(Text, { style: modernStyles.totalLabel }, messages.labels.total),
             React.createElement(Text, { style: [modernStyles.totalValue, { fontSize: 14 }] }, fmt(invoice.total))
           )
         ),
@@ -374,8 +433,18 @@ function ModernTemplate({ invoice }: { invoice: InvoiceData }) {
             View,
             { style: { marginTop: 16 } },
             invoice.bankName && React.createElement(Text, { style: { fontFamily: "Helvetica-Bold", fontSize: 9 } }, invoice.bankName),
-            invoice.iban && React.createElement(Text, { style: { fontSize: 9 } }, `IBAN: ${invoice.iban}`),
-            invoice.bic && React.createElement(Text, { style: { fontSize: 9 } }, `BIC/SWIFT: ${invoice.bic}`)
+            invoice.iban &&
+              React.createElement(
+                Text,
+                { style: { fontSize: 9 } },
+                `${messages.labels.iban}: ${invoice.iban}`
+              ),
+            invoice.bic &&
+              React.createElement(
+                Text,
+                { style: { fontSize: 9 } },
+                `${messages.labels.bicSwift}: ${invoice.bic}`
+              )
           )
       ),
       invoice.senderVatMention &&
@@ -407,8 +476,15 @@ const minimalStyles = StyleSheet.create({
   footer: { position: "absolute", bottom: 40, left: 50, right: 50, fontSize: 8, color: "#CCC", textAlign: "center" },
 });
 
-function MinimalTemplate({ invoice }: { invoice: InvoiceData }) {
+function MinimalTemplate({
+  invoice,
+  locale,
+}: {
+  invoice: InvoiceData;
+  locale: InvoiceLocale;
+}) {
   const groups = groupByCategory(invoice.items);
+  const messages = getInvoiceTemplateMessages(locale);
   return React.createElement(
     Document,
     null,
@@ -421,7 +497,11 @@ function MinimalTemplate({ invoice }: { invoice: InvoiceData }) {
         React.createElement(
           View,
           null,
-          React.createElement(Text, { style: minimalStyles.title }, invoice.senderName || ""),
+          React.createElement(
+            Text,
+            { style: minimalStyles.title },
+            invoice.senderName || messages.fallbackTitle
+          ),
           React.createElement(Text, { style: minimalStyles.invoiceNum }, invoice.displayNumber),
           invoice.title && React.createElement(Text, { style: { fontSize: 10, fontFamily: "Helvetica-Bold", marginTop: 4 } }, invoice.title),
           invoice.subject && React.createElement(Text, { style: { fontSize: 9, color: "#888", marginTop: 2 } }, invoice.subject)
@@ -429,20 +509,25 @@ function MinimalTemplate({ invoice }: { invoice: InvoiceData }) {
         React.createElement(
           View,
           { style: { alignItems: "flex-end" } },
-          React.createElement(Text, { style: { color: "#AAA" } }, fmtDate(invoice.issueDate)),
-          invoice.dueDate && React.createElement(Text, { style: { color: "#CCC", marginTop: 2 } }, `Due ${fmtDate(invoice.dueDate)}`)
+          React.createElement(Text, { style: { color: "#AAA" } }, formatInvoiceDate(invoice.issueDate, locale)),
+          invoice.dueDate &&
+            React.createElement(
+              Text,
+              { style: { color: "#CCC", marginTop: 2 } },
+              `${messages.labels.due} ${formatInvoiceDate(invoice.dueDate, locale)}`
+            )
         )
       ),
       invoice.location &&
         React.createElement(
           Text,
           { style: { fontSize: 9, color: "#AAA", marginBottom: 10 } },
-          `${invoice.location}, ${fmtDate(invoice.issueDate)}`
+          `${invoice.location}, ${formatInvoiceDate(invoice.issueDate, locale)}`
         ),
       React.createElement(
         View,
         { style: minimalStyles.clientBlock },
-        React.createElement(Text, { style: minimalStyles.label }, "TO"),
+        React.createElement(Text, { style: minimalStyles.label }, messages.labels.to),
         React.createElement(Text, null, invoice.clientName || "—"),
         invoice.clientAddress && React.createElement(Text, { style: { color: "#888" } }, invoice.clientAddress),
         (invoice.clientPostalCode || invoice.clientCity) &&
@@ -470,29 +555,33 @@ function MinimalTemplate({ invoice }: { invoice: InvoiceData }) {
           )
         ),
       ]),
-      React.createElement(
-        View,
-        { style: minimalStyles.totalsBlock },
         React.createElement(
           View,
-          { style: minimalStyles.totalRow },
-          React.createElement(Text, { style: minimalStyles.totalLabel }, "Subtotal"),
-          React.createElement(Text, { style: minimalStyles.totalValue }, fmt(invoice.subtotal))
-        ),
-        (invoice.taxRate ?? 0) > 0 &&
+          { style: minimalStyles.totalsBlock },
           React.createElement(
             View,
             { style: minimalStyles.totalRow },
-            React.createElement(Text, { style: minimalStyles.totalLabel }, `Tax ${invoice.taxRate}%`),
-            React.createElement(Text, { style: minimalStyles.totalValue }, fmt(invoice.taxAmount))
+            React.createElement(Text, { style: minimalStyles.totalLabel }, messages.labels.subtotal),
+            React.createElement(Text, { style: minimalStyles.totalValue }, fmt(invoice.subtotal))
           ),
-        React.createElement(
-          View,
-          { style: [minimalStyles.totalRow, { marginTop: 4 }] },
-          React.createElement(Text, { style: [minimalStyles.totalLabel, { fontSize: 12 }] }, "Total"),
-          React.createElement(Text, { style: [minimalStyles.totalValue, { fontSize: 14 }] }, fmt(invoice.total))
-        )
-      ),
+          (invoice.taxRate ?? 0) > 0 &&
+            React.createElement(
+              View,
+              { style: minimalStyles.totalRow },
+              React.createElement(
+                Text,
+                { style: minimalStyles.totalLabel },
+                `${messages.labels.tax} ${invoice.taxRate}%`
+              ),
+              React.createElement(Text, { style: minimalStyles.totalValue }, fmt(invoice.taxAmount))
+            ),
+          React.createElement(
+            View,
+            { style: [minimalStyles.totalRow, { marginTop: 4 }] },
+            React.createElement(Text, { style: [minimalStyles.totalLabel, { fontSize: 12 }] }, messages.labels.total),
+            React.createElement(Text, { style: [minimalStyles.totalValue, { fontSize: 14 }] }, fmt(invoice.total))
+          )
+        ),
       invoice.notes &&
         React.createElement(
           View,
@@ -505,14 +594,24 @@ function MinimalTemplate({ invoice }: { invoice: InvoiceData }) {
           { style: { marginTop: 20, fontSize: 8, color: "#AAA" } },
           React.createElement(Text, null, invoice.paymentTerms)
         ),
-      (invoice.bankName || invoice.iban || invoice.bic) &&
-        React.createElement(
-          View,
-          { style: { marginTop: 20 } },
-          invoice.bankName && React.createElement(Text, { style: { fontFamily: "Helvetica-Bold", fontSize: 9 } }, invoice.bankName),
-          invoice.iban && React.createElement(Text, { style: { fontSize: 9, color: "#888" } }, `IBAN: ${invoice.iban}`),
-          invoice.bic && React.createElement(Text, { style: { fontSize: 9, color: "#888" } }, `BIC/SWIFT: ${invoice.bic}`)
-        ),
+        (invoice.bankName || invoice.iban || invoice.bic) &&
+          React.createElement(
+            View,
+            { style: { marginTop: 20 } },
+            invoice.bankName && React.createElement(Text, { style: { fontFamily: "Helvetica-Bold", fontSize: 9 } }, invoice.bankName),
+            invoice.iban &&
+              React.createElement(
+                Text,
+                { style: { fontSize: 9, color: "#888" } },
+                `${messages.labels.iban}: ${invoice.iban}`
+              ),
+            invoice.bic &&
+              React.createElement(
+                Text,
+                { style: { fontSize: 9, color: "#888" } },
+                `${messages.labels.bicSwift}: ${invoice.bic}`
+              )
+          ),
       invoice.senderVatMention &&
         React.createElement(Text, { style: minimalStyles.footer }, invoice.senderVatMention)
     )
@@ -537,19 +636,32 @@ function groupByCategory(items: InvoiceData["items"]) {
 
 // ─── Public API ───
 
-export async function generateInvoicePdf(invoice: InvoiceData): Promise<Buffer> {
+export async function generateInvoicePdf(
+  invoice: InvoiceData,
+  locale?: string | null
+): Promise<Buffer> {
   const templateType = invoice.templateType || "CLASSIC";
+  const normalizedLocale = normalizeInvoiceLocale(locale);
   let component: React.ReactElement;
 
   switch (templateType) {
     case "MODERN":
-      component = React.createElement(ModernTemplate, { invoice });
+      component = React.createElement(ModernTemplate, {
+        invoice,
+        locale: normalizedLocale,
+      });
       break;
     case "MINIMAL":
-      component = React.createElement(MinimalTemplate, { invoice });
+      component = React.createElement(MinimalTemplate, {
+        invoice,
+        locale: normalizedLocale,
+      });
       break;
     default:
-      component = React.createElement(ClassicTemplate, { invoice });
+      component = React.createElement(ClassicTemplate, {
+        invoice,
+        locale: normalizedLocale,
+      });
   }
 
   return renderToBuffer(

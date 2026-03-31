@@ -233,7 +233,7 @@ export default function InvoicesClient({
       const res = await fetch(`/api/invoices/${id}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ format }),
+        body: JSON.stringify({ format, locale }),
       });
       if (!res.ok) throw new Error();
       const blob = await res.blob();

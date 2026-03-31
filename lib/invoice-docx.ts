@@ -14,15 +14,15 @@ import {
 import Docxtemplater from "docxtemplater";
 import PizZip from "pizzip";
 import type { InvoiceData } from "./invoice-pdf";
+import {
+  formatInvoiceDate,
+  getInvoiceTemplateMessages,
+  normalizeInvoiceLocale,
+} from "./invoice-i18n";
 
 const FONT = "Calibri";
 
 const fmt = (n: number) => n.toFixed(2);
-const fmtDate = (d: Date | string | null) => {
-  if (!d) return "—";
-  const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleDateString("fr-FR");
-};
 
 /**
  * Pre-processes the template DOCX XML to remove Word artifacts
@@ -90,15 +90,20 @@ const lightBorder = {
   right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
 } as const;
 
-function buildClassicDoc(invoice: InvoiceData): Document {
+function buildClassicDoc(invoice: InvoiceData, locale?: string | null): Document {
   const groups = groupByCategory(invoice.items);
+  const messages = getInvoiceTemplateMessages(locale);
   const children: (Paragraph | Table)[] = [];
 
   // Title
   children.push(
     new Paragraph({
       children: [
-        new TextRun({ text: invoice.senderName || "Invoice", bold: true, size: 40 }),
+        new TextRun({
+          text: invoice.senderName || messages.fallbackTitle,
+          bold: true,
+          size: 40,
+        }),
       ],
     })
   );
@@ -120,7 +125,9 @@ function buildClassicDoc(invoice: InvoiceData): Document {
     invoice.senderAddress,
     invoice.senderEmail,
     invoice.senderPhone,
-    invoice.senderSiret ? `SIRET: ${invoice.senderSiret}` : null,
+    invoice.senderSiret
+      ? `${messages.labels.siret}: ${invoice.senderSiret}`
+      : null,
   ].filter(Boolean);
   for (const line of senderLines) {
     children.push(new Paragraph({ children: [new TextRun({ text: line!, color: "666666", size: 18 })] }));
@@ -132,7 +139,10 @@ function buildClassicDoc(invoice: InvoiceData): Document {
     children.push(
       new Paragraph({
         children: [
-          new TextRun({ text: `${invoice.location}, ${fmtDate(invoice.issueDate)}`, size: 20 }),
+          new TextRun({
+            text: `${invoice.location}, ${formatInvoiceDate(invoice.issueDate, locale)}`,
+            size: 20,
+          }),
         ],
         spacing: { after: 100 },
       })
@@ -141,9 +151,19 @@ function buildClassicDoc(invoice: InvoiceData): Document {
   children.push(
     new Paragraph({
       children: [
-        new TextRun({ text: `Date: ${fmtDate(invoice.issueDate)}`, size: 20 }),
+        new TextRun({
+          text: `${messages.labels.date}: ${formatInvoiceDate(invoice.issueDate, locale)}`,
+          size: 20,
+        }),
         invoice.dueDate
-          ? new TextRun({ text: `  |  Due: ${fmtDate(invoice.dueDate)}`, color: "888888", size: 20 })
+          ? new TextRun({
+              text: `  |  ${messages.labels.due}: ${formatInvoiceDate(
+                invoice.dueDate,
+                locale
+              )}`,
+              color: "888888",
+              size: 20,
+            })
           : new TextRun(""),
       ],
       spacing: { after: 200 },
@@ -151,7 +171,19 @@ function buildClassicDoc(invoice: InvoiceData): Document {
   );
 
   // Client
-  children.push(new Paragraph({ children: [new TextRun({ text: "BILL TO", color: "888888", size: 16, bold: true })], spacing: { before: 100 } }));
+  children.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: messages.labels.billTo,
+          color: "888888",
+          size: 16,
+          bold: true,
+        }),
+      ],
+      spacing: { before: 100 },
+    })
+  );
   children.push(new Paragraph({ children: [new TextRun({ text: invoice.clientName || "—", bold: true, size: 22 })] }));
   if (invoice.clientAddress) {
     children.push(new Paragraph({ children: [new TextRun({ text: invoice.clientAddress, color: "666666", size: 18 })] }));
@@ -170,10 +202,10 @@ function buildClassicDoc(invoice: InvoiceData): Document {
   // Items table
   const headerRow = new TableRow({
     children: [
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Description", bold: true, size: 18 })] })], width: { size: 50, type: WidthType.PERCENTAGE }, borders: lightBorder }),
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Qty", bold: true, size: 18 })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE }, borders: lightBorder }),
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Price", bold: true, size: 18 })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE }, borders: lightBorder }),
-      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Amount", bold: true, size: 18 })], alignment: AlignmentType.RIGHT })], width: { size: 20, type: WidthType.PERCENTAGE }, borders: lightBorder }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: messages.labels.description, bold: true, size: 18 })] })], width: { size: 50, type: WidthType.PERCENTAGE }, borders: lightBorder }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: messages.labels.quantity, bold: true, size: 18 })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE }, borders: lightBorder }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: messages.labels.price, bold: true, size: 18 })], alignment: AlignmentType.RIGHT })], width: { size: 15, type: WidthType.PERCENTAGE }, borders: lightBorder }),
+      new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: messages.labels.amount, bold: true, size: 18 })], alignment: AlignmentType.RIGHT })], width: { size: 20, type: WidthType.PERCENTAGE }, borders: lightBorder }),
     ],
   });
 
@@ -219,7 +251,10 @@ function buildClassicDoc(invoice: InvoiceData): Document {
   children.push(
     new Paragraph({
       children: [
-        new TextRun({ text: `Subtotal: ${fmt(invoice.subtotal)}`, size: 20 }),
+        new TextRun({
+          text: `${messages.labels.subtotal}: ${fmt(invoice.subtotal)}`,
+          size: 20,
+        }),
       ],
       alignment: AlignmentType.RIGHT,
     })
@@ -227,14 +262,28 @@ function buildClassicDoc(invoice: InvoiceData): Document {
   if ((invoice.taxRate ?? 0) > 0) {
     children.push(
       new Paragraph({
-        children: [new TextRun({ text: `Tax (${invoice.taxRate}%): ${fmt(invoice.taxAmount)}`, color: "888888", size: 20 })],
+        children: [
+          new TextRun({
+            text: `${messages.labels.tax} (${invoice.taxRate}%): ${fmt(
+              invoice.taxAmount
+            )}`,
+            color: "888888",
+            size: 20,
+          }),
+        ],
         alignment: AlignmentType.RIGHT,
       })
     );
   }
   children.push(
     new Paragraph({
-      children: [new TextRun({ text: `Total: ${fmt(invoice.total)}`, bold: true, size: 28 })],
+      children: [
+        new TextRun({
+          text: `${messages.labels.total}: ${fmt(invoice.total)}`,
+          bold: true,
+          size: 28,
+        }),
+      ],
       alignment: AlignmentType.RIGHT,
       spacing: { before: 100 },
     })
@@ -243,7 +292,18 @@ function buildClassicDoc(invoice: InvoiceData): Document {
   // Notes
   if (invoice.notes) {
     children.push(new Paragraph({ spacing: { before: 400 } }));
-    children.push(new Paragraph({ children: [new TextRun({ text: "Notes", bold: true, color: "888888", size: 18 })] }));
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: messages.labels.notes,
+            bold: true,
+            color: "888888",
+            size: 18,
+          }),
+        ],
+      })
+    );
     children.push(new Paragraph({ children: [new TextRun({ text: invoice.notes, color: "555555", size: 18 })] }));
   }
 
@@ -271,10 +331,28 @@ function buildClassicDoc(invoice: InvoiceData): Document {
       children.push(new Paragraph({ children: [new TextRun({ text: invoice.bankName, bold: true, size: 18 })] }));
     }
     if (invoice.iban) {
-      children.push(new Paragraph({ children: [new TextRun({ text: `IBAN: ${invoice.iban}`, size: 18 })] }));
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `${messages.labels.iban}: ${invoice.iban}`,
+              size: 18,
+            }),
+          ],
+        })
+      );
     }
     if (invoice.bic) {
-      children.push(new Paragraph({ children: [new TextRun({ text: `BIC/SWIFT: ${invoice.bic}`, size: 18 })] }));
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `${messages.labels.bicSwift}: ${invoice.bic}`,
+              size: 18,
+            }),
+          ],
+        })
+      );
     }
   }
 
@@ -293,7 +371,8 @@ function buildClassicDoc(invoice: InvoiceData): Document {
 
 function buildFromCustomTemplate(
   invoice: InvoiceData,
-  templateBuffer: Buffer
+  templateBuffer: Buffer,
+  locale?: string | null
 ): Buffer {
   const zip = new PizZip(templateBuffer);
 
@@ -343,8 +422,8 @@ function buildFromCustomTemplate(
       title: invoice.title || "",
       subject: invoice.subject || "",
       location: invoice.location || "",
-      issueDate: fmtDate(invoice.issueDate),
-      dueDate: fmtDate(invoice.dueDate),
+      issueDate: formatInvoiceDate(invoice.issueDate, locale),
+      dueDate: formatInvoiceDate(invoice.dueDate, locale),
       // Items (for loop: {#items}...{/items})
       items: itemsData,
       // Totals — always pass strings for consistent rendering
@@ -372,14 +451,21 @@ function buildFromCustomTemplate(
 
 export async function generateInvoiceDocx(
   invoice: InvoiceData,
-  customTemplateBuffer?: Buffer
+  customTemplateBuffer?: Buffer,
+  locale?: string | null
 ): Promise<Buffer> {
+  const normalizedLocale = normalizeInvoiceLocale(locale);
+
   // If a custom template buffer is provided, use docxtemplater to fill placeholders
   if (customTemplateBuffer) {
-    return buildFromCustomTemplate(invoice, customTemplateBuffer);
+    return buildFromCustomTemplate(
+      invoice,
+      customTemplateBuffer,
+      normalizedLocale
+    );
   }
 
   // Otherwise use the built-in classic layout
-  const doc = buildClassicDoc(invoice);
+  const doc = buildClassicDoc(invoice, normalizedLocale);
   return Buffer.from(await Packer.toBuffer(doc));
 }

@@ -6,6 +6,8 @@ import { generateInvoiceDocx } from "@/lib/invoice-docx";
 import { generateQrBillPdf } from "@/lib/invoice-qrbill";
 import { mergePdfs } from "@/lib/pdf-merge";
 import type { QrBillData } from "@/lib/invoice-qrbill";
+import { normalizeInvoiceLocale } from "@/lib/invoice-i18n";
+import { cookies } from "next/headers";
 
 export async function POST(
   request: Request,
@@ -17,10 +19,21 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { format, qrData: bodyQrData } = (await request.json()) as {
+  const {
+    format,
+    qrData: bodyQrData,
+    locale: bodyLocale,
+  } = (await request.json()) as {
     format: "pdf" | "docx" | "qrbill";
     qrData?: QrBillData;
+    locale?: string;
   };
+  const cookieStore = await cookies();
+  const locale = normalizeInvoiceLocale(
+    bodyLocale ??
+      cookieStore.get("NEXT_LOCALE")?.value ??
+      request.headers.get("accept-language")
+  );
 
   const invoice = await prisma.invoice.findFirst({
     where: { id, userId: session.user.id },
@@ -199,7 +212,7 @@ export async function POST(
   }
 
   if (format === "pdf") {
-    const pdfBuffer = await generateInvoicePdf(invoiceData);
+    const pdfBuffer = await generateInvoicePdf(invoiceData, locale);
 
     // If QR-bill data is available, append it as a separate page
     const qrData = buildQrBillData();
@@ -223,7 +236,11 @@ export async function POST(
   }
 
   if (format === "docx") {
-    const docxBuffer = await generateInvoiceDocx(invoiceData, customTemplateBuffer);
+    const docxBuffer = await generateInvoiceDocx(
+      invoiceData,
+      customTemplateBuffer,
+      locale
+    );
     return new Response(docxBuffer, {
       headers: {
         "Content-Type":
