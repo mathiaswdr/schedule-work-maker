@@ -1,11 +1,10 @@
+import { Suspense } from "react";
 import { DM_Serif_Display } from "next/font/google";
-import { auth } from "@/server/auth";
-import { prisma } from "@/server/prisma";
-import { getSessionUserId } from "@/server/work-sessions";
 import { getBillingStats } from "@/server/billing-stats";
 import BillingStatsClient from "@/components/dashboard/billing-stats-client";
 import PlanGate from "@/components/dashboard/plan-gate";
-import { type PlanId } from "@/lib/plans";
+import DashboardPageFallback from "@/components/dashboard/dashboard-page-fallback";
+import { getDashboardViewer } from "@/server/dashboard-viewer";
 
 const display = DM_Serif_Display({
   subsets: ["latin"],
@@ -13,24 +12,15 @@ const display = DM_Serif_Display({
   display: "swap",
 });
 
-export default async function DashboardBillingStatsPage() {
-  const session = await auth();
-  const userPlan = (session?.user?.plan ?? "FREE") as PlanId;
-  const userId = await getSessionUserId();
-
-  const [user, billingStats] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { currency: true },
-    }),
-    getBillingStats(userId),
-  ]);
+async function BillingStatsContent() {
+  const { userId, userPlan, currency } = await getDashboardViewer();
+  const billingStats = await getBillingStats(userId);
 
   return (
     <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="stats">
       <BillingStatsClient
         displayClassName={display.className}
-        currency={user?.currency ?? "CHF"}
+        currency={currency}
         summary={billingStats.summary}
         dailyPoints={billingStats.dailyPoints}
         monthlyPoints={billingStats.monthlyPoints}
@@ -41,5 +31,13 @@ export default async function DashboardBillingStatsPage() {
         clientPaymentPoints={billingStats.clientPaymentPoints}
       />
     </PlanGate>
+  );
+}
+
+export default function DashboardBillingStatsPage() {
+  return (
+    <Suspense fallback={<DashboardPageFallback statsCards={6} sectionBlocks={2} />}>
+      <BillingStatsContent />
+    </Suspense>
   );
 }

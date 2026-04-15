@@ -3,11 +3,11 @@ import TimeTrackingClient from "@/components/dashboard/time-tracking-client";
 import {
   getActiveSession,
   getRecentSessions,
-  getSessionUserId,
   getWorkSummary,
 } from "@/server/work-sessions";
 import { prisma } from "@/server/prisma";
 import { serializeForClient } from "@/lib/utils";
+import { getDashboardViewer } from "@/server/dashboard-viewer";
 
 const display = DM_Serif_Display({
   subsets: ["latin"],
@@ -15,9 +15,9 @@ const display = DM_Serif_Display({
 });
 
 export default async function DashboardPage() {
-  const userId = await getSessionUserId();
+  const { userId, hourlyRate } = await getDashboardViewer();
 
-  const [session, summary, recentSessions, clients, projects, user] = await Promise.all([
+  const [session, summary, recentSessions, clients, projects] = await Promise.all([
     getActiveSession(userId),
     getWorkSummary(userId),
     getRecentSessions(userId),
@@ -35,16 +35,12 @@ export default async function DashboardPage() {
         client: { select: { id: true, name: true, color: true } },
       },
     }),
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { hourlyRate: true },
-    }),
   ]);
 
   return (
     <TimeTrackingClient
       displayClassName={display.className}
-      defaultHourlyRate={user?.hourlyRate ?? 0}
+      defaultHourlyRate={hourlyRate}
       initialData={serializeForClient({ session, summary, recentSessions })}
       initialClients={serializeForClient(clients)}
       initialProjects={serializeForClient(projects)}

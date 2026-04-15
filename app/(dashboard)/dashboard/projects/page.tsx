@@ -1,11 +1,9 @@
 import { DM_Serif_Display } from "next/font/google";
-import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
-import { getSessionUserId } from "@/server/work-sessions";
 import ProjectsClient from "@/components/dashboard/projects-client";
 import PlanGate from "@/components/dashboard/plan-gate";
-import { type PlanId } from "@/lib/plans";
 import { serializeForClient } from "@/lib/utils";
+import { getDashboardViewer } from "@/server/dashboard-viewer";
 
 const INITIAL_PROJECTS_PAGE_SIZE = 24;
 
@@ -16,9 +14,7 @@ const display = DM_Serif_Display({
 });
 
 export default async function DashboardProjectsPage() {
-  const session = await auth();
-  const userPlan = (session?.user?.plan ?? "FREE") as PlanId;
-  const userId = await getSessionUserId();
+  const { userId, userPlan } = await getDashboardViewer();
   const initialProjects = await prisma.project.findMany({
     where: { userId },
     orderBy: { name: "asc" },

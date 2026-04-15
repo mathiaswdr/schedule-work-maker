@@ -1,15 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { EASE, pickVariants } from "@/lib/motion-variants";
 import { useAction } from "next-safe-action/hooks";
 import {
   ArrowLeft,
   Download,
   FileText,
-  Loader2,
   Pencil,
   Plus,
   Receipt,
@@ -18,42 +19,60 @@ import {
 } from "lucide-react";
 import {
   deleteExpense,
-  addExpenseReceipt,
-  deleteExpenseReceipt,
+  deleteExpenseInvoice,
 } from "@/server/actions/expenses";
-import ExpenseFormDialog from "@/components/dashboard/expense-form-dialog";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 
+const ExpenseFormDialog = dynamic(
+  () => import("@/components/dashboard/expense-form-dialog")
+);
+const ExpenseInvoiceDialog = dynamic(
+  () => import("@/components/dashboard/expense-invoice-dialog")
+);
+
 // ── Types ──
 
-type ExpenseReceiptItem = {
+type ExpenseInvoiceItem = {
   id: string;
+  invoiceNumber: string | null;
+  amount: number | null;
+  billedAt: string;
+  notes: string | null;
   fileUrl: string;
   fileName: string | null;
   createdAt: string;
+};
+
+type ExpenseInvoiceSummaryItem = {
+  id: string;
+  amount: number | null;
+  billedAt: string;
 };
 
 type ExpenseItem = {
   id: string;
   name: string;
   amount: number;
-  recurrence: "MONTHLY" | "ANNUAL";
+  recurrence: "MONTHLY" | "ANNUAL" | "ONE_TIME";
   category: string | null;
   notes: string | null;
   color: string | null;
   isActive: boolean;
   startDate: string;
+  invoices: ExpenseInvoiceSummaryItem[];
 };
 
-type ExpenseDetail = ExpenseItem & {
-  receipts: ExpenseReceiptItem[];
+type ExpenseDetail = Omit<ExpenseItem, "invoices"> & {
+  invoices: ExpenseInvoiceItem[];
 };
 
 type ExpensesClientProps = {
   displayClassName: string;
   currency: string;
   initialExpenses?: ExpenseItem[];
+  initialExpenseId?: string;
+  initialExpenseDetail?: ExpenseDetail | null;
 };
 
 // ── Donut colors ──
@@ -69,39 +88,54 @@ const DONUT_COLORS = [
   "#6366F1",
 ];
 
+type ChartTypeFilter = "ALL" | "SUBSCRIPTIONS" | "ONE_TIME";
+type ChartPeriodFilter =
+  | "LAST_90_DAYS"
+  | "THIS_MONTH"
+  | "THIS_YEAR"
+  | "PREVIOUS_YEAR";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 // ── Component ──
 
 export default function ExpensesClient({
   displayClassName,
   currency,
   initialExpenses,
+  initialExpenseId,
+  initialExpenseDetail,
 }: ExpensesClientProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
   const locale = useLocale();
+  const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const { confirm, ConfirmDialogElement } = useConfirm();
   const hasInitialExpenses = initialExpenses !== undefined;
+  const hasInitialDetail = initialExpenseDetail !== undefined;
   const [expenses, setExpenses] = useState<ExpenseItem[]>(initialExpenses ?? []);
-  const [isLoading, setIsLoading] = useState(!hasInitialExpenses);
+  const [isLoading, setIsLoading] = useState(!hasInitialExpenses && !hasInitialDetail);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [pendingInvoiceFile, setPendingInvoiceFile] = useState<File | null>(
+    null
+  );
+  const [isInvoiceDragging, setIsInvoiceDragging] = useState(false);
   const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(
     null
   );
+  const invoiceFileInputRef = useRef<HTMLInputElement>(null);
 
   // Detail view
   const [selectedExpense, setSelectedExpense] = useState<ExpenseDetail | null>(
-    null
+    initialExpenseDetail ?? null
   );
   const [isDetailLoading, setIsDetailLoading] = useState(false);
-
-  // Receipt drag-and-drop
-  const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const dragCounter = useRef(0);
-
-  const ACCEPTED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
+  const [chartTypeFilter, setChartTypeFilter] =
+    useState<ChartTypeFilter>("ALL");
+  const [chartPeriodFilter, setChartPeriodFilter] =
+    useState<ChartPeriodFilter>("LAST_90_DAYS");
 
   // ── Actions ──
 
@@ -113,16 +147,9 @@ export default function ExpensesClient({
     },
   });
 
-  const { execute: executeAddReceipt } = useAction(addExpenseReceipt, {
+  const { execute: executeDeleteInvoice } = useAction(deleteExpenseInvoice, {
     onSuccess: () => {
-      toast.success(t("expenses.receiptAdded"));
-      if (selectedExpense) fetchExpenseDetail(selectedExpense.id);
-    },
-  });
-
-  const { execute: executeDeleteReceipt } = useAction(deleteExpenseReceipt, {
-    onSuccess: () => {
-      toast.success(t("expenses.receiptDeleted"));
+      toast.success(t("expenses.invoiceDeleted"));
       if (selectedExpense) fetchExpenseDetail(selectedExpense.id);
     },
   });
@@ -150,7 +177,7 @@ export default function ExpensesClient({
   };
 
   useEffect(() => {
-    if (hasInitialExpenses) return;
+    if (hasInitialExpenses || hasInitialDetail) return;
 
     let isMounted = true;
     fetchExpenses()
@@ -161,7 +188,12 @@ export default function ExpensesClient({
     return () => {
       isMounted = false;
     };
-  }, [hasInitialExpenses]);
+  }, [hasInitialDetail, hasInitialExpenses]);
+
+  useEffect(() => {
+    if (!initialExpenseId || initialExpenseDetail) return;
+    fetchExpenseDetail(initialExpenseId).catch(() => null);
+  }, [initialExpenseDetail, initialExpenseId]);
 
   // ── Handlers ──
 
@@ -192,87 +224,38 @@ export default function ExpensesClient({
     if (selectedExpense) fetchExpenseDetail(selectedExpense.id);
   };
 
-  const handleBack = () => {
-    setSelectedExpense(null);
+  const handleInvoiceDialogSuccess = () => {
+    setPendingInvoiceFile(null);
     fetchExpenses();
+    if (selectedExpense) fetchExpenseDetail(selectedExpense.id);
   };
 
-  // ── Receipt upload ──
+  const handleBack = () => {
+    setInvoiceDialogOpen(false);
+    setPendingInvoiceFile(null);
+    setSelectedExpense(null);
+    router.push("/dashboard/expenses");
+  };
 
-  const uploadReceiptFile = useCallback(
-    async (file: File) => {
-      if (!ACCEPTED_TYPES.includes(file.type)) {
-        toast.error("PDF, JPG, PNG");
-        return;
-      }
-      if (!selectedExpense) return;
-      setIsUploading(true);
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("type", "invoice");
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-        if (!res.ok) throw new Error("Upload failed");
-        const data = await res.json();
-        if (data.url) {
-          executeAddReceipt({
-            expenseId: selectedExpense.id,
-            fileUrl: data.url,
-            fileName: file.name,
-          });
-        }
-      } catch {
-        toast.error("Upload failed");
-      } finally {
-        setIsUploading(false);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedExpense]
-  );
+  const handleInvoiceDialogOpenChange = (open: boolean) => {
+    setInvoiceDialogOpen(open);
+    if (!open) {
+      setPendingInvoiceFile(null);
+    }
+  };
 
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounter.current++;
-    if (e.dataTransfer.items?.length) setIsDragging(true);
-  }, []);
+  const queueInvoiceFile = (file?: File | null) => {
+    if (!file) return;
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounter.current--;
-    if (dragCounter.current === 0) setIsDragging(false);
-  }, []);
+    const acceptedMimeList = ["application/pdf", "image/jpeg", "image/png"];
+    if (!acceptedMimeList.includes(file.type)) {
+      toast.error("PDF, JPG, PNG");
+      return;
+    }
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
-      dragCounter.current = 0;
-      const file = e.dataTransfer.files?.[0];
-      if (file) uploadReceiptFile(file);
-    },
-    [uploadReceiptFile]
-  );
-
-  const handleFileInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) uploadReceiptFile(file);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    },
-    [uploadReceiptFile]
-  );
+    setPendingInvoiceFile(file);
+    setInvoiceDialogOpen(true);
+  };
 
   // ── Formatters ──
 
@@ -300,7 +283,7 @@ export default function ExpensesClient({
 
   const monthlyTotal = useMemo(() => {
     return expenses
-      .filter((e) => e.isActive)
+      .filter((e) => e.isActive && e.recurrence !== "ONE_TIME")
       .reduce((sum, e) => {
         return sum + (e.recurrence === "ANNUAL" ? e.amount / 12 : e.amount);
       }, 0);
@@ -308,40 +291,159 @@ export default function ExpensesClient({
 
   const annualTotal = useMemo(() => {
     return expenses
-      .filter((e) => e.isActive)
+      .filter((e) => e.isActive && e.recurrence !== "ONE_TIME")
       .reduce((sum, e) => {
         return sum + (e.recurrence === "MONTHLY" ? e.amount * 12 : e.amount);
       }, 0);
   }, [expenses]);
 
   const activeCount = useMemo(() => {
-    return expenses.filter((e) => e.isActive).length;
+    return expenses.filter(
+      (e) => e.isActive && e.recurrence !== "ONE_TIME"
+    ).length;
   }, [expenses]);
 
   const avgPerSubscription = useMemo(() => {
     return activeCount > 0 ? monthlyTotal / activeCount : 0;
   }, [monthlyTotal, activeCount]);
 
-  // ── Donut data (per expense) ──
+  const previousYear = useMemo(() => new Date().getFullYear() - 1, []);
 
-  const donutSegments = useMemo(() => {
-    if (monthlyTotal <= 0) return [];
-    const CIRCUMFERENCE = 2 * Math.PI * 80; // radius = 80
-    const activeExpenses = expenses
-      .filter((e) => e.isActive)
-      .map((e) => ({
-        name: e.name,
-        monthlyAmount: e.recurrence === "ANNUAL" ? e.amount / 12 : e.amount,
-        color: e.color || DONUT_COLORS[expenses.indexOf(e) % DONUT_COLORS.length],
-      }))
-      .sort((a, b) => b.monthlyAmount - a.monthlyAmount);
+  const chartRange = useMemo(() => {
+    const now = new Date();
+    const end = new Date(now);
+
+    switch (chartPeriodFilter) {
+      case "THIS_MONTH":
+        return {
+          start: new Date(now.getFullYear(), now.getMonth(), 1),
+          end,
+        };
+      case "THIS_YEAR":
+        return {
+          start: new Date(now.getFullYear(), 0, 1),
+          end,
+        };
+      case "PREVIOUS_YEAR":
+        return {
+          start: new Date(previousYear, 0, 1),
+          end: new Date(previousYear, 11, 31, 23, 59, 59, 999),
+        };
+      case "LAST_90_DAYS":
+      default:
+        return {
+          start: new Date(now.getTime() - 89 * DAY_MS),
+          end,
+        };
+    }
+  }, [chartPeriodFilter, previousYear]);
+
+  const chartPeriodLabel = useMemo(() => {
+    switch (chartPeriodFilter) {
+      case "THIS_MONTH":
+        return t("expenses.filters.period.thisMonth");
+      case "THIS_YEAR":
+        return t("expenses.filters.period.thisYear");
+      case "PREVIOUS_YEAR":
+        return String(previousYear);
+      case "LAST_90_DAYS":
+      default:
+        return t("expenses.filters.period.last90Days");
+    }
+  }, [chartPeriodFilter, previousYear, t]);
+
+  const chartSegments = useMemo(() => {
+    const CIRCUMFERENCE = 2 * Math.PI * 80;
+
+    const isWithinRange = (value: Date) =>
+      value >= chartRange.start && value <= chartRange.end;
+
+    const countOccurrences = (
+      seed: Date,
+      increment: "month" | "year",
+      rangeStart: Date,
+      rangeEnd: Date
+    ) => {
+      let count = 0;
+      const cursor = new Date(seed);
+      cursor.setHours(0, 0, 0, 0);
+
+      while (cursor <= rangeEnd) {
+        if (cursor >= rangeStart) count += 1;
+        if (increment === "month") {
+          cursor.setMonth(cursor.getMonth() + 1);
+        } else {
+          cursor.setFullYear(cursor.getFullYear() + 1);
+        }
+      }
+
+      return count;
+    };
+
+    const filteredExpenses = expenses
+      .filter((expense) => {
+        if (chartTypeFilter === "SUBSCRIPTIONS") {
+          return expense.recurrence !== "ONE_TIME";
+        }
+        if (chartTypeFilter === "ONE_TIME") {
+          return expense.recurrence === "ONE_TIME";
+        }
+        return true;
+      })
+      .map((expense, index) => {
+        const invoicesTotal = expense.invoices.reduce((sum, invoice) => {
+          const billedAt = new Date(invoice.billedAt);
+          if (!isWithinRange(billedAt)) return sum;
+          return sum + (invoice.amount ?? expense.amount);
+        }, 0);
+
+        let fallbackTotal = 0;
+        const startDate = new Date(expense.startDate);
+
+        if (invoicesTotal === 0) {
+          if (expense.recurrence === "ONE_TIME") {
+            fallbackTotal = isWithinRange(startDate) ? expense.amount : 0;
+          } else if (expense.isActive) {
+            fallbackTotal =
+              expense.recurrence === "MONTHLY"
+                ? countOccurrences(
+                    startDate,
+                    "month",
+                    chartRange.start,
+                    chartRange.end
+                  ) * expense.amount
+                : countOccurrences(
+                    startDate,
+                    "year",
+                    chartRange.start,
+                    chartRange.end
+                  ) * expense.amount;
+          }
+        }
+
+        return {
+          id: expense.id,
+          name: expense.name,
+          totalAmount: invoicesTotal || fallbackTotal,
+          color:
+            expense.color || DONUT_COLORS[index % DONUT_COLORS.length],
+          recurrence: expense.recurrence,
+        };
+      })
+      .filter((expense) => expense.totalAmount > 0)
+      .sort((a, b) => b.totalAmount - a.totalAmount);
+
+    const total = filteredExpenses.reduce(
+      (sum, expense) => sum + expense.totalAmount,
+      0
+    );
 
     let offset = 0;
-    return activeExpenses.map((item) => {
-      const pct = item.monthlyAmount / monthlyTotal;
+    const segments = filteredExpenses.map((expense) => {
+      const pct = total > 0 ? expense.totalAmount / total : 0;
       const length = pct * CIRCUMFERENCE;
       const segment = {
-        ...item,
+        ...expense,
         pct: Math.round(pct * 100),
         dashArray: `${length} ${CIRCUMFERENCE - length}`,
         dashOffset: -offset,
@@ -349,7 +451,9 @@ export default function ExpensesClient({
       offset += length;
       return segment;
     });
-  }, [expenses, monthlyTotal]);
+
+    return { total, segments };
+  }, [chartRange.end, chartRange.start, chartTypeFilter, expenses]);
 
   const v = pickVariants(shouldReduceMotion);
 
@@ -424,7 +528,7 @@ export default function ExpensesClient({
             {/* Info cards */}
             <motion.section
               variants={v.fadeUp}
-              className="grid gap-4 sm:grid-cols-3"
+              className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
             >
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
                 <p className="text-xs uppercase text-ink-muted">
@@ -434,7 +538,9 @@ export default function ExpensesClient({
                   {currencyFormatter.format(selectedExpense.amount)}
                 </p>
                 <p className="text-xs text-ink-muted">
-                  {selectedExpense.recurrence === "ANNUAL"
+                  {selectedExpense.recurrence === "ONE_TIME"
+                    ? t("expenses.singleCharge")
+                    : selectedExpense.recurrence === "ANNUAL"
                     ? `~${currencyFormatter.format(selectedExpense.amount / 12)}${t("expenses.perMonth")}`
                     : `~${currencyFormatter.format(selectedExpense.amount * 12)}${t("expenses.perYear")}`}
                 </p>
@@ -446,7 +552,9 @@ export default function ExpensesClient({
                 <p className="mt-2 text-2xl font-semibold">
                   {selectedExpense.recurrence === "MONTHLY"
                     ? t("expenses.monthly")
-                    : t("expenses.annual")}
+                    : selectedExpense.recurrence === "ANNUAL"
+                      ? t("expenses.annual")
+                      : t("expenses.oneTime")}
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
@@ -455,6 +563,24 @@ export default function ExpensesClient({
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
                   {dateFormatter.format(new Date(selectedExpense.startDate))}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
+                <p className="text-xs uppercase text-ink-muted">
+                  {t("expenses.invoiceCount")}
+                </p>
+                <p className="mt-2 text-2xl font-semibold">
+                  {selectedExpense.invoices.length}
+                </p>
+                <p className="text-xs text-ink-muted">
+                  {selectedExpense.invoices[0]
+                    ? t("expenses.lastInvoiceDate").replace(
+                        "__date__",
+                        dateFormatter.format(
+                          new Date(selectedExpense.invoices[0].billedAt)
+                        )
+                      )
+                    : t("expenses.noInvoicesYet")}
                 </p>
               </div>
             </motion.section>
@@ -473,131 +599,124 @@ export default function ExpensesClient({
               </motion.section>
             )}
 
-            {/* Receipts */}
+            {/* Invoices */}
             <motion.section variants={v.fadeUp} className="space-y-4">
-              <p className="text-sm font-semibold">
-                {t("expenses.receipts")}
-              </p>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold">{t("expenses.invoices")}</p>
+                  <p className="text-xs text-ink-muted">
+                    {selectedExpense.recurrence === "ONE_TIME"
+                      ? t("expenses.oneTimeInvoiceSectionHint")
+                      : t("expenses.invoiceSectionHint")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setInvoiceDialogOpen(true)}
+                  className="flex items-center gap-2 self-start rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
+                >
+                  <Plus className="h-4 w-4" />
+                  {selectedExpense.recurrence === "ONE_TIME"
+                    ? t("expenses.addReceipt")
+                    : t("expenses.addInvoice")}
+                </button>
+              </div>
 
-              {/* Drop zone */}
               <input
-                ref={fileInputRef}
+                ref={invoiceFileInputRef}
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png"
-                onChange={handleFileInput}
                 className="hidden"
+                onChange={(event) => {
+                  queueInvoiceFile(event.target.files?.[0] ?? null);
+                  event.currentTarget.value = "";
+                }}
               />
 
-              <motion.div
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onClick={() => !isUploading && fileInputRef.current?.click()}
-                className="group cursor-pointer"
+              <div
+                onDragEnter={(event) => {
+                  event.preventDefault();
+                  setIsInvoiceDragging(true);
+                }}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  setIsInvoiceDragging(true);
+                }}
+                onDragLeave={(event) => {
+                  event.preventDefault();
+                  const relatedTarget = event.relatedTarget as Node | null;
+                  if (!event.currentTarget.contains(relatedTarget)) {
+                    setIsInvoiceDragging(false);
+                  }
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  setIsInvoiceDragging(false);
+                  queueInvoiceFile(event.dataTransfer.files?.[0] ?? null);
+                }}
+                onClick={() => invoiceFileInputRef.current?.click()}
+                className={`group cursor-pointer rounded-2xl border-2 border-dashed px-4 py-6 text-center transition ${
+                  isInvoiceDragging
+                    ? "border-brand bg-brand/[0.06]"
+                    : "border-line bg-white/45 hover:border-brand/40 hover:bg-brand/[0.02]"
+                }`}
               >
-                <motion.div
-                  animate={{
-                    borderColor: isDragging
-                      ? "rgb(249 115 22)"
-                      : "rgb(229 231 235)",
-                    backgroundColor: isDragging
-                      ? "rgb(249 115 22 / 0.05)"
-                      : "rgb(255 255 255 / 0.5)",
-                    scale: isDragging ? 1.02 : 1,
-                  }}
-                  transition={{ duration: 0.2 }}
-                  className="rounded-2xl border-2 border-dashed p-6 text-center transition-colors group-hover:border-brand/40 group-hover:bg-brand/[0.02]"
-                >
-                  <AnimatePresence mode="wait">
-                    {isUploading ? (
-                      <motion.div
-                        key="uploading"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="flex flex-col items-center"
-                      >
-                        <Loader2 className="h-6 w-6 animate-spin text-brand" />
-                        <p className="mt-2 text-sm font-medium text-brand">
-                          {t("expenses.uploading")}
-                        </p>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="idle"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="flex flex-col items-center"
-                      >
-                        <motion.div
-                          animate={{
-                            y: isDragging ? -4 : 0,
-                            scale: isDragging ? 1.1 : 1,
-                          }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 300,
-                            damping: 20,
-                          }}
-                        >
-                          <Upload
-                            className={`h-6 w-6 transition-colors duration-200 ${
-                              isDragging
-                                ? "text-brand"
-                                : "text-ink-muted/40 group-hover:text-ink-muted/60"
-                            }`}
-                          />
-                        </motion.div>
-                        {isDragging ? (
-                          <motion.p
-                            initial={{ opacity: 0, y: 4 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-2 text-sm font-semibold text-brand"
-                          >
-                            {t("expenses.dropReceiptHere")}
-                          </motion.p>
-                        ) : (
-                          <>
-                            <p className="mt-2 text-sm font-medium text-ink-muted/70">
-                              {t("expenses.dropReceipt")}
-                            </p>
-                            <p className="mt-0.5 text-xs text-ink-muted/50">
-                              PDF, JPG, PNG
-                            </p>
-                          </>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              </motion.div>
+                <div className="flex flex-col items-center gap-2">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+                    <Upload className="h-5 w-5" />
+                  </span>
+                  <p className="text-sm font-medium text-ink">
+                    {isInvoiceDragging
+                      ? t("expenses.dropInvoiceHere")
+                      : t("expenses.dropInvoice")}
+                  </p>
+                  <p className="text-xs text-ink-muted">
+                    {t("expenses.dropInvoiceHint")}
+                  </p>
+                </div>
+              </div>
 
-              {/* Receipt list */}
-              {selectedExpense.receipts.length > 0 ? (
-                <div className="space-y-2">
-                  {selectedExpense.receipts.map((receipt) => (
+              {selectedExpense.invoices.length > 0 ? (
+                <div className="space-y-3">
+                  {selectedExpense.invoices.map((invoice) => (
                     <motion.div
-                      key={receipt.id}
+                      key={invoice.id}
                       variants={v.item}
-                      className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
+                      className="flex flex-col gap-4 rounded-2xl border border-line bg-white/70 px-4 py-4 text-sm sm:flex-row sm:items-start sm:justify-between"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-start gap-3">
                         <FileText className="h-4 w-4 text-ink-muted/60" />
-                        <div>
+                        <div className="space-y-1">
                           <p className="font-medium">
-                            {receipt.fileName ||
-                              receipt.fileUrl.split("/").pop()}
+                            {invoice.invoiceNumber ||
+                              invoice.fileName ||
+                              t("expenses.invoiceFallbackName")}
                           </p>
-                          <p className="text-xs text-ink-muted">
-                            {dateFormatter.format(new Date(receipt.createdAt))}
-                          </p>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
+                            <span>
+                              {dateFormatter.format(new Date(invoice.billedAt))}
+                            </span>
+                            {invoice.amount !== null && (
+                              <span className="font-medium text-ink">
+                                {currencyFormatter.format(invoice.amount)}
+                              </span>
+                            )}
+                            {invoice.fileName && (
+                              <span className="truncate">
+                                {invoice.fileName}
+                              </span>
+                            )}
+                          </div>
+                          {invoice.notes && (
+                            <p className="whitespace-pre-wrap text-xs text-ink-muted">
+                              {invoice.notes}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <a
-                          href={receipt.fileUrl}
+                          href={invoice.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
@@ -609,12 +728,12 @@ export default function ExpensesClient({
                           type="button"
                           onClick={async () => {
                             const ok = await confirm({
-                              title: t("expenses.receipts"),
-                              description: t("expenses.deleteReceiptConfirm"),
+                              title: t("expenses.invoices"),
+                              description: t("expenses.deleteInvoiceConfirm"),
                               confirmLabel: tc("delete"),
                               cancelLabel: tc("cancel"),
                             });
-                            if (ok) executeDeleteReceipt({ id: receipt.id });
+                            if (ok) executeDeleteInvoice({ id: invoice.id });
                           }}
                           className="rounded-lg p-1.5 text-ink-muted transition hover:bg-red-50 hover:text-red-600"
                         >
@@ -625,11 +744,9 @@ export default function ExpensesClient({
                   ))}
                 </div>
               ) : (
-                !isUploading && (
-                  <p className="text-center text-xs text-ink-muted">
-                    {t("expenses.noReceipts")}
-                  </p>
-                )
+                <p className="rounded-2xl border border-dashed border-line bg-white/40 px-4 py-8 text-center text-xs text-ink-muted">
+                  {t("expenses.noInvoices")}
+                </p>
               )}
             </motion.section>
 
@@ -647,6 +764,15 @@ export default function ExpensesClient({
           onOpenChange={setDialogOpen}
           onSuccess={handleDialogSuccess}
           editingExpense={editingExpense}
+        />
+        <ExpenseInvoiceDialog
+          open={invoiceDialogOpen}
+          onOpenChange={handleInvoiceDialogOpenChange}
+          onSuccess={handleInvoiceDialogSuccess}
+          expenseId={selectedExpense.id}
+          expenseName={selectedExpense.name}
+          defaultAmount={selectedExpense.amount}
+          initialFile={pendingInvoiceFile}
         />
       </main>
     );
@@ -766,7 +892,7 @@ export default function ExpensesClient({
               {expenses.map((expense) => (
                 <motion.div key={expense.id} variants={v.item}>
                 <div
-                  onClick={() => fetchExpenseDetail(expense.id)}
+                  onClick={() => router.push(`/dashboard/expenses/${expense.id}`)}
                   className="group flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 transition hover:shadow-md"
                 >
                   <div className="flex items-center gap-3">
@@ -787,9 +913,11 @@ export default function ExpensesClient({
                         <span className="text-xs text-ink-muted">
                           {expense.recurrence === "MONTHLY"
                             ? t("expenses.monthly")
-                            : t("expenses.annual")}
+                            : expense.recurrence === "ANNUAL"
+                              ? t("expenses.annual")
+                              : t("expenses.oneTime")}
                         </span>
-                        {!expense.isActive && (
+                        {!expense.isActive && expense.recurrence !== "ONE_TIME" && (
                           <span className="rounded-full bg-ink-soft px-2 py-0.5 text-[10px] font-medium text-ink-muted">
                             {t("expenses.inactive")}
                           </span>
@@ -803,7 +931,9 @@ export default function ExpensesClient({
                         {currencyFormatter.format(expense.amount)}
                       </p>
                       <p className="text-[10px] text-ink-muted">
-                        {expense.recurrence === "ANNUAL"
+                        {expense.recurrence === "ONE_TIME"
+                          ? t("expenses.singleCharge")
+                          : expense.recurrence === "ANNUAL"
                           ? `~${currencyFormatter.format(expense.amount / 12)}${t("expenses.perMonth")}`
                           : `~${currencyFormatter.format(expense.amount * 12)}${t("expenses.perYear")}`}
                       </p>
@@ -831,21 +961,91 @@ export default function ExpensesClient({
             </motion.section>
           )}
 
-          {/* Donut chart — category breakdown */}
-          {donutSegments.length > 0 && (
+          {/* Filtered spend chart */}
+          {!isLoading && (
             <motion.section variants={v.fadeUp}>
               <div className="rounded-3xl border border-line bg-white/80 p-6">
-                <p className="mb-6 text-sm font-semibold">
-                  {t("expenses.byCategory")}
-                </p>
-                <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr]">
-                  {/* Donut SVG */}
+                <div className="mb-6 flex flex-col gap-4">
+                  <div>
+                    <p className="text-sm font-semibold">
+                      {t("expenses.filteredChartTitle")}
+                    </p>
+                    <p className="text-xs text-ink-muted">
+                      {t("expenses.filteredChartSubtitle").replace(
+                        "__period__",
+                        chartPeriodLabel
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-wrap gap-2">
+                      {(
+                        [
+                          ["ALL", t("expenses.filters.type.all")],
+                          [
+                            "SUBSCRIPTIONS",
+                            t("expenses.filters.type.subscriptions"),
+                          ],
+                          ["ONE_TIME", t("expenses.filters.type.oneTime")],
+                        ] as const
+                      ).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setChartTypeFilter(value)}
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                            chartTypeFilter === value
+                              ? "bg-ink text-white"
+                              : "bg-white text-ink-muted hover:bg-ink-soft hover:text-ink"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {(
+                        [
+                          [
+                            "LAST_90_DAYS",
+                            t("expenses.filters.period.last90Days"),
+                          ],
+                          [
+                            "THIS_MONTH",
+                            t("expenses.filters.period.thisMonth"),
+                          ],
+                          [
+                            "THIS_YEAR",
+                            t("expenses.filters.period.thisYear"),
+                          ],
+                          ["PREVIOUS_YEAR", String(previousYear)],
+                        ] as const
+                      ).map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setChartPeriodFilter(value)}
+                          className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                            chartPeriodFilter === value
+                              ? "bg-brand text-white"
+                              : "bg-white text-ink-muted hover:bg-brand/10 hover:text-brand"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {chartSegments.segments.length > 0 ? (
+                  <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr]">
                   <div className="relative mx-auto h-[200px] w-[200px]">
                     <svg
                       viewBox="0 0 200 200"
                       className="h-full w-full -rotate-90"
                     >
-                      {donutSegments.map((seg, i) => (
+                      {chartSegments.segments.map((seg, i) => (
                         <motion.circle
                           key={seg.name}
                           cx="100"
@@ -876,17 +1076,17 @@ export default function ExpensesClient({
                     {/* Center text */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <p className="text-lg font-bold">
-                        {currencyFormatter.format(monthlyTotal)}
+                        {currencyFormatter.format(chartSegments.total)}
                       </p>
                       <p className="text-xs text-ink-muted">
-                        {t("expenses.perMonth")}
+                        {chartPeriodLabel}
                       </p>
                     </div>
                   </div>
 
                   {/* Legend */}
                   <div className="space-y-3">
-                    {donutSegments.map((seg) => (
+                    {chartSegments.segments.map((seg) => (
                       <div
                         key={seg.name}
                         className="flex items-center justify-between"
@@ -900,10 +1100,7 @@ export default function ExpensesClient({
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-sm font-medium">
-                            {currencyFormatter.format(seg.monthlyAmount)}
-                            <span className="text-xs font-normal text-ink-muted">
-                              {t("expenses.perMonth")}
-                            </span>
+                            {currencyFormatter.format(seg.totalAmount)}
                           </span>
                           <span className="w-10 text-right text-xs text-ink-muted">
                             {seg.pct}%
@@ -912,7 +1109,12 @@ export default function ExpensesClient({
                       </div>
                     ))}
                   </div>
-                </div>
+                  </div>
+                ) : (
+                  <p className="rounded-2xl border border-dashed border-line bg-white/40 px-4 py-8 text-center text-sm text-ink-muted">
+                    {t("expenses.filteredChartEmpty")}
+                  </p>
+                )}
               </div>
             </motion.section>
           )}

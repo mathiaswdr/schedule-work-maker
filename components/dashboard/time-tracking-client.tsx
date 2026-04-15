@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { pickVariants } from "@/lib/motion-variants";
@@ -11,10 +12,7 @@ import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
 import TimeCard from "@/components/dashboard/time-card";
 import LiveTimer from "@/components/dashboard/live-timer";
-import SessionEditDialog from "@/components/dashboard/session-edit-dialog";
-import InvoiceFormDialog, {
-  type InvoiceDraftDefaults,
-} from "@/components/dashboard/invoice-form-dialog";
+import type { InvoiceDraftDefaults } from "@/components/dashboard/invoice-form-dialog";
 import {
   Select,
   SelectContent,
@@ -22,6 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+const SessionEditDialog = dynamic(
+  () => import("@/components/dashboard/session-edit-dialog")
+);
+const InvoiceFormDialog = dynamic(
+  () => import("@/components/dashboard/invoice-form-dialog")
+);
 
 type SessionStatus = "RUNNING" | "PAUSED" | "ENDED";
 
@@ -140,6 +145,7 @@ export default function TimeTrackingClient({
   const [timelineExpanded, setTimelineExpanded] = useState(false);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const [lastEndedSession, setLastEndedSession] = useState<NonNullable<SessionItem> | null>(null);
+  const lastSilentRefreshAtRef = useRef(0);
 
   const timeFormatter = useMemo(() => {
     return new Intl.DateTimeFormat(locale, {
@@ -194,17 +200,17 @@ export default function TimeTrackingClient({
       .catch(() => null);
   }, [hasInitialClients, hasInitialProjects]);
 
-  // Refetch projects when client filter changes
-  useEffect(() => {
-    if (selectedClientId === null) return;
-    fetch(`/api/projects?clientId=${selectedClientId}`, { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => setProjects(d.projects))
-      .catch(() => null);
-  }, [selectedClientId]);
-
   const refreshStatus = useCallback(
     async ({ silent = false }: { silent?: boolean } = {}) => {
+      const now = Date.now();
+      if (silent && now - lastSilentRefreshAtRef.current < 4000) {
+        return;
+      }
+
+      if (silent) {
+        lastSilentRefreshAtRef.current = now;
+      }
+
       setIsRefreshing(true);
       try {
         await fetchStatus();
@@ -256,6 +262,13 @@ export default function TimeTrackingClient({
   const recentSessions = data?.recentSessions ?? [];
   const breaks = useMemo(() => session?.breaks ?? [], [session?.breaks]);
   const isSessionPaused = session?.status === "PAUSED";
+  const availableProjects = useMemo(() => {
+    if (!selectedClientId) {
+      return projects;
+    }
+
+    return projects.filter((project) => project.client?.id === selectedClientId);
+  }, [projects, selectedClientId]);
 
   useEffect(() => {
     const syncOnVisibility = () => {
@@ -611,7 +624,7 @@ export default function TimeTrackingClient({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">{t("timer.noProject")}</SelectItem>
-                      {projects.map((p) => (
+                      {availableProjects.map((p) => (
                         <SelectItem key={p.id} value={p.id}>
                           {p.name}
                         </SelectItem>
@@ -981,10 +994,10 @@ export default function TimeTrackingClient({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">{t("timer.noProject")}</SelectItem>
-                        {projects.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {p.name}
-                          </SelectItem>
+                      {availableProjects.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name}
+                        </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

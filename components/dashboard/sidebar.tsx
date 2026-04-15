@@ -178,7 +178,6 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                               <Link
                                 key={child.href}
                                 href={child.href}
-                                prefetch={false}
                                 className={`block rounded-2xl border px-3 py-2 text-sm transition ${
                                   childActive
                                     ? "border-line-strong bg-white text-ink"
@@ -200,7 +199,6 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  prefetch={false}
                   className="block"
                 >
                   <motion.div
@@ -311,7 +309,6 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                                     <Link
                                       key={child.href}
                                       href={child.href}
-                                      prefetch={false}
                                       onClick={() => setMoreOpen(false)}
                                       className={`block rounded-2xl px-3 py-2 text-sm transition-colors ${
                                         childActive
@@ -335,7 +332,6 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      prefetch={false}
                       onClick={() => setMoreOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
                         active
@@ -371,7 +367,7 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: EASE, delay: 0.2 }}
+          transition={{ duration: 0.25, ease: EASE }}
           className="flex items-center justify-around rounded-full border border-line bg-panel px-1 py-1 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.1)]"
         >
           {mobileMainItems.map((item) => {
@@ -382,14 +378,11 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
               <Link
                 key={item.href}
                 href={item.href}
-                prefetch={false}
                 className="relative flex flex-1 flex-col items-center justify-center py-2"
               >
                 {active && (
-                  <motion.div
-                    layoutId="mobile-nav-active"
+                  <span
                     className="absolute inset-0 m-0.5 rounded-full bg-brand/10 shadow-[0_2px_12px_-4px_rgba(249,115,22,0.25)]"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
                 <span className="relative z-10 flex flex-col items-center gap-0.5">
@@ -417,10 +410,8 @@ export default function DashboardSidebar({ userPlan }: { userPlan: PlanId }) {
             className="relative flex flex-1 flex-col items-center justify-center py-2"
           >
             {(isMoreActive && !moreOpen) && (
-              <motion.div
-                layoutId="mobile-nav-active"
+              <span
                 className="absolute inset-0 m-0.5 rounded-full bg-brand/10 shadow-[0_2px_12px_-4px_rgba(249,115,22,0.25)]"
-                transition={{ type: "spring", stiffness: 380, damping: 30 }}
               />
             )}
             <span className="relative z-10 flex flex-col items-center gap-0.5">

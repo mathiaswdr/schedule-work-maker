@@ -1,15 +1,21 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
 import { pickVariants } from "@/lib/motion-variants";
 import { ArrowLeft, FileSpreadsheet, FileText, FolderKanban, Mail, Pencil, Plus, Trash2, Users } from "lucide-react";
-import ClientFormDialog from "@/components/dashboard/client-form-dialog";
-import ClientImportDialog from "@/components/dashboard/client-import-dialog";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
+
+const ClientFormDialog = dynamic(
+  () => import("@/components/dashboard/client-form-dialog")
+);
+const ClientImportDialog = dynamic(
+  () => import("@/components/dashboard/client-import-dialog")
+);
 
 type ClientItem = {
   id: string;

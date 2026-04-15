@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -20,8 +21,15 @@ import { BusinessProfileSchema } from "@/types/business-profile-schema";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { upsertBusinessProfile } from "@/server/actions/business-profile";
-import { CloudinaryUploadButton } from "@/components/ui/cloudinary-upload-button";
 import { EASE } from "@/lib/motion-variants";
+
+const CloudinaryUploadButton = dynamic(
+  () =>
+    import("@/components/ui/cloudinary-upload-button").then(
+      (module) => module.CloudinaryUploadButton
+    ),
+  { ssr: false }
+);
 
 type BusinessProfileData = {
   companyName: string | null;

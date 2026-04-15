@@ -28,7 +28,12 @@ export class WorkSessionTransitionError extends Error {
 
 export const getSessionUserId = cache(requireUserId);
 
-export async function getActiveSession(userId: string) {
+const DAY_COUNT = 5;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export const getActiveSession = cache(async function getActiveSession(
+  userId: string
+) {
   return prisma.workSession.findFirst({
     where: {
       userId,
@@ -43,7 +48,7 @@ export async function getActiveSession(userId: string) {
       project: { select: { id: true, name: true } },
     },
   });
-}
+});
 
 export function getBreakMs(
   breaks: { startedAt: Date; endedAt: Date | null }[],
@@ -76,7 +81,9 @@ const startOfWeek = (date: Date) => {
   return base;
 };
 
-export async function getWorkSummary(userId: string): Promise<WorkSummary> {
+export const getWorkSummary = cache(async function getWorkSummary(
+  userId: string
+): Promise<WorkSummary> {
   const now = new Date();
   const todayStart = startOfDay(now);
   const tomorrowStart = new Date(todayStart);
@@ -105,27 +112,17 @@ export async function getWorkSummary(userId: string): Promise<WorkSummary> {
   let breakMs = 0;
   let breakCount = 0;
 
-  const getBreaksForDay = (
-    breaks: { startedAt: Date; endedAt: Date | null }[],
-    dayStart: Date,
-    dayEnd: Date
-  ) => {
-    return breaks.reduce(
-      (acc, pause) => {
-        if (pause.startedAt < dayStart || pause.startedAt >= dayEnd) {
-          return acc;
-        }
-        const end = pause.endedAt ?? now;
-        const cappedEnd = end > dayEnd ? dayEnd : end;
-        const duration = Math.max(cappedEnd.getTime() - pause.startedAt.getTime(), 0);
-        return {
-          breakMs: acc.breakMs + duration,
-          breakCount: acc.breakCount + 1,
-        };
-      },
-      { breakMs: 0, breakCount: 0 }
-    );
-  };
+  const weekDays = Array.from({ length: DAY_COUNT }, (_, index) => {
+    const dayStart = new Date(weekStart);
+    dayStart.setDate(weekStart.getDate() + index);
+
+    return {
+      date: dayStart.toISOString(),
+      valueMs: 0,
+      breakMs: 0,
+      breakCount: 0,
+    };
+  });
 
   for (const session of sessions) {
     const sessionMs = getSessionMs(session, session.breaks, now);
@@ -140,41 +137,39 @@ export async function getWorkSummary(userId: string): Promise<WorkSummary> {
       }
       breakMs += getBreakMs(session.breaks, now);
     }
-  }
 
-  const weekDays = Array.from({ length: 5 }, (_, index) => {
+    const sessionDay = startOfDay(session.startedAt);
+    const dayIndex = Math.floor(
+      (sessionDay.getTime() - weekStart.getTime()) / DAY_MS
+    );
+
+    if (dayIndex < 0 || dayIndex >= DAY_COUNT) {
+      continue;
+    }
+
     const dayStart = new Date(weekStart);
-    dayStart.setDate(weekStart.getDate() + index);
+    dayStart.setDate(weekStart.getDate() + dayIndex);
     const dayEnd = new Date(dayStart);
     dayEnd.setDate(dayStart.getDate() + 1);
+    const dayBucket = weekDays[dayIndex];
+    dayBucket.valueMs += sessionMs;
 
-    const daySessions = sessions.filter(
-      (session) => session.startedAt >= dayStart && session.startedAt < dayEnd
-    );
+    for (const pause of session.breaks) {
+      if (pause.startedAt < dayStart || pause.startedAt >= dayEnd) {
+        continue;
+      }
 
-    const valueMs = daySessions.reduce(
-      (total, session) => total + getSessionMs(session, session.breaks, now),
-      0
-    );
+      const pauseEnd = pause.endedAt ?? now;
+      const cappedEnd = pauseEnd > dayEnd ? dayEnd : pauseEnd;
+      const pauseDuration = Math.max(
+        cappedEnd.getTime() - pause.startedAt.getTime(),
+        0
+      );
 
-    const breakStats = daySessions.reduce(
-      (acc, session) => {
-        const stats = getBreaksForDay(session.breaks, dayStart, dayEnd);
-        return {
-          breakMs: acc.breakMs + stats.breakMs,
-          breakCount: acc.breakCount + stats.breakCount,
-        };
-      },
-      { breakMs: 0, breakCount: 0 }
-    );
-
-    return {
-      date: dayStart.toISOString(),
-      valueMs,
-      breakMs: breakStats.breakMs,
-      breakCount: breakStats.breakCount,
-    };
-  });
+      dayBucket.breakMs += pauseDuration;
+      dayBucket.breakCount += 1;
+    }
+  }
 
   return {
     todayMs,
@@ -183,9 +178,12 @@ export async function getWorkSummary(userId: string): Promise<WorkSummary> {
     breakCount,
     weekDays,
   };
-}
+});
 
-export async function getRecentSessions(userId: string, limit = 5) {
+export const getRecentSessions = cache(async function getRecentSessions(
+  userId: string,
+  limit = 5
+) {
   return prisma.workSession.findMany({
     where: { userId, status: WorkSessionStatus.ENDED },
     orderBy: { startedAt: "desc" },
@@ -196,9 +194,9 @@ export async function getRecentSessions(userId: string, limit = 5) {
       project: { select: { id: true, name: true } },
     },
   });
-}
+});
 
-export async function getEndedSessionMonthStats(
+export const getEndedSessionMonthStats = cache(async function getEndedSessionMonthStats(
   userId: string
 ): Promise<EndedSessionMonthStats> {
   const now = new Date();
@@ -228,7 +226,7 @@ export async function getEndedSessionMonthStats(
     ),
     sessionCount: monthSessions.length,
   };
-}
+});
 
 export async function startSession(
   userId: string,

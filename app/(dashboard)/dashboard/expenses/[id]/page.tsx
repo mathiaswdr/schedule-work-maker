@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { DM_Serif_Display } from "next/font/google";
 import { prisma } from "@/server/prisma";
 import ExpensesClient from "@/components/dashboard/expenses-client";
@@ -11,30 +12,34 @@ const display = DM_Serif_Display({
   display: "swap",
 });
 
-export default async function DashboardExpensesPage() {
+export default async function DashboardExpenseDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const { userId, userPlan, currency } = await getDashboardViewer();
 
-  const initialExpenses = await prisma.expense.findMany({
-    where: { userId },
+  const expense = await prisma.expense.findFirst({
+    where: { id, userId },
     include: {
       invoices: {
-        select: {
-          id: true,
-          amount: true,
-          billedAt: true,
-        },
         orderBy: [{ billedAt: "desc" }, { createdAt: "desc" }],
       },
     },
-    orderBy: { createdAt: "desc" },
   });
+
+  if (!expense) {
+    notFound();
+  }
 
   return (
     <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="expenses">
       <ExpensesClient
         displayClassName={display.className}
         currency={currency}
-        initialExpenses={serializeForClient(initialExpenses)}
+        initialExpenseId={id}
+        initialExpenseDetail={serializeForClient(expense)}
       />
     </PlanGate>
   );

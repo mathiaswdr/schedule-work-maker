@@ -1,0 +1,1 @@
+ALTER TYPE "ExpenseRecurrence" ADD VALUE IF NOT EXISTS 'ONE_TIME';

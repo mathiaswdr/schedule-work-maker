@@ -1,14 +1,14 @@
+import { Suspense } from "react";
 import { DM_Serif_Display } from "next/font/google";
 import { prisma } from "@/server/prisma";
 import {
   getActiveSession,
-  getSessionUserId,
   getWorkSummary,
 } from "@/server/work-sessions";
-import { auth } from "@/server/auth";
 import StatsClient from "@/components/dashboard/stats-client";
 import PlanGate from "@/components/dashboard/plan-gate";
-import { type PlanId } from "@/lib/plans";
+import DashboardPageFallback from "@/components/dashboard/dashboard-page-fallback";
+import { getDashboardViewer } from "@/server/dashboard-viewer";
 
 const display = DM_Serif_Display({
   subsets: ["latin"],
@@ -28,19 +28,13 @@ const getWeekNumber = (date: Date) => {
   );
 };
 
-export default async function DashboardProductivityStatsPage() {
-  const session = await auth();
-  const userPlan = (session?.user?.plan ?? "FREE") as PlanId;
-  const userId = await getSessionUserId();
+async function ProductivityStatsContent() {
+  const { userId, userPlan, currency, hourlyRate } = await getDashboardViewer();
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [user, summary, activeSession, invoiceAgg] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: { currency: true, hourlyRate: true },
-    }),
+  const [summary, activeSession, invoiceAgg] = await Promise.all([
     getWorkSummary(userId),
     getActiveSession(userId),
     prisma.invoice.aggregate({
@@ -49,8 +43,6 @@ export default async function DashboardProductivityStatsPage() {
     }),
   ]);
 
-  const currency = user?.currency ?? "CHF";
-  const hourlyRate = user?.hourlyRate ?? 0;
   const invoiceRevenue = invoiceAgg._sum.total ?? 0;
 
   const weekDays = summary.weekDays.length
@@ -111,5 +103,13 @@ export default async function DashboardProductivityStatsPage() {
         timezone={timezone}
       />
     </PlanGate>
+  );
+}
+
+export default function DashboardProductivityStatsPage() {
+  return (
+    <Suspense fallback={<DashboardPageFallback statsCards={6} sectionBlocks={2} />}>
+      <ProductivityStatsContent />
+    </Suspense>
   );
 }

@@ -1,10 +1,8 @@
 import { Space_Grotesk } from "next/font/google";
 import DashboardSidebar from "@/components/dashboard/sidebar";
 import BusinessProfilePrompt from "@/components/dashboard/business-profile-prompt";
-import { auth } from "@/server/auth";
-import { type PlanId } from "@/lib/plans";
 import { prisma } from "@/server/prisma";
-import { redirect } from "next/navigation";
+import { getDashboardViewer } from "@/server/dashboard-viewer";
 
 const body = Space_Grotesk({
   subsets: ["latin"],
@@ -26,13 +24,8 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const { session, userPlan } = await getDashboardViewer();
 
-  if (!session?.user?.id) {
-    redirect("/auth/login");
-  }
-
-  const userPlan = (session?.user?.plan ?? "FREE") as PlanId;
   const businessProfile = await prisma.businessProfile.findUnique({
     where: { userId: session.user.id },
     select: {

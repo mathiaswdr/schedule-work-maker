@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -19,9 +20,16 @@ import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { deleteInvoice, updateInvoiceStatus } from "@/server/actions/invoices";
 import { useConfirm } from "@/components/ui/confirm-dialog";
-import InvoiceFormDialog from "@/components/dashboard/invoice-form-dialog";
-import UploadInvoiceDialog from "@/components/dashboard/upload-invoice-dialog";
-import QrBillDialog from "@/components/dashboard/qr-bill-dialog";
+
+const InvoiceFormDialog = dynamic(
+  () => import("@/components/dashboard/invoice-form-dialog")
+);
+const UploadInvoiceDialog = dynamic(
+  () => import("@/components/dashboard/upload-invoice-dialog")
+);
+const QrBillDialog = dynamic(
+  () => import("@/components/dashboard/qr-bill-dialog")
+);
 
 type InvoiceItem = {
   id: string;

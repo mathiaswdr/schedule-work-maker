@@ -1,3 +1,6 @@
+import { cache } from "react";
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/server/prisma";
 
 export type BillingRevenuePoint = {
@@ -73,24 +76,67 @@ const createRevenuePoint = (key: string): BillingRevenuePoint => ({
   count: 0,
 });
 
-export async function getBillingStats(userId: string): Promise<BillingStats> {
-  const invoices = await prisma.invoice.findMany({
-    where: { userId },
-    orderBy: { issueDate: "asc" },
-    select: {
-      total: true,
-      status: true,
-      issueDate: true,
-      clientId: true,
-      clientName: true,
-      projectId: true,
-      project: { select: { name: true } },
-    },
-  });
+type RevenuePointRow = {
+  key: string;
+  total: number | string | null;
+  paid: number | string | null;
+  pending: number | string | null;
+  count: number | bigint;
+};
 
+type EntityStatRow = {
+  name: string | null;
+  total: number | string | null;
+  paid: number | string | null;
+  count: number | bigint;
+};
+
+const toNumber = (value: number | string | null | undefined) =>
+  Number(value ?? 0);
+
+const toCount = (value: number | bigint) => Number(value);
+
+const mergeRevenuePoints = (
+  points: BillingRevenuePoint[],
+  rows: RevenuePointRow[]
+) => {
+  const byKey = new Map(points.map((point) => [point.key, point]));
+
+  for (const row of rows) {
+    const point = byKey.get(row.key);
+    if (!point) {
+      continue;
+    }
+
+    point.total = toNumber(row.total);
+    point.paid = toNumber(row.paid);
+    point.pending = toNumber(row.pending);
+    point.count = toCount(row.count);
+  }
+
+  return points;
+};
+
+const toEntityStat = (row: EntityStatRow): BillingEntityStat => ({
+  name: row.name ?? "__NO_CLIENT__",
+  total: toNumber(row.total),
+  paid: toNumber(row.paid),
+  count: toCount(row.count),
+});
+
+export const getBillingStats = cache(async function getBillingStats(
+  userId: string
+): Promise<BillingStats> {
   const now = new Date();
   const monthStart = startOfMonth(now);
   const yearStart = startOfYear(now);
+  const dayStart = startOfDay(now);
+  const dailyWindowStart = new Date(dayStart);
+  dailyWindowStart.setDate(dayStart.getDate() - 13);
+  const monthlyWindowStart = startOfMonth(
+    new Date(now.getFullYear(), now.getMonth() - 11, 1)
+  );
+  const yearlyWindowStart = new Date(now.getFullYear() - 4, 0, 1);
 
   const dailyPoints = Array.from({ length: 14 }, (_, index) => {
     const date = startOfDay(now);
@@ -106,138 +152,170 @@ export async function getBillingStats(userId: string): Promise<BillingStats> {
     createRevenuePoint(String(now.getFullYear() - (4 - index)))
   );
 
-  const dailyMap = new Map(dailyPoints.map((point) => [point.key, point]));
-  const monthlyMap = new Map(monthlyPoints.map((point) => [point.key, point]));
-  const yearlyMap = new Map(yearlyPoints.map((point) => [point.key, point]));
+  const [
+    summaryAgg,
+    paidAgg,
+    monthAgg,
+    yearAgg,
+    statusRows,
+    dailyRows,
+    monthlyRows,
+    yearlyRows,
+    topClientRows,
+    topProjectRows,
+    clientCountRows,
+    clientPaymentPoints,
+  ] = await Promise.all([
+    prisma.invoice.aggregate({
+      where: { userId },
+      _sum: { total: true },
+      _count: { id: true },
+    }),
+    prisma.invoice.aggregate({
+      where: { userId, status: "PAID" },
+      _sum: { total: true },
+    }),
+    prisma.invoice.aggregate({
+      where: { userId, issueDate: { gte: monthStart } },
+      _sum: { total: true },
+    }),
+    prisma.invoice.aggregate({
+      where: { userId, issueDate: { gte: yearStart } },
+      _sum: { total: true },
+    }),
+    prisma.invoice.groupBy({
+      by: ["status"],
+      where: { userId },
+      _sum: { total: true },
+      _count: { status: true },
+    }),
+    prisma.$queryRaw<RevenuePointRow[]>(Prisma.sql`
+      SELECT
+        TO_CHAR(DATE_TRUNC('day', "issueDate"), 'YYYY-MM-DD') AS key,
+        SUM("total") AS total,
+        SUM(CASE WHEN "status" = 'PAID' THEN "total" ELSE 0 END) AS paid,
+        SUM(CASE WHEN "status" <> 'PAID' THEN "total" ELSE 0 END) AS pending,
+        COUNT(*)::int AS count
+      FROM "Invoice"
+      WHERE "userId" = ${userId}
+        AND "issueDate" >= ${dailyWindowStart}
+      GROUP BY 1
+    `),
+    prisma.$queryRaw<RevenuePointRow[]>(Prisma.sql`
+      SELECT
+        TO_CHAR(DATE_TRUNC('month', "issueDate"), 'YYYY-MM') AS key,
+        SUM("total") AS total,
+        SUM(CASE WHEN "status" = 'PAID' THEN "total" ELSE 0 END) AS paid,
+        SUM(CASE WHEN "status" <> 'PAID' THEN "total" ELSE 0 END) AS pending,
+        COUNT(*)::int AS count
+      FROM "Invoice"
+      WHERE "userId" = ${userId}
+        AND "issueDate" >= ${monthlyWindowStart}
+      GROUP BY 1
+    `),
+    prisma.$queryRaw<RevenuePointRow[]>(Prisma.sql`
+      SELECT
+        TO_CHAR(DATE_TRUNC('year', "issueDate"), 'YYYY') AS key,
+        SUM("total") AS total,
+        SUM(CASE WHEN "status" = 'PAID' THEN "total" ELSE 0 END) AS paid,
+        SUM(CASE WHEN "status" <> 'PAID' THEN "total" ELSE 0 END) AS pending,
+        COUNT(*)::int AS count
+      FROM "Invoice"
+      WHERE "userId" = ${userId}
+        AND "issueDate" >= ${yearlyWindowStart}
+      GROUP BY 1
+    `),
+    prisma.$queryRaw<EntityStatRow[]>(Prisma.sql`
+      SELECT
+        MAX(COALESCE(NULLIF(BTRIM("clientName"), ''), '__NO_CLIENT__')) AS name,
+        SUM("total") AS total,
+        SUM(CASE WHEN "status" = 'PAID' THEN "total" ELSE 0 END) AS paid,
+        COUNT(*)::int AS count
+      FROM "Invoice"
+      WHERE "userId" = ${userId}
+      GROUP BY COALESCE(
+        "clientId",
+        CONCAT('snapshot:', LOWER(COALESCE(NULLIF(BTRIM("clientName"), ''), '__NO_CLIENT__')))
+      )
+      ORDER BY SUM("total") DESC
+      LIMIT 5
+    `),
+    prisma.$queryRaw<EntityStatRow[]>(Prisma.sql`
+      SELECT
+        MAX(COALESCE(NULLIF(BTRIM("Project"."name"), ''), '__NO_PROJECT__')) AS name,
+        SUM("Invoice"."total") AS total,
+        SUM(CASE WHEN "Invoice"."status" = 'PAID' THEN "Invoice"."total" ELSE 0 END) AS paid,
+        COUNT(*)::int AS count
+      FROM "Invoice"
+      LEFT JOIN "Project" ON "Project"."id" = "Invoice"."projectId"
+      WHERE "Invoice"."userId" = ${userId}
+      GROUP BY COALESCE(
+        "Invoice"."projectId",
+        CONCAT('snapshot:', LOWER(COALESCE(NULLIF(BTRIM("Project"."name"), ''), '__NO_PROJECT__')))
+      )
+      ORDER BY SUM("Invoice"."total") DESC
+      LIMIT 5
+    `),
+    prisma.$queryRaw<Array<{ count: number | bigint }>>(Prisma.sql`
+      SELECT
+        COUNT(
+          DISTINCT COALESCE(
+            "clientId",
+            CONCAT('snapshot:', LOWER(COALESCE(NULLIF(BTRIM("clientName"), ''), '__NO_CLIENT__')))
+          )
+        )::int AS count
+      FROM "Invoice"
+      WHERE "userId" = ${userId}
+    `),
+    prisma.invoice.findMany({
+      where: { userId },
+      orderBy: { issueDate: "asc" },
+      select: {
+        clientName: true,
+        issueDate: true,
+        total: true,
+        status: true,
+        project: { select: { name: true } },
+      },
+    }),
+  ]);
 
-  const statusMap = new Map<BillingStatusBreakdown["status"], BillingStatusBreakdown>(
-    [
-      ["DRAFT", { status: "DRAFT", total: 0, count: 0 }],
-      ["SENT", { status: "SENT", total: 0, count: 0 }],
-      ["PAID", { status: "PAID", total: 0, count: 0 }],
-    ]
-  );
-
-  const clientTotals = new Map<string, BillingEntityStat>();
-  const projectTotals = new Map<string, BillingEntityStat>();
-
-  let totalInvoiced = 0;
-  let totalPaid = 0;
-  let totalPending = 0;
-  let thisMonthTotal = 0;
-  let thisYearTotal = 0;
-
-  for (const invoice of invoices) {
-    const amount = Number(invoice.total ?? 0);
-    const issueDate = new Date(invoice.issueDate);
-    const isPaid = invoice.status === "PAID";
-
-    totalInvoiced += amount;
-    if (isPaid) {
-      totalPaid += amount;
-    } else {
-      totalPending += amount;
-    }
-
-    if (issueDate >= monthStart) {
-      thisMonthTotal += amount;
-    }
-    if (issueDate >= yearStart) {
-      thisYearTotal += amount;
-    }
-
-    const statusEntry = statusMap.get(invoice.status);
-    if (statusEntry) {
-      statusEntry.total += amount;
-      statusEntry.count += 1;
-    }
-
-    const dayPoint = dailyMap.get(toDayKey(issueDate));
-    if (dayPoint) {
-      dayPoint.total += amount;
-      dayPoint.count += 1;
-      if (isPaid) {
-        dayPoint.paid += amount;
-      } else {
-        dayPoint.pending += amount;
-      }
-    }
-
-    const monthPoint = monthlyMap.get(toMonthKey(issueDate));
-    if (monthPoint) {
-      monthPoint.total += amount;
-      monthPoint.count += 1;
-      if (isPaid) {
-        monthPoint.paid += amount;
-      } else {
-        monthPoint.pending += amount;
-      }
-    }
-
-    const yearPoint = yearlyMap.get(String(issueDate.getFullYear()));
-    if (yearPoint) {
-      yearPoint.total += amount;
-      yearPoint.count += 1;
-      if (isPaid) {
-        yearPoint.paid += amount;
-      } else {
-        yearPoint.pending += amount;
-      }
-    }
-
-    const clientName = invoice.clientName?.trim() || "__NO_CLIENT__";
-    const clientKey = invoice.clientId ?? `snapshot:${clientName.toLowerCase()}`;
-    const clientEntry = clientTotals.get(clientKey) ?? {
-      name: clientName,
-      total: 0,
-      paid: 0,
-      count: 0,
-    };
-    clientEntry.total += amount;
-    clientEntry.count += 1;
-    if (isPaid) {
-      clientEntry.paid += amount;
-    }
-    clientTotals.set(clientKey, clientEntry);
-
-    const projectName = invoice.project?.name?.trim() || "__NO_PROJECT__";
-    const projectKey = invoice.projectId ?? `snapshot:${projectName.toLowerCase()}`;
-    const projectEntry = projectTotals.get(projectKey) ?? {
-      name: projectName,
-      total: 0,
-      paid: 0,
-      count: 0,
-    };
-    projectEntry.total += amount;
-    projectEntry.count += 1;
-    if (isPaid) {
-      projectEntry.paid += amount;
-    }
-    projectTotals.set(projectKey, projectEntry);
-  }
+  const totalInvoiced = toNumber(summaryAgg._sum.total);
+  const totalPaid = toNumber(paidAgg._sum.total);
+  const totalPending = totalInvoiced - totalPaid;
 
   return {
     summary: {
-      thisMonthTotal,
-      thisYearTotal,
+      thisMonthTotal: toNumber(monthAgg._sum.total),
+      thisYearTotal: toNumber(yearAgg._sum.total),
       totalInvoiced,
       totalPaid,
       totalPending,
-      averageInvoice: invoices.length ? totalInvoiced / invoices.length : 0,
-      invoiceCount: invoices.length,
-      clientsCount: clientTotals.size,
+      averageInvoice: summaryAgg._count.id ? totalInvoiced / summaryAgg._count.id : 0,
+      invoiceCount: summaryAgg._count.id,
+      clientsCount: toCount(clientCountRows[0]?.count ?? 0),
     },
-    dailyPoints,
-    monthlyPoints,
-    yearlyPoints,
-    statusBreakdown: Array.from(statusMap.values()),
-    topClients: Array.from(clientTotals.values())
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5),
-    topProjects: Array.from(projectTotals.values())
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 5),
-    clientPaymentPoints: invoices.map((invoice) => ({
+    dailyPoints: mergeRevenuePoints(dailyPoints, dailyRows),
+    monthlyPoints: mergeRevenuePoints(monthlyPoints, monthlyRows),
+    yearlyPoints: mergeRevenuePoints(yearlyPoints, yearlyRows),
+    statusBreakdown: (["DRAFT", "SENT", "PAID"] as const).map((status) => {
+      const row = statusRows.find((entry) => entry.status === status);
+
+      return {
+        status,
+        total: toNumber(row?._sum.total),
+        count: row?._count.status ?? 0,
+      };
+    }),
+    topClients: topClientRows.map((row) => ({
+      ...toEntityStat(row),
+      name: row.name ?? "__NO_CLIENT__",
+    })),
+    topProjects: topProjectRows.map((row) => ({
+      ...toEntityStat(row),
+      name: row.name ?? "__NO_PROJECT__",
+    })),
+    clientPaymentPoints: clientPaymentPoints.map((invoice) => ({
       clientName: invoice.clientName?.trim() || "__NO_CLIENT__",
       projectName: invoice.project?.name?.trim() || "__NO_PROJECT__",
       issueDate: new Date(invoice.issueDate).toISOString(),
@@ -245,4 +323,4 @@ export async function getBillingStats(userId: string): Promise<BillingStats> {
       status: invoice.status,
     })),
   };
-}
+});

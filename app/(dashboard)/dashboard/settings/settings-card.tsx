@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Session } from "next-auth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -24,7 +25,6 @@ import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { deleteAccount, settings } from "@/server/actions/settings";
 import { redeemAccessCode } from "@/server/actions/redeem-code";
-import { CloudinaryUploadButton } from "@/components/ui/cloudinary-upload-button";
 import {
   Select,
   SelectContent,
@@ -34,12 +34,22 @@ import {
 } from "@/components/ui/select";
 import BusinessProfileForm from "@/components/dashboard/business-profile-form";
 import type { BusinessProfileFormHandle } from "@/components/dashboard/business-profile-form";
-import BankAccountFormDialog from "@/components/dashboard/bank-account-form-dialog";
 import { deleteBankAccount } from "@/server/actions/bank-accounts";
 import { Pencil, Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { EASE } from "@/lib/motion-variants";
 import { getPlanDisplayName } from "@/lib/plans";
+
+const CloudinaryUploadButton = dynamic(
+  () =>
+    import("@/components/ui/cloudinary-upload-button").then(
+      (module) => module.CloudinaryUploadButton
+    ),
+  { ssr: false }
+);
+const BankAccountFormDialog = dynamic(
+  () => import("@/components/dashboard/bank-account-form-dialog")
+);
 
 const CURRENCIES = [
   { code: "CHF", label: "CHF – Franc suisse" },

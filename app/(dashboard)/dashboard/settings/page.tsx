@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import { DM_Serif_Display } from "next/font/google";
-import { auth } from "@/server/auth";
-import { redirect } from "next/navigation";
 import { prisma } from "@/server/prisma";
+import DashboardPageFallback from "@/components/dashboard/dashboard-page-fallback";
+import { getDashboardViewer } from "@/server/dashboard-viewer";
 import SettingsCard from "./settings-card";
 
 const display = DM_Serif_Display({
@@ -9,18 +10,13 @@ const display = DM_Serif_Display({
   weight: "400",
 });
 
-export default async function Settings() {
-  const session = await auth();
+async function SettingsContent() {
+  const { session, currency, hourlyRate, userPlan, stripeCustomerId } =
+    await getDashboardViewer();
 
-  if (!session) redirect("/auth/login");
-
-  const [businessProfile, user, bankAccounts] = await Promise.all([
+  const [businessProfile, bankAccounts] = await Promise.all([
     prisma.businessProfile.findUnique({
       where: { userId: session.user.id },
-    }),
-    prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { currency: true, hourlyRate: true, plan: true, stripeCustomerId: true },
     }),
     prisma.bankAccount.findMany({
       where: { userId: session.user.id },
@@ -33,11 +29,19 @@ export default async function Settings() {
       session={session}
       businessProfile={businessProfile}
       bankAccounts={bankAccounts}
-      currency={user?.currency ?? "CHF"}
-      hourlyRate={user?.hourlyRate ?? 0}
-      plan={user?.plan ?? "FREE"}
-      hasStripeCustomer={!!user?.stripeCustomerId}
+      currency={currency}
+      hourlyRate={hourlyRate}
+      plan={userPlan}
+      hasStripeCustomer={!!stripeCustomerId}
       displayClassName={display.className}
     />
+  );
+}
+
+export default function Settings() {
+  return (
+    <Suspense fallback={<DashboardPageFallback statsCards={4} sectionBlocks={3} />}>
+      <SettingsContent />
+    </Suspense>
   );
 }

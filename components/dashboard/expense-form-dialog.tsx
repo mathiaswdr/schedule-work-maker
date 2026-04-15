@@ -48,7 +48,7 @@ type ExpenseFormDialogProps = {
     id: string;
     name: string;
     amount: number;
-    recurrence: "MONTHLY" | "ANNUAL";
+    recurrence: "MONTHLY" | "ANNUAL" | "ONE_TIME";
     category: string | null;
     notes: string | null;
     color: string | null;
@@ -183,7 +183,10 @@ export default function ExpenseFormDialog({
               <Select
                 value={form.watch("recurrence")}
                 onValueChange={(v) =>
-                  form.setValue("recurrence", v as "MONTHLY" | "ANNUAL")
+                  form.setValue(
+                    "recurrence",
+                    v as "MONTHLY" | "ANNUAL" | "ONE_TIME"
+                  )
                 }
               >
                 <SelectTrigger className="rounded-xl">
@@ -195,6 +198,9 @@ export default function ExpenseFormDialog({
                   </SelectItem>
                   <SelectItem value="ANNUAL">
                     {t("expenses.annual")}
+                  </SelectItem>
+                  <SelectItem value="ONE_TIME">
+                    {t("expenses.oneTime")}
                   </SelectItem>
                 </SelectContent>
               </Select>

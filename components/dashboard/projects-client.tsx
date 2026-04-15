@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
@@ -7,10 +8,15 @@ import { pickVariants } from "@/lib/motion-variants";
 import { useAction } from "next-safe-action/hooks";
 import { FolderKanban, Pencil, Plus, Settings2, Trash2 } from "lucide-react";
 import { deleteProject } from "@/server/actions/projects";
-import ProjectFormDialog from "@/components/dashboard/project-form-dialog";
-import ServiceTypeFormDialog from "@/components/dashboard/service-type-form-dialog";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
+
+const ProjectFormDialog = dynamic(
+  () => import("@/components/dashboard/project-form-dialog")
+);
+const ServiceTypeFormDialog = dynamic(
+  () => import("@/components/dashboard/service-type-form-dialog")
+);
 
 type ProjectItem = {
   id: string;

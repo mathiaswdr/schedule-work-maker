@@ -1,11 +1,9 @@
 import { DM_Serif_Display } from "next/font/google";
-import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import InvoicesClient from "@/components/dashboard/invoices-client";
-import { type PlanId } from "@/lib/plans";
 import { checkInvoiceMonthlyLimit } from "@/lib/plan-limits";
-import { getSessionUserId } from "@/server/work-sessions";
 import { serializeForClient } from "@/lib/utils";
+import { getDashboardViewer } from "@/server/dashboard-viewer";
 
 const INITIAL_INVOICES_PAGE_SIZE = 24;
 
@@ -16,13 +14,8 @@ const display = DM_Serif_Display({
 });
 
 export default async function DashboardInvoicesPage() {
-  const session = await auth();
-  const userPlan = (session?.user?.plan ?? "FREE") as PlanId;
-  const userId = await getSessionUserId();
-
-  const invoiceLimit = session
-    ? await checkInvoiceMonthlyLimit(session.user.id, userPlan)
-    : { allowed: true, current: 0, max: null };
+  const { userId, userPlan } = await getDashboardViewer();
+  const invoiceLimit = await checkInvoiceMonthlyLimit(userId, userPlan);
 
   const initialInvoices = await prisma.invoice.findMany({
     where: { userId },

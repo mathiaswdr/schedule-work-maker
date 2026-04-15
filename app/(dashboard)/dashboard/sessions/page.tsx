@@ -1,14 +1,12 @@
 import { DM_Serif_Display } from "next/font/google";
-import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import {
   getEndedSessionMonthStats,
-  getSessionUserId,
 } from "@/server/work-sessions";
 import SessionsClient from "@/components/dashboard/sessions-client";
 import PlanGate from "@/components/dashboard/plan-gate";
-import { type PlanId } from "@/lib/plans";
 import { serializeForClient } from "@/lib/utils";
+import { getDashboardViewer } from "@/server/dashboard-viewer";
 
 const INITIAL_SESSIONS_PAGE_SIZE = 20;
 
@@ -19,15 +17,7 @@ const display = DM_Serif_Display({
 });
 
 export default async function DashboardSessionsPage() {
-  const session = await auth();
-  const userPlan = (session?.user?.plan ?? "FREE") as PlanId;
-  const userId = await getSessionUserId();
-  const user = session
-    ? await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { currency: true, hourlyRate: true },
-      })
-    : null;
+  const { userId, userPlan, currency, hourlyRate } = await getDashboardViewer();
 
   const [initialActiveSession, initialSessions, initialMonthStats] = await Promise.all([
     prisma.workSession.findFirst({
@@ -68,8 +58,8 @@ export default async function DashboardSessionsPage() {
     <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="sessions">
       <SessionsClient
         displayClassName={display.className}
-        currency={user?.currency ?? "CHF"}
-        hourlyRate={user?.hourlyRate ?? 0}
+        currency={currency}
+        hourlyRate={hourlyRate}
         initialActiveSession={serializeForClient(initialActiveSession)}
         initialSessions={serializeForClient(paginatedInitialSessions)}
         initialHasMore={hasMoreInitialSessions}

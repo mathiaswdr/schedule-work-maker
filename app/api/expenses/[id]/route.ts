@@ -12,7 +12,9 @@ export async function GET(
     const expense = await prisma.expense.findFirst({
       where: { id, userId },
       include: {
-        receipts: { orderBy: { createdAt: "desc" } },
+        invoices: {
+          orderBy: [{ billedAt: "desc" }, { createdAt: "desc" }],
+        },
       },
     })
 

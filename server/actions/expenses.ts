@@ -5,8 +5,8 @@ import {
   ExpenseSchema,
   ExpenseUpdateSchema,
   ExpenseDeleteSchema,
-  ExpenseReceiptSchema,
-  ExpenseReceiptDeleteSchema,
+  ExpenseInvoiceSchema,
+  ExpenseInvoiceDeleteSchema,
 } from '@/types/expense-schema'
 import { auth } from '@/server/auth'
 import { prisma } from '@/server/prisma'
@@ -76,8 +76,8 @@ export const deleteExpense = action
     return { success: true }
   })
 
-export const addExpenseReceipt = action
-  .schema(ExpenseReceiptSchema)
+export const addExpenseInvoice = action
+  .schema(ExpenseInvoiceSchema)
   .action(async ({ parsedInput: values }) => {
     const user = await auth()
     if (!user) return { error: "User not found" }
@@ -88,31 +88,35 @@ export const addExpenseReceipt = action
     })
     if (!expense) return { error: "Expense not found" }
 
-    const receipt = await prisma.expenseReceipt.create({
+    const invoice = await prisma.expenseReceipt.create({
       data: {
         expenseId: values.expenseId,
+        invoiceNumber: values.invoiceNumber || null,
+        amount: values.amount ?? null,
+        billedAt: new Date(values.billedAt),
+        notes: values.notes || null,
         fileUrl: values.fileUrl,
         fileName: values.fileName || null,
       },
     })
 
     revalidatePath("/dashboard/expenses")
-    return { success: receipt }
+    return { success: invoice }
   })
 
-export const deleteExpenseReceipt = action
-  .schema(ExpenseReceiptDeleteSchema)
+export const deleteExpenseInvoice = action
+  .schema(ExpenseInvoiceDeleteSchema)
   .action(async ({ parsedInput: { id } }) => {
     const user = await auth()
     if (!user) return { error: "User not found" }
 
     // Verify ownership via expense
-    const receipt = await prisma.expenseReceipt.findFirst({
+    const invoice = await prisma.expenseReceipt.findFirst({
       where: { id },
       include: { expense: { select: { userId: true } } },
     })
-    if (!receipt || receipt.expense.userId !== user.user.id) {
-      return { error: "Receipt not found" }
+    if (!invoice || invoice.expense.userId !== user.user.id) {
+      return { error: "Invoice not found" }
     }
 
     await prisma.expenseReceipt.delete({ where: { id } })
