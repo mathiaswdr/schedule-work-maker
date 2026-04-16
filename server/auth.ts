@@ -7,6 +7,7 @@ import type { Provider } from "next-auth/providers";
 import { UserPlan } from "@prisma/client";
 
 import { prisma } from "@/server/prisma";
+import { sendMagicLinkEmail } from "@/server/auth-email";
 import { stripe } from "./stripe";
 import {
   isE2ETestMode,
@@ -39,8 +40,19 @@ if (isEmailAuthEnabled) {
           },
         })
       : Resend({
+          id: "email",
+          name: "Email",
           from: process.env.AUTH_RESEND_FROM!,
           apiKey: process.env.AUTH_RESEND_KEY!,
+          async sendVerificationRequest({ identifier, url, provider, request }) {
+            await sendMagicLinkEmail({
+              email: identifier,
+              url,
+              apiKey: provider.apiKey!,
+              from: provider.from!,
+              request,
+            });
+          },
         })
   );
 }
