@@ -3,9 +3,9 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "sonner";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
-import { Analytics } from "@vercel/analytics/next"
+import { getLocale } from "next-intl/server";
+import { Analytics } from "@vercel/analytics/next";
+import WebVitalsReporter from "@/components/telemetry/web-vitals-reporter";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -20,25 +20,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
-  const messages = await getMessages();
 
   return (
     <html lang={locale} className="" suppressHydrationWarning>
-      <body
-        className={`min-h-screen bg-paper text-ink ${inter.className}`}
-      >
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster />
-            <Analytics />
-          </ThemeProvider>
-        </NextIntlClientProvider>
+      <body className={`min-h-screen bg-paper text-ink ${inter.className}`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <WebVitalsReporter locale={locale} />
+          {children}
+          <Toaster />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );

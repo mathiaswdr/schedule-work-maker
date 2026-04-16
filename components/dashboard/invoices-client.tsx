@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
@@ -142,6 +142,7 @@ export default function InvoicesClient({
   const [editingUploadedInvoice, setEditingUploadedInvoice] =
     useState<InvoiceDetail | null>(null);
   const [qrBillDialogOpen, setQrBillDialogOpen] = useState(false);
+  const invoiceDetailCacheRef = useRef(new Map<string, InvoiceDetail>());
 
   const dateFormatter = useMemo(
     () =>
@@ -168,6 +169,9 @@ export default function InvoicesClient({
     });
     if (res.ok) {
       const data = await res.json();
+      if (!append) {
+        invoiceDetailCacheRef.current.clear();
+      }
       setInvoices((current) =>
         append ? [...current, ...(data.invoices || [])] : data.invoices || []
       );
@@ -176,11 +180,23 @@ export default function InvoicesClient({
   };
 
   const fetchInvoiceDetail = async (id: string) => {
+    const cached = invoiceDetailCacheRef.current.get(id);
+
+    if (cached) {
+      startTransition(() => {
+        setSelectedInvoice(cached);
+      });
+      return cached;
+    }
+
     setIsDetailLoading(true);
     try {
       const res = await fetch(`/api/invoices/${id}`, { cache: "no-store" });
       if (!res.ok) return null;
       const data = await res.json();
+      if (data.invoice) {
+        invoiceDetailCacheRef.current.set(id, data.invoice);
+      }
       setSelectedInvoice(data.invoice ?? null);
       return data.invoice as InvoiceDetail | null;
     } finally {
@@ -211,6 +227,7 @@ export default function InvoicesClient({
       toast.success(t("invoices.deleted"));
       setSelectedId(null);
       setSelectedInvoice(null);
+      invoiceDetailCacheRef.current.clear();
       fetchInvoices();
     },
   });
@@ -218,6 +235,9 @@ export default function InvoicesClient({
   const { execute: execStatusUpdate } = useAction(updateInvoiceStatus, {
     onSuccess: () => {
       toast.success(t("invoices.statusUpdated"));
+      if (selectedId) {
+        invoiceDetailCacheRef.current.delete(selectedId);
+      }
       fetchInvoices();
       if (selectedId) {
         fetchInvoiceDetail(selectedId).catch(() => null);
@@ -298,7 +318,9 @@ export default function InvoicesClient({
   };
 
   const handleOpenInvoice = (id: string) => {
-    setSelectedId(id);
+    startTransition(() => {
+      setSelectedId(id);
+    });
   };
 
   const handleEditInvoice = async (id: string, source: "GENERATED" | "UPLOADED") => {
@@ -855,7 +877,10 @@ export default function InvoicesClient({
               }
             : null
         }
-        onSuccess={fetchInvoices}
+        onSuccess={() => {
+          invoiceDetailCacheRef.current.clear();
+          void fetchInvoices();
+        }}
       />
 
       <UploadInvoiceDialog
@@ -877,7 +902,10 @@ export default function InvoicesClient({
               }
             : null
         }
-        onSuccess={fetchInvoices}
+        onSuccess={() => {
+          invoiceDetailCacheRef.current.clear();
+          void fetchInvoices();
+        }}
       />
       {selected && (
         <QrBillDialog

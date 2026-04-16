@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
@@ -136,6 +136,7 @@ export default function ExpensesClient({
     useState<ChartTypeFilter>("ALL");
   const [chartPeriodFilter, setChartPeriodFilter] =
     useState<ChartPeriodFilter>("LAST_90_DAYS");
+  const expenseDetailCacheRef = useRef(new Map<string, ExpenseDetail>());
 
   // ── Actions ──
 
@@ -143,6 +144,7 @@ export default function ExpensesClient({
     onSuccess: () => {
       toast.success(t("expenses.deleted"));
       setSelectedExpense(null);
+      expenseDetailCacheRef.current.clear();
       fetchExpenses();
     },
   });
@@ -150,6 +152,9 @@ export default function ExpensesClient({
   const { execute: executeDeleteInvoice } = useAction(deleteExpenseInvoice, {
     onSuccess: () => {
       toast.success(t("expenses.invoiceDeleted"));
+      if (selectedExpense) {
+        expenseDetailCacheRef.current.delete(selectedExpense.id);
+      }
       if (selectedExpense) fetchExpenseDetail(selectedExpense.id);
     },
   });
@@ -159,10 +164,20 @@ export default function ExpensesClient({
   const fetchExpenses = async () => {
     const response = await fetch("/api/expenses", { cache: "no-store" });
     const payload = await response.json();
+    expenseDetailCacheRef.current.clear();
     setExpenses(payload.expenses);
   };
 
   const fetchExpenseDetail = async (id: string) => {
+    const cached = expenseDetailCacheRef.current.get(id);
+
+    if (cached) {
+      startTransition(() => {
+        setSelectedExpense(cached);
+      });
+      return cached;
+    }
+
     setIsDetailLoading(true);
     try {
       const response = await fetch(`/api/expenses/${id}`, {
@@ -170,7 +185,11 @@ export default function ExpensesClient({
       });
       if (!response.ok) return;
       const payload = await response.json();
+      if (payload.expense) {
+        expenseDetailCacheRef.current.set(id, payload.expense);
+      }
       setSelectedExpense(payload.expense);
+      return payload.expense as ExpenseDetail | undefined;
     } finally {
       setIsDetailLoading(false);
     }
@@ -194,6 +213,11 @@ export default function ExpensesClient({
     if (!initialExpenseId || initialExpenseDetail) return;
     fetchExpenseDetail(initialExpenseId).catch(() => null);
   }, [initialExpenseDetail, initialExpenseId]);
+
+  useEffect(() => {
+    if (!initialExpenseDetail) return;
+    expenseDetailCacheRef.current.set(initialExpenseDetail.id, initialExpenseDetail);
+  }, [initialExpenseDetail]);
 
   // ── Handlers ──
 
@@ -220,12 +244,14 @@ export default function ExpensesClient({
   };
 
   const handleDialogSuccess = () => {
+    expenseDetailCacheRef.current.clear();
     fetchExpenses();
     if (selectedExpense) fetchExpenseDetail(selectedExpense.id);
   };
 
   const handleInvoiceDialogSuccess = () => {
     setPendingInvoiceFile(null);
+    expenseDetailCacheRef.current.clear();
     fetchExpenses();
     if (selectedExpense) fetchExpenseDetail(selectedExpense.id);
   };

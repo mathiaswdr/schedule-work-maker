@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
@@ -130,10 +130,14 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
   const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false);
   const [isLoadingMoreSessions, setIsLoadingMoreSessions] = useState(false);
   const [isLoadingMoreInvoices, setIsLoadingMoreInvoices] = useState(false);
+  const clientDetailCacheRef = useRef(new Map<string, ClientDetail>());
+  const clientAnalyticsCacheRef = useRef(new Map<string, ClientAnalytics | null>());
 
   const fetchClients = async () => {
     const response = await fetch("/api/clients", { cache: "no-store" });
     const payload = await response.json();
+    clientDetailCacheRef.current.clear();
+    clientAnalyticsCacheRef.current.clear();
     setClients(payload.clients);
   };
 
@@ -152,6 +156,19 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
       appendSessions = false,
       appendInvoices = false,
     } = options ?? {};
+    const isPaginatedRequest =
+      appendSessions || appendInvoices || sessionOffset > 0 || invoiceOffset > 0;
+
+    if (!isPaginatedRequest) {
+      const cached = clientDetailCacheRef.current.get(id);
+
+      if (cached) {
+        startTransition(() => {
+          setSelectedClient(cached);
+        });
+        return cached;
+      }
+    }
 
     if (!appendSessions && !appendInvoices) {
       setIsDetailLoading(true);
@@ -163,19 +180,30 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
       );
       if (!response.ok) return;
       const payload = await response.json();
-      setSelectedClient((current) => ({
+      const cachedAnalytics = clientAnalyticsCacheRef.current.get(id) ?? null;
+      const currentDetail =
+        clientDetailCacheRef.current.get(id) ??
+        (selectedClient?.id === payload.client.id ? selectedClient : null);
+      const nextClient = {
         ...payload.client,
         projects: payload.projects,
-        analytics: current?.id === payload.client.id ? current?.analytics ?? null : null,
+        analytics:
+          currentDetail?.id === payload.client.id
+            ? currentDetail?.analytics ?? cachedAnalytics
+            : cachedAnalytics,
         hasMoreSessions: payload.hasMoreSessions,
         hasMoreInvoices: payload.hasMoreInvoices,
         recentSessions: appendSessions
-          ? [...(current?.recentSessions ?? []), ...(payload.recentSessions ?? [])]
+          ? [...(currentDetail?.recentSessions ?? []), ...(payload.recentSessions ?? [])]
           : payload.recentSessions ?? [],
         recentInvoices: appendInvoices
-          ? [...(current?.recentInvoices ?? []), ...(payload.recentInvoices ?? [])]
+          ? [...(currentDetail?.recentInvoices ?? []), ...(payload.recentInvoices ?? [])]
           : payload.recentInvoices ?? [],
-      }));
+      };
+
+      clientDetailCacheRef.current.set(id, nextClient);
+      setSelectedClient(nextClient);
+      return nextClient;
     } finally {
       if (!appendSessions && !appendInvoices) {
         setIsDetailLoading(false);
@@ -184,6 +212,22 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
   };
 
   const fetchClientAnalytics = async (id: string) => {
+    const cachedAnalytics = clientAnalyticsCacheRef.current.get(id);
+
+    if (cachedAnalytics !== undefined) {
+      startTransition(() => {
+        setSelectedClient((current) =>
+          current && current.id === id
+            ? {
+                ...current,
+                analytics: cachedAnalytics,
+              }
+            : current
+        );
+      });
+      return cachedAnalytics;
+    }
+
     setIsAnalyticsLoading(true);
     try {
       const response = await fetch(`/api/clients/${id}/analytics`, {
@@ -191,6 +235,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
       });
       if (!response.ok) return;
       const payload = await response.json();
+      clientAnalyticsCacheRef.current.set(id, payload.analytics ?? null);
       setSelectedClient((current) =>
         current && current.id === id
           ? {
@@ -199,6 +244,14 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
             }
           : current
       );
+      const cachedDetail = clientDetailCacheRef.current.get(id);
+      if (cachedDetail) {
+        clientDetailCacheRef.current.set(id, {
+          ...cachedDetail,
+          analytics: payload.analytics ?? null,
+        });
+      }
+      return payload.analytics ?? null;
     } finally {
       setIsAnalyticsLoading(false);
     }
@@ -250,6 +303,8 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
 
       toast.success(t("clients.deleted"));
       setSelectedClient(null);
+      clientDetailCacheRef.current.delete(id);
+      clientAnalyticsCacheRef.current.delete(id);
       await fetchClients();
     } catch {
       toast.error(t("settingsPage.error"));
@@ -342,8 +397,10 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
   };
 
   const openClientDetail = async (id: string) => {
-    await fetchClientDetail(id);
-    void fetchClientAnalytics(id);
+    const detail = await fetchClientDetail(id);
+    if (!detail?.analytics) {
+      void fetchClientAnalytics(id);
+    }
   };
 
   const handleLoadMoreSessions = async () => {
