@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { DM_Serif_Display, Space_Grotesk } from "next/font/google";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import ScrollSectionButton from "@/components/ui/scroll-section-button";
+import {
+  absoluteUrl,
+  buildMarketingMetadata,
+  serializeJsonLd,
+} from "@/lib/seo";
 import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import { PricingCards } from "./pricing-cards";
@@ -40,7 +46,20 @@ type StatItem = {
   value: string;
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+
+  return buildMarketingMetadata({
+    title: "Tarifs Kronoma | Suivi du temps, facturation et QR-facture suisse",
+    description:
+      "Comparez les tarifs de Kronoma pour le suivi du temps freelance, la facturation suisse et la QR-facture suisse. Commencez gratuitement puis passez au plan Pro.",
+    path: "/pricing",
+    index: locale === "fr",
+  });
+}
+
 export default async function PricingPage() {
+  const locale = await getLocale();
   const t = await getTranslations("pricingPage");
   const plans = t.raw("plans") as PricingPlan[];
   const includedItems = t.raw("included.items") as string[];
@@ -58,8 +77,33 @@ export default async function PricingPage() {
     userPlan = user?.plan ?? "FREE";
   }
 
+  const canonicalUrl = absoluteUrl("/pricing");
+  const pricingJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Kronoma",
+    url: canonicalUrl,
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    inLanguage: locale,
+    description: t("hero.subtitle"),
+    offers: plans.map((plan) => ({
+      "@type": "Offer",
+      name: plan.name,
+      price: plan.price.replace(/[^\d.]/g, "") || "0",
+      priceCurrency: "CHF",
+      description: plan.desc,
+      url: canonicalUrl,
+      availability: "https://schema.org/InStock",
+    })),
+  };
+
   return (
     <main className={`${body.className} w-full bg-paper text-ink`}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(pricingJsonLd) }}
+      />
       <div className="relative w-full overflow-hidden">
         <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[320px] w-[320px] sm:h-[380px] sm:w-[380px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.35),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_10s_ease-in-out_infinite]" />
         <div className="pointer-events-none absolute bottom-[-12rem] left-[-8rem] h-[320px] w-[320px] sm:h-[460px] sm:w-[460px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.3),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_12s_ease-in-out_infinite]" />

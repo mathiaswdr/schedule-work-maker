@@ -24,6 +24,8 @@ const isResourceMissingError = (error: unknown): error is { code: string } =>
   typeof error.code === "string" &&
   error.code === "resource_missing";
 
+const SUBSCRIPTION_TRIAL_DAYS = 7;
+
 export async function POST(req: NextRequest) {
   try {
     const authSession = await auth();
@@ -94,6 +96,9 @@ export async function POST(req: NextRequest) {
             quantity: 1,
           }
         ],
+        subscription_data: {
+          trial_period_days: SUBSCRIPTION_TRIAL_DAYS,
+        },
         metadata: { planId: targetPlan },
         success_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription?success=true`,
         cancel_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
@@ -115,6 +120,9 @@ export async function POST(req: NextRequest) {
             enabled: true,
           },
           line_items: [{ price: priceId, quantity: 1 }],
+          subscription_data: {
+            trial_period_days: SUBSCRIPTION_TRIAL_DAYS,
+          },
           metadata: { planId: targetPlan },
           success_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription?success=true`,
           cancel_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,

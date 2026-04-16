@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { DM_Serif_Display, Space_Grotesk } from "next/font/google";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import {
+  absoluteUrl,
+  buildMarketingMetadata,
+  serializeJsonLd,
+} from "@/lib/seo";
 
 const display = DM_Serif_Display({
   subsets: ["latin"],
@@ -29,15 +35,50 @@ type StepItem = {
   copy: string;
 };
 
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+
+  return buildMarketingMetadata({
+    title: "A propos de Kronoma | Logiciel suisse de suivi du temps pour freelances",
+    description:
+      "Decouvrez Kronoma, le logiciel suisse de suivi du temps pour freelances concu pour rendre les heures visibles, simplifier la facturation et sortir des tableurs.",
+    path: "/about",
+    index: locale === "fr",
+  });
+}
+
 export default async function AboutPage() {
+  const locale = await getLocale();
   const t = await getTranslations("aboutPage");
   const impactStats = t.raw("impact.stats") as StatItem[];
   const values = t.raw("mission.values") as ValueItem[];
   const buildSteps = t.raw("build.steps") as StepItem[];
   const timeline = t.raw("story.timeline") as string[];
+  const canonicalUrl = absoluteUrl("/about");
+  const aboutJsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Kronoma",
+      url: canonicalUrl,
+      description: t("hero.subtitle"),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      name: "A propos de Kronoma",
+      url: canonicalUrl,
+      inLanguage: locale,
+      description: t("story.subtitle"),
+    },
+  ];
 
   return (
     <main className={`${body.className} w-full bg-paper text-ink`}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(aboutJsonLd) }}
+      />
       <div className="relative w-full overflow-hidden">
         <div className="pointer-events-none absolute -top-32 right-[-5rem] h-[320px] w-[320px] sm:h-[420px] sm:w-[420px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(249,115,22,0.3),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_12s_ease-in-out_infinite]" />
         <div className="pointer-events-none absolute bottom-[-12rem] left-[-9rem] h-[320px] w-[320px] sm:h-[460px] sm:w-[460px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(15,118,110,0.3),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_10s_ease-in-out_infinite]" />

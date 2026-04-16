@@ -90,7 +90,14 @@ export default async function DashboardLayout({
     >
       <div className={`${body.className} min-h-screen w-full bg-paper text-ink`}>
         <div className="mx-auto flex w-full maxW flex-col gap-6 px-4 pb-28 pt-6 lg:flex-row lg:items-start lg:gap-8 lg:px-8 lg:pb-10">
-          <DashboardSidebar userPlan={userPlan} labels={sidebarLabels} />
+          <DashboardSidebar
+            userPlan={userPlan}
+            user={{
+              name: session.user.name,
+              image: session.user.image,
+            }}
+            labels={sidebarLabels}
+          />
           <div className="min-w-0 flex-1 [content-visibility:auto] [contain-intrinsic-size:1px_900px]">
             {children}
           </div>

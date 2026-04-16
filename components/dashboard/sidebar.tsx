@@ -18,6 +18,7 @@ import {
   Settings2,
   Users,
 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { markDashboardNavigationStart } from "@/lib/perf-metrics";
 import {
@@ -69,9 +70,14 @@ function PlanBadge({ requiredPlan }: { requiredPlan: PlanId }) {
 
 export default function DashboardSidebar({
   userPlan,
+  user,
   labels,
 }: {
   userPlan: PlanId;
+  user: {
+    name?: string | null;
+    image?: string | null;
+  };
   labels: SidebarLabels;
 }) {
   const pathname = usePathname();
@@ -102,6 +108,7 @@ export default function DashboardSidebar({
 
   const isActive = (href: string) =>
     href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
+  const userInitial = user.name?.charAt(0).toUpperCase() ?? "T";
 
   const isLocked = (key: FeatureKey) => {
     const required = FEATURE_PLAN_MAP[key];
@@ -137,9 +144,14 @@ export default function DashboardSidebar({
               <p className="text-[10px] uppercase text-ink-muted">{labels.subtitle}</p>
               <p className="text-lg font-semibold text-ink">{labels.title}</p>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-line bg-white text-sm font-semibold text-brand">
-              T
-            </div>
+            <Avatar className="h-10 w-10 rounded-full border border-line bg-white">
+              {user.image ? (
+                <AvatarImage src={user.image} alt={user.name ?? "User avatar"} />
+              ) : null}
+              <AvatarFallback className="bg-brand/10 text-sm font-bold text-brand">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
           </div>
 
           <nav className="mt-5 flex flex-col gap-2">

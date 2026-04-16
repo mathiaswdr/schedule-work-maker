@@ -1,0 +1,6 @@
+# Kronoma - LLM Index
+
+## Core Pages
+- / - Logiciel suisse de suivi du temps pour freelances
+- /pricing - Tarifs, QR-facture suisse et fonctions incluses
+- /about - Presentation de Kronoma et du produit

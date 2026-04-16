@@ -6,14 +6,14 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Kronoma",
     short_name: "Kronoma",
     description:
-      "Track work sessions, follow your productivity, and manage your freelance activity with Kronoma.",
+      "Logiciel suisse de suivi du temps pour freelances avec facturation et QR-facture suisse.",
     start_url: "/dashboard",
     scope: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: "#f7f1e6",
     theme_color: "#f97316",
-    lang: "en",
+    lang: "fr",
     categories: ["productivity", "business", "finance"],
     icons: [
       {
@@ -40,9 +40,9 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       {
-        name: "Dashboard",
+        name: "Tableau de bord",
         short_name: "Dashboard",
-        description: "Open your overview and current work session.",
+        description: "Ouvrez votre vue d'ensemble et votre session active.",
         url: "/dashboard",
         icons: [
           {
@@ -53,9 +53,9 @@ export default function manifest(): MetadataRoute.Manifest {
         ],
       },
       {
-        name: "Pricing",
-        short_name: "Pricing",
-        description: "Compare plans and unlock premium features.",
+        name: "Tarifs",
+        short_name: "Tarifs",
+        description: "Comparez les offres et debloquez les fonctions avancees.",
         url: "/pricing",
         icons: [
           {

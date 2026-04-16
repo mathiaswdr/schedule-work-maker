@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { DM_Serif_Display, Space_Grotesk } from "next/font/google";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import ScrollSectionButton from "@/components/ui/scroll-section-button";
+import {
+  absoluteUrl,
+  buildMarketingMetadata,
+  serializeJsonLd,
+} from "@/lib/seo";
 import { PricingCards } from "./pricing/pricing-cards";
 
 const display = DM_Serif_Display({
@@ -75,7 +81,20 @@ type FaqItem = {
 
 const SITE_SECTION_OFFSET = -112;
 
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+
+  return buildMarketingMetadata({
+    title: "Kronoma | Logiciel suisse de suivi du temps pour freelances",
+    description:
+      "Suivez vos heures, gerez vos projets et generez vos factures avec QR-facture suisse. Kronoma aide les freelances suisses a transformer leur temps en factures.",
+    path: "/",
+    index: locale === "fr",
+  });
+}
+
 export default async function Home() {
+  const locale = await getLocale();
   const t = await getTranslations("home");
   const heroBullets = t.raw("hero.bullets") as string[];
   const demoEvents = t.raw("demo.events") as DemoEvent[];
@@ -100,9 +119,52 @@ export default async function Home() {
     "bg-brand-2",
     "bg-ink",
   ];
+  const canonicalUrl = absoluteUrl("/");
+  const homeJsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Kronoma",
+      url: canonicalUrl,
+      description: t("hero.subtitle"),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Kronoma",
+      url: canonicalUrl,
+      inLanguage: locale,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: "Kronoma",
+      url: canonicalUrl,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      inLanguage: locale,
+      description: t("features.subtitle"),
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.a,
+        },
+      })),
+    },
+  ];
 
   return (
     <main className={`${body.className} w-full bg-paper text-ink`}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(homeJsonLd) }}
+      />
       <div className="relative w-full overflow-hidden">
         <div className="pointer-events-none absolute -top-28 right-[-6rem] h-[320px] w-[320px] sm:h-[420px] sm:w-[420px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.35),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_10s_ease-in-out_infinite]" />
         <div className="pointer-events-none absolute bottom-[-12rem] left-[-10rem] h-[320px] w-[320px] sm:h-[520px] sm:w-[520px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.3),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_12s_ease-in-out_infinite]" />

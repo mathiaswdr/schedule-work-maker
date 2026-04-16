@@ -6,14 +6,31 @@ import { Toaster } from "sonner";
 import { getLocale } from "next-intl/server";
 import { Analytics } from "@vercel/analytics/next";
 import WebVitalsReporter from "@/components/telemetry/web-vitals-reporter";
+import { getSiteUrl } from "@/lib/seo";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
+  metadataBase: getSiteUrl(),
   title: "Kronoma",
-  description: "Kronoma, time tracking and freelance invoicing.",
+  description:
+    "Kronoma est un logiciel suisse de suivi du temps pour freelances qui transforme vos heures en factures avec QR-facture suisse.",
   applicationName: "Kronoma",
   manifest: "/manifest.webmanifest",
+  openGraph: {
+    type: "website",
+    locale: "fr_CH",
+    siteName: "Kronoma",
+    title: "Kronoma",
+    description:
+      "Kronoma est un logiciel suisse de suivi du temps pour freelances qui transforme vos heures en factures avec QR-facture suisse.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kronoma",
+    description:
+      "Kronoma est un logiciel suisse de suivi du temps pour freelances qui transforme vos heures en factures avec QR-facture suisse.",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
