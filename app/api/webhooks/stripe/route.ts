@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/server/stripe";
 import { prisma } from "@/server/prisma";
-import { getPlanByStripePrice } from "@/lib/plans";
+import { getPlanByStripePrice, isPlanId, normalizePlanId } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
+
+const STRIPE_SUBSCRIPTION_STATUSES_TO_CANCEL = new Set([
+  "active",
+  "trialing",
+  "past_due",
+  "unpaid",
+  "paused",
+]);
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -32,12 +40,13 @@ export async function POST(req: NextRequest) {
       const user = await findUserFromCustomerId(session.customer);
       if (!user?.id) break;
 
-      const planId = (session.metadata?.planId as PlanId) || "PRO";
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { plan: planId },
-      });
-      console.log("Checkout session completed — plan set to", planId);
+      const metadataPlanId = session.metadata?.planId;
+      const planId = isPlanId(metadataPlanId) ? normalizePlanId(metadataPlanId) : "PRO";
+      await updateUserPlanPreservingLifetime(user, planId);
+      if (planId === "LIFETIME") {
+        await cancelBillableSubscriptions(session.customer);
+      }
+      console.log("Checkout session completed - plan set to", planId);
       break;
     }
 
@@ -54,11 +63,8 @@ export async function POST(req: NextRequest) {
       if (priceId) {
         planId = getPlanByStripePrice(priceId);
       }
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { plan: planId },
-      });
-      console.log("Invoice paid — plan set to", planId);
+      await updateUserPlanPreservingLifetime(user, planId);
+      console.log("Invoice paid - plan set to", planId);
       break;
     }
 
@@ -67,11 +73,8 @@ export async function POST(req: NextRequest) {
       const user = await findUserFromCustomerId(invoice.customer);
       if (!user?.id) break;
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { plan: "FREE" },
-      });
-      console.log("Invoice payment failed — plan set to FREE");
+      await downgradeUserToFreePreservingLifetime(user);
+      console.log("Invoice payment failed - plan set to FREE");
       break;
     }
 
@@ -80,11 +83,8 @@ export async function POST(req: NextRequest) {
       const user = await findUserFromCustomerId(subscription.customer);
       if (!user?.id) break;
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { plan: "FREE" },
-      });
-      console.log("Subscription deleted — plan set to FREE");
+      await downgradeUserToFreePreservingLifetime(user);
+      console.log("Subscription deleted - plan set to FREE");
       break;
     }
 
@@ -102,5 +102,52 @@ const findUserFromCustomerId = async (stripeCustomerId: unknown) => {
   }
   return prisma.user.findFirst({
     where: { stripeCustomerId },
+    select: { id: true, plan: true },
   });
 };
+
+type StripeUser = NonNullable<Awaited<ReturnType<typeof findUserFromCustomerId>>>;
+
+async function updateUserPlanPreservingLifetime(user: StripeUser, nextPlan: PlanId) {
+  if (user.plan === "LIFETIME" && nextPlan !== "LIFETIME") {
+    console.log("Lifetime plan preserved - ignored downgrade to", nextPlan);
+    return;
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { plan: nextPlan },
+  });
+}
+
+async function downgradeUserToFreePreservingLifetime(user: StripeUser) {
+  if (user.plan === "LIFETIME") {
+    console.log("Lifetime plan preserved - ignored subscription downgrade");
+    return;
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { plan: "FREE" },
+  });
+}
+
+async function cancelBillableSubscriptions(stripeCustomerId: unknown) {
+  if (typeof stripeCustomerId !== "string") {
+    return;
+  }
+
+  const subscriptions = await stripe.subscriptions.list({
+    customer: stripeCustomerId,
+    status: "all",
+    limit: 100,
+  });
+
+  await Promise.all(
+    subscriptions.data
+      .filter((subscription) =>
+        STRIPE_SUBSCRIPTION_STATUSES_TO_CANCEL.has(subscription.status)
+      )
+      .map((subscription) => stripe.subscriptions.cancel(subscription.id))
+  );
+}

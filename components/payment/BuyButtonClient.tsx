@@ -11,7 +11,7 @@ type RequestDataType = {
 }
 
 type BuyButtonClientProps = {
-  plan?: "STARTER" | "PRO";
+  plan?: "STARTER" | "PRO" | "LIFETIME";
 };
 
 export default function BuyButtonClient({ plan = "STARTER" }: BuyButtonClientProps) {

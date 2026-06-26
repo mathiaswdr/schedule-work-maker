@@ -9,6 +9,7 @@ import {
   type FeatureKey,
   isPlanSufficient,
 } from "@/lib/plans";
+import { buildSubscriptionCheckoutPath } from "@/lib/checkout-intent";
 
 type PlanGateProps = {
   userPlan: PlanId;
@@ -41,7 +42,7 @@ export default function PlanGate({ userPlan, requiredPlan, feature, children }: 
             {t(`${feature}.description`)}
           </p>
           <Link
-            href="/dashboard/subscription"
+            href={buildSubscriptionCheckoutPath(requiredPlan)}
             className="mt-2 rounded-2xl bg-brand px-6 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
           >
             {t("upgrade", { plan: getPlanDisplayName(requiredPlan) })}

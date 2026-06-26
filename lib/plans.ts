@@ -1,13 +1,16 @@
-export type PlanId = "FREE" | "STARTER" | "PRO";
+export type PlanId = "FREE" | "STARTER" | "PRO" | "LIFETIME";
 export type BillingPeriod = "monthly" | "yearly";
+export type PlanBillingType = "free" | "subscription" | "lifetime";
 
 export type PlanDefinition = {
   id: PlanId;
   i18nKey: string;
   stripePriceEnvVar: string | null;
   stripeYearlyPriceEnvVar: string | null;
+  billingType: PlanBillingType;
   priceAmount: number;
   yearlyPriceAmount: number;
+  compareAtPriceAmount?: number;
   highlight: boolean;
   visible: boolean;
   sortOrder: number;
@@ -19,6 +22,7 @@ export const PLANS: PlanDefinition[] = [
     i18nKey: "free",
     stripePriceEnvVar: null,
     stripeYearlyPriceEnvVar: null,
+    billingType: "free",
     priceAmount: 0,
     yearlyPriceAmount: 0,
     highlight: false,
@@ -30,6 +34,7 @@ export const PLANS: PlanDefinition[] = [
     i18nKey: "starter",
     stripePriceEnvVar: "SUBSCRIPTION_PRICE_ID",
     stripeYearlyPriceEnvVar: "SUBSCRIPTION_YEAR_PRICE_ID",
+    billingType: "subscription",
     priceAmount: 9.9,
     yearlyPriceAmount: 99,
     highlight: false,
@@ -41,17 +46,40 @@ export const PLANS: PlanDefinition[] = [
     i18nKey: "pro",
     stripePriceEnvVar: "SUBSCRIPTION_PRICE_ID",
     stripeYearlyPriceEnvVar: "SUBSCRIPTION_YEAR_PRICE_ID",
+    billingType: "subscription",
     priceAmount: 9.9,
     yearlyPriceAmount: 99,
-    highlight: true,
+    highlight: false,
     visible: true,
     sortOrder: 1,
+  },
+  {
+    id: "LIFETIME",
+    i18nKey: "lifetime",
+    stripePriceEnvVar: "LIFETIME_PRICE_ID",
+    stripeYearlyPriceEnvVar: null,
+    billingType: "lifetime",
+    priceAmount: 149,
+    yearlyPriceAmount: 149,
+    compareAtPriceAmount: 249,
+    highlight: true,
+    visible: true,
+    sortOrder: 2,
   },
 ];
 
 export function normalizePlanId(plan: string | null | undefined): PlanId {
   if (plan === "STARTER" || plan === "PRO") return "PRO";
+  if (plan === "LIFETIME") return "LIFETIME";
   return "FREE";
+}
+
+export function isPlanId(plan: string | null | undefined): plan is PlanId {
+  return plan === "FREE" || plan === "STARTER" || plan === "PRO" || plan === "LIFETIME";
+}
+
+export function getEntitlementPlanId(plan: string | null | undefined): "FREE" | "PRO" {
+  return normalizePlanId(plan) === "FREE" ? "FREE" : "PRO";
 }
 
 export function getVisiblePlans() {
@@ -59,19 +87,28 @@ export function getVisiblePlans() {
 }
 
 export function getPlanDisplayName(plan: string | null | undefined): string {
-  return normalizePlanId(plan) === "PRO" ? "Pro" : "Free";
+  const normalizedPlan = normalizePlanId(plan);
+  if (normalizedPlan === "LIFETIME") return "Lifetime";
+  return normalizedPlan === "PRO" ? "Pro" : "Free";
 }
 
 export function getStripePriceId(planId: PlanId, billing: BillingPeriod = "monthly"): string | null {
   const normalizedPlanId = normalizePlanId(planId);
   const plan = PLANS.find((p) => p.id === normalizedPlanId || p.id === planId);
   if (!plan) return null;
-  const envVar = billing === "yearly" ? plan.stripeYearlyPriceEnvVar : plan.stripePriceEnvVar;
+  const envVar =
+    plan.billingType === "lifetime"
+      ? plan.stripePriceEnvVar
+      : billing === "yearly"
+        ? plan.stripeYearlyPriceEnvVar
+        : plan.stripePriceEnvVar;
   if (!envVar) return null;
   return process.env[envVar] ?? null;
 }
 
 export function getPlanByStripePrice(priceId: string): PlanId {
+  if (process.env.LIFETIME_PRICE_ID === priceId) return "LIFETIME";
+
   const paidPriceIds = [
     process.env.SUBSCRIPTION_PRICE_ID,
     process.env.SUBSCRIPTION_YEAR_PRICE_ID,
@@ -122,6 +159,7 @@ export const PLAN_LIMITS: Record<PlanId, { clients: number | null; invoicesPerMo
   FREE: { clients: 2, invoicesPerMonth: 5 },
   STARTER: { clients: null, invoicesPerMonth: null },
   PRO: { clients: null, invoicesPerMonth: null },
+  LIFETIME: { clients: null, invoicesPerMonth: null },
 };
 
 /** Returns true if `userPlan` is equal or higher than `requiredPlan`. */

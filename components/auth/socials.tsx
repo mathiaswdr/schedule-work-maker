@@ -1,17 +1,24 @@
 'use client'
 
 import { signIn } from "next-auth/react"
+import { useSearchParams } from "next/navigation";
 import { Button } from "../ui/button"
 import {FcGoogle} from "react-icons/fc";
 import { useTranslations } from "next-intl";
 
 export default function Socials(){
     const t = useTranslations("auth");
+    const searchParams = useSearchParams();
+    const rawCallbackUrl = searchParams.get("callbackUrl");
+    const callbackUrl =
+        rawCallbackUrl?.startsWith("/") && !rawCallbackUrl.startsWith("//")
+            ? rawCallbackUrl
+            : "/dashboard";
 
     return(
         <div className="flex flex-col items-center w-full">
             <Button 
-                onClick={() => signIn("google", { callbackUrl: "/" })}
+                onClick={() => signIn("google", { callbackUrl })}
                 className="flex w-full max-w-sm items-center justify-center gap-4"
                 variant={"outline"}
             >

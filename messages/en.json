@@ -11,7 +11,7 @@
     "faq": "F.A.Q",
     "dashboard": "Dashboard",
     "login": "Sign in",
-    "trial": "Free trial"
+    "trial": "Try Pro 7 days"
   },
   "footer": {
     "tagline": "The simplest way to turn your hours into invoices.",
@@ -26,9 +26,9 @@
     "copy": "Kronoma. Time tracking and freelance invoicing."
   },
   "auth": {
-    "title": "Welcome back",
-    "subtitle": "Welcome to Kronoma. Sign in with social or a magic link.",
-    "backLabel": "Create a new account",
+    "title": "Sign in to continue",
+    "subtitle": "Your account is created automatically with Google or a magic link. Your Pro trial stays ready after sign-in.",
+    "backLabel": "Back to home",
     "emailLabel": "Email",
     "emailPlaceholder": "name@company.com",
     "magicLink": "Send magic link",
@@ -48,13 +48,13 @@
       "badge": "Time tracking software for freelancers",
       "title": "Track your hours.\nGenerate your invoices.",
       "titleAccent": "Get paid.",
-      "subtitle": "Kronoma is a simple time tracking software for freelancers and small teams. Track your hours, manage your projects and generate invoices with Swiss QR invoice in a few clicks.",
-      "ctaPrimary": "Start for free",
+      "subtitle": "Kronoma is a simple time tracking software for freelancers and small teams. Try Pro free for 7 days, then track hours, manage projects and generate invoices with Swiss QR invoice in a few clicks.",
+      "ctaPrimary": "Try Pro 7 days",
       "ctaSecondary": "Learn more",
       "bullets": [
         "Simple time tracking",
         "Invoices with Swiss QR invoice",
-        "CSV and PDF exports"
+        "7 free days of Pro"
       ]
     },
     "demo": {
@@ -184,15 +184,23 @@
     "pricing": {
       "eyebrow": "Simple pricing",
       "socialProof": "Ideal for developers, designers, consultants and freelancers.",
-      "title": "A simple plan for freelancers and small teams.",
-      "subtitle": "Start free, then upgrade to Pro at 9.90 CHF to unlock every feature.",
+      "title": "Simple plans for freelancers and small teams.",
+      "subtitle": "Try Pro free for 7 days, continue at 9.90 CHF/month, or choose Lifetime once for 149 CHF.",
       "cta": "Choose {plan}",
+      "ctaFree": "Create free account",
+      "ctaTrial": "Try {plan} 7 days",
+      "ctaLifetime": "Buy {plan}",
+      "planNotes": {
+        "free": "Free account to test the basics, no card required.",
+        "trial": "7 free days on Pro, cancel before the first payment.",
+        "lifetime": "One-time payment, Pro access for life. No free trial."
+      },
       "billingToggle": {
         "monthly": "Monthly",
         "yearly": "Yearly",
         "badge": "2 months free",
         "yearlyHint": "Save with annual billing",
-        "suffixMonthly": " /user/month",
+        "suffixMonthly": " /month",
         "suffixYearly": " /user/year",
         "monthlyHint": "or __price__ CHF/yr with annual billing",
         "yearlyEquivalent": "~__price__ CHF/month equivalent"
@@ -218,8 +226,8 @@
           "name": "Pro",
           "planId": "PRO",
           "price": "9.90 CHF",
-          "suffix": "/user/mo",
-          "desc": "One complete paid plan for freelancers and small teams.",
+          "suffix": "/mo",
+          "desc": "The complete plan for freelancers and small teams. The first 7 days are free.",
           "perks": [
             "✓ Full time tracking",
             "✓ Unlimited clients",
@@ -233,6 +241,28 @@
             "✓ CSV exports",
             "✓ Custom invoice templates",
             "✓ Advanced reporting"
+          ],
+          "highlight": false
+        },
+        {
+          "name": "Lifetime",
+          "planId": "LIFETIME",
+          "price": "149 CHF",
+          "desc": "Every Pro feature with a one-time payment, no subscription.",
+          "perks": [
+            "✓ Full time tracking",
+            "✓ Unlimited clients",
+            "✓ Projects",
+            "✓ Invoice generation",
+            "✓ Swiss QR invoice",
+            "✓ Payment reminders",
+            "✓ Full session history",
+            "✓ Advanced analytics",
+            "✓ Expense tracking",
+            "✓ CSV exports",
+            "✓ Custom invoice templates",
+            "✓ Advanced reporting",
+            "✓ Pro access for life"
           ],
           "highlight": true
         }
@@ -264,8 +294,8 @@
     "closing": {
       "eyebrow": "Ready to start",
       "title": "Turn your hours into invoices.",
-      "subtitle": "Start for free with Kronoma and simplify your time management.",
-      "ctaPrimary": "Start for free",
+      "subtitle": "Try Pro free for 7 days and simplify your time management.",
+      "ctaPrimary": "Try Pro 7 days",
       "ctaSecondary": "See the demo"
     }
   },
@@ -273,19 +303,27 @@
     "hero": {
       "eyebrow": "Pricing",
       "title": "Simple pricing to track your hours without friction.",
-      "subtitle": "Start free, then upgrade to Pro at 9.90 CHF when you want every feature unlocked.",
-      "ctaPrimary": "Start free trial",
+      "subtitle": "Try Pro free for 7 days, continue at 9.90 CHF/month, or choose Lifetime once for 149 CHF.",
+      "ctaPrimary": "Try Pro 7 days",
       "ctaSecondary": "See the demo"
     },
     "cta": "Choose {plan}",
+    "ctaFree": "Create free account",
+    "ctaTrial": "Try {plan} 7 days",
+    "ctaLifetime": "Buy {plan}",
     "ctaCurrent": "Current plan",
     "ctaManage": "Manage subscription",
+    "planNotes": {
+      "free": "Free account to test the basics, no card required.",
+      "trial": "7 free days on Pro, cancel before the first payment.",
+      "lifetime": "One-time payment, Pro access for life. No free trial."
+    },
     "billingToggle": {
       "monthly": "Monthly",
       "yearly": "Yearly",
       "badge": "2 months free",
       "yearlyHint": "Save with annual billing",
-      "suffixMonthly": " /user/month",
+      "suffixMonthly": " /month",
       "suffixYearly": " /user/year",
       "monthlyHint": "or __price__ CHF/yr with annual billing",
       "yearlyEquivalent": "~__price__ CHF/month equivalent"
@@ -311,8 +349,8 @@
         "name": "Pro",
         "planId": "PRO",
         "price": "9.90 CHF",
-        "suffix": "/user/mo",
-        "desc": "One complete paid plan for freelancers and small teams.",
+        "suffix": "/mo",
+        "desc": "The complete plan for freelancers and small teams. The first 7 days are free.",
         "perks": [
           "✓ Full time tracking",
           "✓ Unlimited clients",
@@ -328,13 +366,36 @@
           "✓ Custom invoice templates",
           "✓ Advanced reporting"
         ],
+        "highlight": false
+      },
+      {
+        "name": "Lifetime",
+        "planId": "LIFETIME",
+        "price": "149 CHF",
+        "desc": "Every Pro feature with a one-time payment, no subscription.",
+        "perks": [
+          "✓ Full time tracking",
+          "✓ Unlimited clients",
+          "✓ Excel/CSV client import",
+          "✓ Projects",
+          "✓ Invoice generation",
+          "✓ Swiss QR invoice",
+          "✓ Payment reminders",
+          "✓ Full session history",
+          "✓ Advanced analytics",
+          "✓ Expense tracking",
+          "✓ CSV exports",
+          "✓ Custom invoice templates",
+          "✓ Advanced reporting",
+          "✓ Pro access for life"
+        ],
         "highlight": true
       }
     ],
     "included": {
       "eyebrow": "Included in every plan",
       "title": "Everything to track start, break and resume without effort.",
-      "subtitle": "Free covers the essentials. Pro unlocks every advanced feature without multiplying plan choices.",
+      "subtitle": "Free covers the essentials. Pro unlocks every advanced feature, and Lifetime keeps them for life.",
       "items": [
         "One-click timer",
         "CSV and PDF export",
@@ -378,7 +439,7 @@
       "items": [
         {
           "q": "Can I change plans anytime?",
-          "a": "Yes, billing is prorated for the month."
+          "a": "Yes, you can change or cancel from the Stripe portal. If you cancel during the 7-day Pro trial, no payment is charged."
         },
         {
           "q": "Is the free plan limited?",
@@ -393,8 +454,8 @@
     "closing": {
       "eyebrow": "Ready to start",
       "title": "Launch your tracking today.",
-      "subtitle": "Create your workspace and track breaks from day one.",
-      "ctaPrimary": "Free trial",
+      "subtitle": "Start Pro free for 7 days and track breaks from day one.",
+      "ctaPrimary": "Try Pro 7 days",
       "ctaSecondary": "Learn more"
     }
   },
@@ -403,7 +464,7 @@
       "eyebrow": "About",
       "title": "We help teams make time visible.",
       "subtitle": "Kronoma was born from a simple need: stop spreadsheets and give teams a clear view of their real hours. We build a tool that respects each rhythm, with clear stats and clean reports.",
-      "ctaPrimary": "Free trial",
+      "ctaPrimary": "Try Pro 7 days",
       "ctaSecondary": "See pricing"
     },
     "impact": {
@@ -448,7 +509,7 @@
       "eyebrow": "Join Kronoma",
       "title": "Ready to make your hours visible?",
       "subtitle": "Start a free trial and see your stats from week one.",
-      "ctaPrimary": "Free trial",
+      "ctaPrimary": "Try Pro 7 days",
       "ctaSecondary": "View pricing"
     }
   },
@@ -478,6 +539,55 @@
         "subtitle": "Fill in your business information so invoicing works correctly.",
         "cta": "Complete my profile",
         "dismiss": "Later"
+      }
+    },
+    "onboardingModal": {
+      "title": "Quick setup",
+      "eyebrow": "Step {current}/{total}",
+      "optional": "optional",
+      "later": "Later",
+      "back": "Back",
+      "next": "Continue",
+      "finish": "Finish setup",
+      "saving": "Saving...",
+      "success": "Your workspace is configured.",
+      "error": "Unable to save the setup.",
+      "steps": {
+        "identity": {
+          "title": "Start with your business",
+          "description": "These details will be used across your workspace and documents."
+        },
+        "business": {
+          "title": "Billing details",
+          "description": "Kronoma will add these details to your invoices automatically."
+        },
+        "billing": {
+          "title": "Revenue and mentions",
+          "description": "Set the defaults used to calculate revenue and prepare invoices."
+        },
+        "bank": {
+          "title": "Payment account",
+          "description": "Add a bank account now or skip this step and do it later.",
+          "descriptionExisting": "You already have a bank account. You can skip this step."
+        }
+      },
+      "fields": {
+        "name": "Display name",
+        "companyName": "Company name",
+        "address": "Address",
+        "postalCode": "Postal code",
+        "city": "City",
+        "country": "Country",
+        "email": "Billing email",
+        "phone": "Phone",
+        "currency": "Currency",
+        "hourlyRate": "Hourly rate",
+        "siret": "SIRET / business number",
+        "vatMention": "VAT mention",
+        "bankLabel": "Account label",
+        "bankName": "Bank",
+        "iban": "IBAN",
+        "bic": "BIC / SWIFT"
       }
     },
     "time": {
@@ -901,6 +1011,89 @@
       "serviceTypeDeleted": "Service type deleted",
       "noServiceTypes": "No service types yet"
     },
+    "accountingExport": {
+      "open": "Export for my accountant",
+      "title": "Accountant export",
+      "subtitle": "Generate a ZIP pack with CSV files, client invoices, and expense receipts for the selected period.",
+      "period": "Period",
+      "presets": {
+        "month": "Current month",
+        "quarter": "Quarter",
+        "year": "Year",
+        "custom": "Custom"
+      },
+      "startDate": "Start date",
+      "endDate": "End date",
+      "summary": "Summary before export",
+      "loadingSummary": "Calculating...",
+      "invoiceCount": "Invoices",
+      "expenseCount": "Expenses",
+      "totalInvoiced": "Total invoiced",
+      "totalExpenses": "Total expenses",
+      "emptyPeriod": "No documents exist for this period. The ZIP will still include empty CSV files and the README.",
+      "generate": "Generate accounting pack",
+      "generating": "Generating...",
+      "cancel": "Cancel",
+      "invalidPeriod": "The selected period is invalid.",
+      "downloadStarted": "Accounting pack download started.",
+      "downloadFailed": "Unable to generate the accounting pack.",
+      "upgradeTitle": "Reserved for Pro",
+      "upgradeDescription": "The accountant export gathers invoices, expenses, and supporting files so you can send everything to your accountant.",
+      "upgradeCta": "Upgrade to {plan}"
+    },
+    "emailInvoices": {
+      "open": "Invoice inbox",
+      "back": "Back to expenses",
+      "eyebrow": "Email import",
+      "title": "Supplier invoice inbox",
+      "subtitle": "Connect Gmail in read-only mode, scan recent emails, and manually approve invoices before creating an expense.",
+      "connectGmail": "Connect Gmail",
+      "disconnect": "Disconnect Gmail",
+      "scan": "Scan now",
+      "scanComplete": "{count} new invoice(s) detected.",
+      "scanError": "Unable to scan the mailbox.",
+      "connection": "Email connection",
+      "connected": "Connected",
+      "noConnection": "No mailbox connected.",
+      "privacyTitle": "Manual approval required",
+      "privacyDescription": "Kronoma uses read-only Gmail access, only looks for PDFs likely to be invoices, and never creates an expense without your approval.",
+      "inboxTitle": "Detected documents",
+      "pendingCount": "{count} document(s) to review",
+      "emptyTitle": "No invoices detected",
+      "emptyWithConnection": "Run a scan or extend the period later if your providers do not appear yet.",
+      "emptyWithoutConnection": "Connect Gmail to start detecting invoices received by email.",
+      "filters": {
+        "pending": "To review",
+        "imported": "Imported",
+        "ignored": "Ignored",
+        "all": "All"
+      },
+      "status": {
+        "pending": "To review",
+        "imported": "Imported",
+        "ignored": "Ignored"
+      },
+      "confidence": "Confidence {value}%",
+      "unknownSender": "Unknown sender",
+      "vendor": "Vendor",
+      "amount": "Amount",
+      "date": "Date",
+      "category": "Category",
+      "notes": "Notes",
+      "openFile": "Open PDF",
+      "import": "Create expense",
+      "importWithAmount": "Import {amount}",
+      "ignore": "Ignore",
+      "viewExpense": "View expense",
+      "ignored": "Invoice ignored.",
+      "imported": "Expense created.",
+      "missingFields": "Enter at least the vendor and amount.",
+      "actionError": "Action unavailable right now.",
+      "ignoreTitle": "Ignore this invoice?",
+      "ignoreDescription": "It will stay in the ignored history and will not create any expense.",
+      "disconnectTitle": "Disconnect Gmail?",
+      "disconnectDescription": "Future scans will be blocked. Already detected documents remain visible."
+    },
     "invoices": {
       "title": "Invoices",
       "subtitle": "Create, manage and export invoices for your clients.",
@@ -1014,7 +1207,10 @@
         "markAsPaid": "Mark as paid",
         "uploadedFile": "Uploaded file",
         "downloadFile": "Download file",
-        "generateQrBill": "Generate QR-bill"
+        "generateQrBill": "Generate QR-bill",
+        "previewTitle": "Invoice preview",
+        "previewHint": "Review the PDF before downloading or sending it.",
+        "openPreview": "Open in a tab"
       },
       "qrBillDialog": {
         "title": "Generate a QR-bill",
@@ -1085,6 +1281,8 @@
       "categoryPlaceholder": "Design, Hosting, Software...",
       "color": "Color",
       "startDate": "Start date",
+      "isActive": "Active expense",
+      "isActiveHint": "Turn off an ended subscription without losing its history.",
       "notes": "Notes",
       "emptyTitle": "No expenses yet",
       "emptySubtitle": "Add your first subscription or professional expense.",
@@ -1177,20 +1375,24 @@
     },
     "subscriptionPage": {
       "title": "Subscription",
-      "subtitle": "Manage your plan, billing, and subscription invoices.",
+      "subtitle": "Manage your plan, billing, and invoices.",
+      "trialNotice": "Pro starts with 7 free days. Lifetime is a one-time payment with no free trial.",
       "currentPlan": "Current plan",
-      "upgrade": "Upgrade",
-      "manageBilling": "Manage billing and invoices",
+      "upgrade": "Try Pro 7 days",
+      "buyLifetime": "Buy Lifetime",
+      "redirecting": "Redirecting to checkout...",
+      "manageBilling": "Manage billing",
       "successMessage": "Your subscription has been updated!",
       "billingToggle": {
         "monthly": "Monthly",
         "yearly": "Yearly",
         "badge": "2 months free",
         "yearlyHint": "Save with annual billing",
-        "suffixMonthly": " /user/month",
+        "suffixMonthly": " /month",
         "suffixYearly": " /user/year",
         "monthlyHint": "or __price__ CHF/yr with annual billing",
-        "yearlyEquivalent": "~__price__ CHF/month equivalent"
+        "yearlyEquivalent": "~__price__ CHF/month equivalent",
+        "lifetimeHint": "One-time payment, Pro access for life"
       },
       "plans": {
         "free": {
@@ -1223,6 +1425,27 @@
             "✓ Custom invoice templates",
             "✓ Advanced reporting"
           ]
+        },
+        "lifetime": {
+          "name": "Lifetime",
+          "perks": [
+            "✓ Every Pro feature",
+            "✓ Full time tracking",
+            "✓ Unlimited clients",
+            "✓ Excel/CSV client import",
+            "✓ Projects",
+            "✓ Invoice generation",
+            "✓ Swiss QR invoice",
+            "✓ Payment reminders",
+            "✓ Full session history",
+            "✓ Advanced analytics",
+            "✓ Expense tracking",
+            "✓ CSV exports",
+            "✓ Custom invoice templates",
+            "✓ Advanced reporting",
+            "✓ One-time payment",
+            "✓ Lifetime access"
+          ]
         }
       }
     },
@@ -1230,22 +1453,22 @@
     "currentTime": "Current time"
   },
   "planGate": {
-    "upgrade": "Upgrade to {plan}",
+    "upgrade": "Try {plan} 7 days",
     "sessions": {
       "title": "Session history",
-      "description": "Upgrade to Pro to access your full session history and detailed logs."
+      "description": "Try Pro 7 days to access your full session history and detailed logs."
     },
     "projects": {
       "title": "Projects",
-      "description": "Upgrade to Pro to organize your work sessions by project."
+      "description": "Try Pro 7 days to organize your work sessions by project."
     },
     "stats": {
       "title": "Advanced analytics",
-      "description": "Upgrade to Pro to access detailed statistics, productivity insights and CSV exports."
+      "description": "Try Pro 7 days to access detailed statistics, productivity insights and CSV exports."
     },
     "expenses": {
       "title": "Expense tracking",
-      "description": "Upgrade to Pro to track your subscriptions, tools and recurring costs."
+      "description": "Try Pro 7 days to track your subscriptions, tools and recurring costs."
     }
   }
 }

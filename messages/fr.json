@@ -11,7 +11,7 @@
     "faq": "F.A.Q",
     "dashboard": "Dashboard",
     "login": "Se connecter",
-    "trial": "Essai gratuit"
+    "trial": "Essayer Pro 7 jours"
   },
   "footer": {
     "tagline": "Le moyen le plus simple de transformer vos heures en factures.",
@@ -26,9 +26,9 @@
     "copy": "Kronoma. Suivi du temps et facturation freelance."
   },
   "auth": {
-    "title": "Welcome back",
-    "subtitle": "Bienvenue sur Kronoma. Connectez-vous avec un social ou un lien magique.",
-    "backLabel": "Creer un nouveau compte",
+    "title": "Connectez-vous pour continuer",
+    "subtitle": "Un compte se cree automatiquement avec Google ou un lien magique. Votre essai Pro reste pret apres connexion.",
+    "backLabel": "Retour a l'accueil",
     "emailLabel": "Email",
     "emailPlaceholder": "nom@entreprise.com",
     "magicLink": "Recevoir un lien magique",
@@ -48,13 +48,13 @@
       "badge": "Logiciel de suivi du temps pour freelances",
       "title": "Suivez vos heures.\nGenerez vos factures.",
       "titleAccent": "Soyez paye.",
-      "subtitle": "Kronoma est un logiciel simple de suivi du temps pour freelances et petites equipes. Suivez vos heures, gerez vos projets et generez des factures avec QR facture suisse en quelques clics.",
-      "ctaPrimary": "Commencer gratuitement",
+      "subtitle": "Kronoma est un logiciel simple de suivi du temps pour freelances et petites equipes. Essayez Pro gratuitement pendant 7 jours, puis suivez vos heures, gerez vos projets et generez des factures avec QR facture suisse en quelques clics.",
+      "ctaPrimary": "Essayer Pro 7 jours",
       "ctaSecondary": "En savoir plus",
       "bullets": [
         "Suivi du temps simple",
         "Factures avec QR facture suisse",
-        "Exports CSV et PDF"
+        "7 jours Pro gratuits"
       ]
     },
     "demo": {
@@ -184,15 +184,23 @@
     "pricing": {
       "eyebrow": "Tarifs simples",
       "socialProof": "Ideal pour developpeurs, designers, consultants et freelances.",
-      "title": "Une offre simple pour freelances et petites equipes.",
-      "subtitle": "Commencez gratuitement, puis passez au plan Pro a 9.90 CHF pour debloquer toutes les fonctions.",
+      "title": "Des offres simples pour freelances et petites equipes.",
+      "subtitle": "Essayez Pro gratuitement pendant 7 jours, continuez a 9.90 CHF/mois, ou choisissez Lifetime a 149 CHF une seule fois.",
       "cta": "Choisir {plan}",
+      "ctaFree": "Creer mon compte gratuit",
+      "ctaTrial": "Essayer {plan} 7 jours",
+      "ctaLifetime": "Acheter {plan}",
+      "planNotes": {
+        "free": "Compte gratuit pour tester les bases, sans carte.",
+        "trial": "7 jours gratuits sur Pro, annulation possible avant le premier paiement.",
+        "lifetime": "Paiement unique, acces Pro à vie. Pas d'essai gratuit."
+      },
       "billingToggle": {
         "monthly": "Mensuel",
         "yearly": "Annuel",
         "badge": "2 mois offerts",
         "yearlyHint": "Economisez avec la facturation annuelle",
-        "suffixMonthly": " /utilisateur/mois",
+        "suffixMonthly": " /mois",
         "suffixYearly": " /utilisateur/an",
         "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
         "yearlyEquivalent": "soit ~__price__ CHF/mois"
@@ -218,8 +226,8 @@
           "name": "Pro",
           "planId": "PRO",
           "price": "9.90 CHF",
-          "suffix": "/utilisateur/mois",
-          "desc": "Une seule offre payante, complete, pour les freelances et petites equipes.",
+          "suffix": "/mois",
+          "desc": "L'offre complete pour les freelances et petites equipes. Les 7 premiers jours sont gratuits.",
           "perks": [
             "✓ Time tracking complet",
             "✓ Clients illimites",
@@ -233,6 +241,28 @@
             "✓ Exports CSV",
             "✓ Templates de facture personnalises",
             "✓ Reporting avance"
+          ],
+          "highlight": false
+        },
+        {
+          "name": "Lifetime",
+          "planId": "LIFETIME",
+          "price": "149 CHF",
+          "desc": "Toutes les fonctions Pro avec un paiement unique, sans abonnement.",
+          "perks": [
+            "✓ Time tracking complet",
+            "✓ Clients illimites",
+            "✓ Projets",
+            "✓ Generation de factures",
+            "✓ QR facture suisse",
+            "✓ Rappels de paiement",
+            "✓ Historique complet des sessions",
+            "✓ Analytics avancees",
+            "✓ Suivi des depenses",
+            "✓ Exports CSV",
+            "✓ Templates de facture personnalises",
+            "✓ Reporting avance",
+            "✓ Acces Pro à vie"
           ],
           "highlight": true
         }
@@ -264,28 +294,36 @@
     "closing": {
       "eyebrow": "Pret a commencer",
       "title": "Transformez vos heures en factures.",
-      "subtitle": "Commencez gratuitement avec Kronoma et simplifiez votre gestion du temps.",
-      "ctaPrimary": "Commencer gratuitement",
+      "subtitle": "Essayez Pro gratuitement pendant 7 jours et simplifiez votre gestion du temps.",
+      "ctaPrimary": "Essayer Pro 7 jours",
       "ctaSecondary": "Voir la demo"
     }
   },
   "pricingPage": {
     "hero": {
       "eyebrow": "Tarifs",
-      "title": "Pricing simple pour suivre vos heures sans friction.",
-      "subtitle": "Commencez gratuitement, puis passez au plan Pro a 9.90 CHF quand vous voulez debloquer toutes les fonctions.",
-      "ctaPrimary": "Demarrer l'essai gratuit",
+      "title": "Des tarifs simples pour suivre vos heures sans friction.",
+      "subtitle": "Essayez Pro gratuitement pendant 7 jours, continuez a 9.90 CHF/mois, ou choisissez Lifetime a 149 CHF une seule fois.",
+      "ctaPrimary": "Essayer Pro 7 jours",
       "ctaSecondary": "Voir la demo"
     },
     "cta": "Choisir {plan}",
+    "ctaFree": "Creer mon compte gratuit",
+    "ctaTrial": "Essayer {plan} 7 jours",
+    "ctaLifetime": "Acheter {plan}",
     "ctaCurrent": "Plan actuel",
     "ctaManage": "Gerer l'abonnement",
+    "planNotes": {
+      "free": "Compte gratuit pour tester les bases, sans carte.",
+      "trial": "7 jours gratuits sur Pro, annulation possible avant le premier paiement.",
+      "lifetime": "Paiement unique, acces Pro à vie. Pas d'essai gratuit."
+    },
     "billingToggle": {
       "monthly": "Mensuel",
       "yearly": "Annuel",
       "badge": "2 mois offerts",
       "yearlyHint": "Economisez avec la facturation annuelle",
-      "suffixMonthly": " /utilisateur/mois",
+      "suffixMonthly": " /mois",
       "suffixYearly": " /utilisateur/an",
       "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
       "yearlyEquivalent": "soit ~__price__ CHF/mois"
@@ -311,8 +349,8 @@
         "name": "Pro",
         "planId": "PRO",
         "price": "9.90 CHF",
-        "suffix": "/utilisateur/mois",
-        "desc": "Une seule offre payante, complete, pour les freelances et petites equipes.",
+        "suffix": "/mois",
+        "desc": "L'offre complete pour les freelances et petites equipes. Les 7 premiers jours sont gratuits.",
         "perks": [
           "✓ Time tracking complet",
           "✓ Clients illimites",
@@ -328,13 +366,36 @@
           "✓ Templates de facture personnalises",
           "✓ Reporting avance"
         ],
+        "highlight": false
+      },
+      {
+        "name": "Lifetime",
+        "planId": "LIFETIME",
+        "price": "149 CHF",
+        "desc": "Toutes les fonctions Pro avec un paiement unique, sans abonnement.",
+        "perks": [
+          "✓ Time tracking complet",
+          "✓ Clients illimites",
+          "✓ Import Excel/CSV des clients",
+          "✓ Projets",
+          "✓ Generation de factures",
+          "✓ QR facture suisse",
+          "✓ Rappels de paiement",
+          "✓ Historique complet des sessions",
+          "✓ Analytics avancees",
+          "✓ Suivi des depenses",
+          "✓ Exports CSV",
+          "✓ Templates de facture personnalises",
+          "✓ Reporting avance",
+          "✓ Acces Pro à vie"
+        ],
         "highlight": true
       }
     ],
     "included": {
       "eyebrow": "Inclus dans chaque plan",
       "title": "Tout pour suivre debut, pause et reprise sans effort.",
-      "subtitle": "Le plan Free couvre l'essentiel. Le plan Pro debloque toutes les fonctions avancees sans multiplier les options.",
+      "subtitle": "Le plan Free couvre l'essentiel. Pro debloque toutes les fonctions avancees, et Lifetime les garde à vie.",
       "items": [
         "Chrono en 1 clic",
         "Export CSV et PDF",
@@ -378,7 +439,7 @@
       "items": [
         {
           "q": "Puis-je changer de plan a tout moment ?",
-          "a": "Oui, la facturation est ajustee au pro-rata du mois."
+          "a": "Oui, vous pouvez modifier ou annuler depuis le portail Stripe. Si vous annulez pendant les 7 jours d'essai Pro, aucun paiement n'est debite."
         },
         {
           "q": "Le plan gratuit a-t-il une limite ?",
@@ -393,8 +454,8 @@
     "closing": {
       "eyebrow": "Pret a demarrer",
       "title": "Lancez votre suivi aujourd'hui.",
-      "subtitle": "Creez votre espace et suivez vos pauses des la premiere journee.",
-      "ctaPrimary": "Essai gratuit",
+      "subtitle": "Lancez Pro gratuitement pendant 7 jours et suivez vos pauses des la premiere journee.",
+      "ctaPrimary": "Essayer Pro 7 jours",
       "ctaSecondary": "En savoir plus"
     }
   },
@@ -403,7 +464,7 @@
       "eyebrow": "A propos",
       "title": "Nous aidons les equipes a rendre le temps visible.",
       "subtitle": "Kronoma est ne d'un besoin simple: arreter les tableurs et donner aux equipes une vision nette de leurs vraies heures. Nous construisons un outil qui respecte le rythme de chacun, avec des stats claires et des rapports propres.",
-      "ctaPrimary": "Essai gratuit",
+      "ctaPrimary": "Essayer Pro 7 jours",
       "ctaSecondary": "Voir les tarifs"
     },
     "impact": {
@@ -448,7 +509,7 @@
       "eyebrow": "Rejoignez Kronoma",
       "title": "Pret a rendre vos heures visibles ?",
       "subtitle": "Lancez un essai gratuit et voyez vos stats des la premiere semaine.",
-      "ctaPrimary": "Essai gratuit",
+      "ctaPrimary": "Essayer Pro 7 jours",
       "ctaSecondary": "Voir pricing"
     }
   },
@@ -478,6 +539,55 @@
         "subtitle": "Renseignez vos informations d'entreprise pour que la facturation fonctionne correctement.",
         "cta": "Completer mon profil",
         "dismiss": "Plus tard"
+      }
+    },
+    "onboardingModal": {
+      "title": "Configuration rapide",
+      "eyebrow": "Etape {current}/{total}",
+      "optional": "optionnel",
+      "later": "Plus tard",
+      "back": "Retour",
+      "next": "Continuer",
+      "finish": "Terminer la configuration",
+      "saving": "Enregistrement...",
+      "success": "Votre espace est configure.",
+      "error": "Impossible d'enregistrer la configuration.",
+      "steps": {
+        "identity": {
+          "title": "Commencons par votre activite",
+          "description": "Ces informations seront utilisees dans votre espace et sur vos documents."
+        },
+        "business": {
+          "title": "Coordonnees de facturation",
+          "description": "Kronoma les ajoutera automatiquement a vos factures."
+        },
+        "billing": {
+          "title": "Revenus et mentions",
+          "description": "Definissez les valeurs par defaut pour calculer vos revenus et preparer la facturation."
+        },
+        "bank": {
+          "title": "Compte de paiement",
+          "description": "Ajoutez un compte bancaire maintenant ou passez cette etape pour le faire plus tard.",
+          "descriptionExisting": "Vous avez deja un compte bancaire. Vous pouvez passer cette etape."
+        }
+      },
+      "fields": {
+        "name": "Nom d'affichage",
+        "companyName": "Nom de l'entreprise",
+        "address": "Adresse",
+        "postalCode": "Code postal",
+        "city": "Ville",
+        "country": "Pays",
+        "email": "Email de facturation",
+        "phone": "Telephone",
+        "currency": "Devise",
+        "hourlyRate": "Taux horaire",
+        "siret": "SIRET / numero d'entreprise",
+        "vatMention": "Mention TVA",
+        "bankLabel": "Libelle du compte",
+        "bankName": "Banque",
+        "iban": "IBAN",
+        "bic": "BIC / SWIFT"
       }
     },
     "time": {
@@ -901,6 +1011,89 @@
       "serviceTypeDeleted": "Type de service supprime",
       "noServiceTypes": "Aucun type de service"
     },
+    "accountingExport": {
+      "open": "Exporter pour mon comptable",
+      "title": "Export fiduciaire",
+      "subtitle": "Generez un pack ZIP avec les CSV, factures clients et justificatifs de frais sur la periode choisie.",
+      "period": "Periode",
+      "presets": {
+        "month": "Mois en cours",
+        "quarter": "Trimestre",
+        "year": "Annee",
+        "custom": "Personnalisee"
+      },
+      "startDate": "Date de debut",
+      "endDate": "Date de fin",
+      "summary": "Resume avant export",
+      "loadingSummary": "Calcul...",
+      "invoiceCount": "Factures",
+      "expenseCount": "Depenses",
+      "totalInvoiced": "Total facture",
+      "totalExpenses": "Total depenses",
+      "emptyPeriod": "Aucun document n'existe sur cette periode. Le ZIP contiendra quand meme les CSV vides et le README.",
+      "generate": "Generer le pack comptable",
+      "generating": "Generation...",
+      "cancel": "Annuler",
+      "invalidPeriod": "La periode selectionnee est invalide.",
+      "downloadStarted": "Telechargement du pack comptable lance.",
+      "downloadFailed": "Impossible de generer le pack comptable.",
+      "upgradeTitle": "Reserve au plan Pro",
+      "upgradeDescription": "L'export fiduciaire regroupe vos factures, depenses et justificatifs pour faciliter la transmission a votre comptable.",
+      "upgradeCta": "Passer a {plan}"
+    },
+    "emailInvoices": {
+      "open": "Inbox factures",
+      "back": "Retour aux frais",
+      "eyebrow": "Import email",
+      "title": "Inbox factures fournisseurs",
+      "subtitle": "Connectez Gmail en lecture seule, scannez les emails recents et validez manuellement les factures avant de creer une depense.",
+      "connectGmail": "Connecter Gmail",
+      "disconnect": "Deconnecter Gmail",
+      "scan": "Scanner maintenant",
+      "scanComplete": "{count} nouvelle(s) facture(s) detectee(s).",
+      "scanError": "Impossible de scanner la boite mail.",
+      "connection": "Connexion email",
+      "connected": "Connecte",
+      "noConnection": "Aucune boite mail connectee.",
+      "privacyTitle": "Validation manuelle obligatoire",
+      "privacyDescription": "Kronoma utilise un acces Gmail en lecture seule, cherche uniquement des PDF susceptibles d'etre des factures et ne cree jamais de depense sans votre validation.",
+      "inboxTitle": "Documents detectes",
+      "pendingCount": "{count} document(s) a verifier",
+      "emptyTitle": "Aucune facture detectee",
+      "emptyWithConnection": "Lancez un scan ou elargissez la periode plus tard si vos fournisseurs n'apparaissent pas encore.",
+      "emptyWithoutConnection": "Connectez Gmail pour commencer a detecter les factures recues par email.",
+      "filters": {
+        "pending": "A verifier",
+        "imported": "Importees",
+        "ignored": "Ignorees",
+        "all": "Toutes"
+      },
+      "status": {
+        "pending": "A verifier",
+        "imported": "Importee",
+        "ignored": "Ignoree"
+      },
+      "confidence": "Confiance {value}%",
+      "unknownSender": "Expediteur inconnu",
+      "vendor": "Fournisseur",
+      "amount": "Montant",
+      "date": "Date",
+      "category": "Categorie",
+      "notes": "Notes",
+      "openFile": "Ouvrir le PDF",
+      "import": "Creer la depense",
+      "importWithAmount": "Importer {amount}",
+      "ignore": "Ignorer",
+      "viewExpense": "Voir la depense",
+      "ignored": "Facture ignoree.",
+      "imported": "Depense creee.",
+      "missingFields": "Renseignez au minimum le fournisseur et le montant.",
+      "actionError": "Action impossible pour le moment.",
+      "ignoreTitle": "Ignorer cette facture ?",
+      "ignoreDescription": "Elle restera dans l'historique ignore et ne creera aucune depense.",
+      "disconnectTitle": "Deconnecter Gmail ?",
+      "disconnectDescription": "Les futurs scans seront bloques. Les documents deja detectes restent visibles."
+    },
     "invoices": {
       "title": "Factures",
       "subtitle": "Creez, gerez et exportez vos factures clients.",
@@ -1014,7 +1207,10 @@
         "markAsPaid": "Marquer comme payee",
         "uploadedFile": "Fichier importe",
         "downloadFile": "Telecharger le fichier",
-        "generateQrBill": "Generer QR-facture"
+        "generateQrBill": "Generer QR-facture",
+        "previewTitle": "Apercu de la facture",
+        "previewHint": "Consultez le PDF avant de le telecharger ou de l'envoyer.",
+        "openPreview": "Ouvrir dans un onglet"
       },
       "qrBillDialog": {
         "title": "Generer une QR-facture",
@@ -1085,6 +1281,8 @@
       "categoryPlaceholder": "Design, Hebergement, Logiciel...",
       "color": "Couleur",
       "startDate": "Date de debut",
+      "isActive": "Frais actif",
+      "isActiveHint": "Desactivez un abonnement termine sans perdre son historique.",
       "notes": "Notes",
       "emptyTitle": "Aucun frais",
       "emptySubtitle": "Ajoutez votre premier abonnement ou frais professionnel.",
@@ -1177,20 +1375,24 @@
     },
     "subscriptionPage": {
       "title": "Abonnement",
-      "subtitle": "Gerez votre plan, votre facturation et vos factures d'abonnement.",
+      "subtitle": "Gerez votre plan, votre facturation et vos factures.",
+      "trialNotice": "Pro commence par 7 jours gratuits. Lifetime est un paiement unique sans essai gratuit.",
       "currentPlan": "Plan actuel",
-      "upgrade": "Upgrade",
-      "manageBilling": "Gerer la facturation et les factures",
+      "upgrade": "Essayer Pro 7 jours",
+      "buyLifetime": "Acheter Lifetime",
+      "redirecting": "Redirection vers le paiement...",
+      "manageBilling": "Gerer l'abonnement",
       "successMessage": "Votre abonnement a ete mis a jour !",
       "billingToggle": {
         "monthly": "Mensuel",
         "yearly": "Annuel",
         "badge": "2 mois offerts",
         "yearlyHint": "Economisez avec la facturation annuelle",
-        "suffixMonthly": " /utilisateur/mois",
+        "suffixMonthly": " /mois",
         "suffixYearly": " /utilisateur/an",
         "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
-        "yearlyEquivalent": "soit ~__price__ CHF/mois"
+        "yearlyEquivalent": "soit ~__price__ CHF/mois",
+        "lifetimeHint": "Paiement unique, acces Pro à vie"
       },
       "plans": {
         "free": {
@@ -1223,6 +1425,27 @@
             "✓ Templates de facture personnalises",
             "✓ Reporting avance"
           ]
+        },
+        "lifetime": {
+          "name": "Lifetime",
+          "perks": [
+            "✓ Toutes les fonctions Pro",
+            "✓ Time tracking complet",
+            "✓ Clients illimites",
+            "✓ Import Excel/CSV des clients",
+            "✓ Projets",
+            "✓ Generation de factures",
+            "✓ QR facture suisse",
+            "✓ Rappels de paiement",
+            "✓ Historique complet des sessions",
+            "✓ Analytics avancees",
+            "✓ Suivi des depenses",
+            "✓ Exports CSV",
+            "✓ Templates de facture personnalises",
+            "✓ Reporting avance",
+            "✓ Paiement unique",
+            "✓ Acces à vie"
+          ]
         }
       }
     },
@@ -1230,22 +1453,22 @@
     "currentTime": "Heure actuelle"
   },
   "planGate": {
-    "upgrade": "Passer au plan {plan}",
+    "upgrade": "Essayer {plan} 7 jours",
     "sessions": {
       "title": "Historique des sessions",
-      "description": "Passez au plan Pro pour acceder a l'historique complet de vos sessions."
+      "description": "Essayez Pro 7 jours pour acceder a l'historique complet de vos sessions."
     },
     "projects": {
       "title": "Projets",
-      "description": "Passez au plan Pro pour organiser vos sessions par projet."
+      "description": "Essayez Pro 7 jours pour organiser vos sessions par projet."
     },
     "stats": {
       "title": "Analytics avancees",
-      "description": "Passez au plan Pro pour acceder aux statistiques detaillees, insights et exports CSV."
+      "description": "Essayez Pro 7 jours pour acceder aux statistiques detaillees, insights et exports CSV."
     },
     "expenses": {
       "title": "Suivi des depenses",
-      "description": "Passez au plan Pro pour suivre vos abonnements, outils et depenses recurrentes."
+      "description": "Essayez Pro 7 jours pour suivre vos abonnements, outils et depenses recurrentes."
     }
   }
 }

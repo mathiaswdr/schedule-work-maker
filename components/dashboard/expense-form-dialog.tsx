@@ -25,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
 type ExpenseFormValues = z.infer<typeof ExpenseSchema>;
@@ -250,6 +251,29 @@ export default function ExpenseFormDialog({
               {...form.register("startDate")}
               type="date"
               className="rounded-xl"
+            />
+          </div>
+
+          {/* Active */}
+          <div className="flex items-center justify-between rounded-2xl border border-line bg-white px-4 py-3">
+            <div className="space-y-1">
+              <label
+                htmlFor="expense-active"
+                className="text-sm font-medium text-ink"
+              >
+                {t("expenses.isActive")}
+              </label>
+              <p className="text-xs text-ink-muted">
+                {t("expenses.isActiveHint")}
+              </p>
+            </div>
+            <Switch
+              id="expense-active"
+              checked={form.watch("isActive")}
+              onCheckedChange={(checked) =>
+                form.setValue("isActive", checked, { shouldDirty: true })
+              }
+              className="data-[state=checked]:bg-brand"
             />
           </div>
 

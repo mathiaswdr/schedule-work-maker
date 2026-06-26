@@ -10,6 +10,7 @@ import { useAction } from "next-safe-action/hooks";
 import {
   ArrowLeft,
   Download,
+  FileArchive,
   FileText,
   Pencil,
   Plus,
@@ -23,7 +24,11 @@ import {
 } from "@/server/actions/expenses";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { toast } from "sonner";
+import type { PlanId } from "@/lib/plans";
 
+const AccountingExportDialog = dynamic(
+  () => import("@/components/dashboard/accounting-export-dialog")
+);
 const ExpenseFormDialog = dynamic(
   () => import("@/components/dashboard/expense-form-dialog")
 );
@@ -69,6 +74,7 @@ type ExpenseDetail = Omit<ExpenseItem, "invoices"> & {
 
 type ExpensesClientProps = {
   displayClassName: string;
+  userPlan: PlanId;
   currency: string;
   initialExpenses?: ExpenseItem[];
   initialExpenseId?: string;
@@ -101,6 +107,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default function ExpensesClient({
   displayClassName,
+  userPlan,
   currency,
   initialExpenses,
   initialExpenseId,
@@ -118,6 +125,7 @@ export default function ExpensesClient({
   const [isLoading, setIsLoading] = useState(!hasInitialExpenses && !hasInitialDetail);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [accountingExportOpen, setAccountingExportOpen] = useState(false);
   const [pendingInvoiceFile, setPendingInvoiceFile] = useState<File | null>(
     null
   );
@@ -543,6 +551,7 @@ export default function ExpensesClient({
                   <button
                     type="button"
                     onClick={(e) => handleDelete(selectedExpense.id, e)}
+                    aria-label={tc("delete")}
                     className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -746,6 +755,7 @@ export default function ExpensesClient({
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
+                          aria-label={t("expenses.download")}
                           className="rounded-lg p-1.5 text-ink-muted transition hover:bg-ink-soft hover:text-ink"
                         >
                           <Download className="h-3.5 w-3.5" />
@@ -761,6 +771,7 @@ export default function ExpensesClient({
                             });
                             if (ok) executeDeleteInvoice({ id: invoice.id });
                           }}
+                          aria-label={tc("delete")}
                           className="rounded-lg p-1.5 text-ink-muted transition hover:bg-red-50 hover:text-red-600"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -800,6 +811,7 @@ export default function ExpensesClient({
           defaultAmount={selectedExpense.amount}
           initialFile={pendingInvoiceFile}
         />
+        {ConfirmDialogElement}
       </main>
     );
   }
@@ -839,14 +851,25 @@ export default function ExpensesClient({
                 {t("expenses.pageSubtitle")}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="flex items-center gap-2 self-start rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
-            >
-              <Plus className="h-4 w-4" />
-              {t("expenses.addExpense")}
-            </button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {/* Email invoice import is intentionally hidden for now. Re-enable the inbox entry when the product decision is confirmed. */}
+              <button
+                type="button"
+                onClick={() => setAccountingExportOpen(true)}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white"
+              >
+                <FileArchive className="h-4 w-4" />
+                {t("accountingExport.open")}
+              </button>
+              <button
+                type="button"
+                onClick={handleAdd}
+                className="flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
+              >
+                <Plus className="h-4 w-4" />
+                {t("expenses.addExpense")}
+              </button>
+            </div>
           </motion.section>
 
           {/* Summary cards */}
@@ -968,6 +991,7 @@ export default function ExpensesClient({
                       <button
                         type="button"
                         onClick={(e) => handleEdit(expense, e)}
+                        aria-label={t("expenses.editExpense")}
                         className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink"
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -975,6 +999,7 @@ export default function ExpensesClient({
                       <button
                         type="button"
                         onClick={(e) => handleDelete(expense.id, e)}
+                        aria-label={tc("delete")}
                         className="rounded-lg p-1.5 text-ink-muted hover:bg-red-50 hover:text-red-600"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -1152,6 +1177,12 @@ export default function ExpensesClient({
         onOpenChange={setDialogOpen}
         onSuccess={handleDialogSuccess}
         editingExpense={editingExpense}
+      />
+      <AccountingExportDialog
+        open={accountingExportOpen}
+        onOpenChange={setAccountingExportOpen}
+        userPlan={userPlan}
+        currency={currency}
       />
       {ConfirmDialogElement}
     </main>

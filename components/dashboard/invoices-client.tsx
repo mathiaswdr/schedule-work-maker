@@ -9,6 +9,8 @@ import { pickVariants } from "@/lib/motion-variants";
 import {
   ArrowLeft,
   Download,
+  ExternalLink,
+  FileArchive,
   FileText,
   Pencil,
   Plus,
@@ -20,9 +22,13 @@ import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { deleteInvoice, updateInvoiceStatus } from "@/server/actions/invoices";
 import { useConfirm } from "@/components/ui/confirm-dialog";
+import type { PlanId } from "@/lib/plans";
 
 const InvoiceFormDialog = dynamic(
   () => import("@/components/dashboard/invoice-form-dialog")
+);
+const AccountingExportDialog = dynamic(
+  () => import("@/components/dashboard/accounting-export-dialog")
 );
 const UploadInvoiceDialog = dynamic(
   () => import("@/components/dashboard/upload-invoice-dialog")
@@ -93,7 +99,8 @@ type InvoiceDetail = InvoiceSummary & {
 
 type InvoicesClientProps = {
   displayClassName: string;
-  userPlan?: string;
+  userPlan: PlanId;
+  currency: string;
   invoiceLimit?: { allowed: boolean; current: number; max: number | null };
   initialInvoices?: InvoiceSummary[];
   initialHasMore?: boolean;
@@ -109,6 +116,8 @@ const statusColors: Record<string, string> = {
 
 export default function InvoicesClient({
   displayClassName,
+  userPlan,
+  currency,
   invoiceLimit,
   initialInvoices,
   initialHasMore,
@@ -139,6 +148,7 @@ export default function InvoicesClient({
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [downloading, setDownloading] = useState<string | null>(null);
   const [uploadFormOpen, setUploadFormOpen] = useState(false);
+  const [accountingExportOpen, setAccountingExportOpen] = useState(false);
   const [editingUploadedInvoice, setEditingUploadedInvoice] =
     useState<InvoiceDetail | null>(null);
   const [qrBillDialogOpen, setQrBillDialogOpen] = useState(false);
@@ -282,6 +292,11 @@ export default function InvoicesClient({
   };
 
   const selected = selectedInvoice?.id === selectedId ? selectedInvoice : null;
+  const invoicePreviewSrc = selected
+    ? `/api/invoices/${selected.id}/generate?format=pdf&locale=${encodeURIComponent(
+        locale
+      )}&disposition=inline`
+    : null;
 
   const filtered =
     statusFilter === "all"
@@ -650,6 +665,39 @@ export default function InvoicesClient({
                   </div>
                 </motion.section>
               )}
+
+              {invoicePreviewSrc && (
+                <motion.section variants={v.fadeUp} className="space-y-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {t("invoices.detail.previewTitle")}
+                      </p>
+                      <p className="mt-1 text-xs text-ink-muted">
+                        {t("invoices.detail.previewHint")}
+                      </p>
+                    </div>
+                    <a
+                      href={invoicePreviewSrc}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      {t("invoices.detail.openPreview")}
+                    </a>
+                  </div>
+                  <div className="overflow-hidden rounded-3xl border border-line bg-white shadow-[0_28px_70px_-55px_rgba(29,27,22,0.45)]">
+                    <iframe
+                      key={invoicePreviewSrc}
+                      title={t("invoices.detail.previewTitle")}
+                      src={invoicePreviewSrc}
+                      loading="lazy"
+                      className="h-[620px] w-full bg-white sm:h-[760px]"
+                    />
+                  </div>
+                </motion.section>
+              )}
                 </>
               )}
             </>
@@ -679,6 +727,14 @@ export default function InvoicesClient({
                       {invoiceLimit.current}/{invoiceLimit.max}
                     </span>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => setAccountingExportOpen(true)}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white sm:w-auto sm:justify-start"
+                  >
+                    <FileArchive className="h-4 w-4" />
+                    {t("accountingExport.open")}
+                  </button>
                   <button
                     type="button"
                     onClick={() => {
@@ -906,6 +962,12 @@ export default function InvoicesClient({
           invoiceDetailCacheRef.current.clear();
           void fetchInvoices();
         }}
+      />
+      <AccountingExportDialog
+        open={accountingExportOpen}
+        onOpenChange={setAccountingExportOpen}
+        userPlan={userPlan}
+        currency={currency}
       />
       {selected && (
         <QrBillDialog

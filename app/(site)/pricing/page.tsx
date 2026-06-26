@@ -8,6 +8,7 @@ import {
   buildMarketingMetadata,
   serializeJsonLd,
 } from "@/lib/seo";
+import { buildLoginCheckoutHref } from "@/lib/checkout-intent";
 import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import { PricingCards } from "./pricing-cards";
@@ -123,7 +124,7 @@ export default async function PricingPage() {
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-4">
             <Link
-              href="/auth/login"
+              href={buildLoginCheckoutHref()}
               className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
             >
               {t("hero.ctaPrimary")}
@@ -144,8 +145,14 @@ export default async function PricingPage() {
             plans={plans}
             userPlan={userPlan}
             ctaLabelTemplate={t("cta", { plan: "{plan}" })}
+            ctaFreeLabel={t("ctaFree")}
+            ctaTrialLabel={t("ctaTrial", { plan: "{plan}" })}
+            ctaLifetimeLabel={t("ctaLifetime", { plan: "{plan}" })}
             ctaCurrentLabel={t("ctaCurrent")}
             ctaManageLabel={t("ctaManage")}
+            freeNote={t("planNotes.free")}
+            trialNote={t("planNotes.trial")}
+            lifetimeNote={t("planNotes.lifetime")}
             toggleMonthly={t("billingToggle.monthly")}
             toggleYearly={t("billingToggle.yearly")}
             toggleBadge={t("billingToggle.badge")}
@@ -239,7 +246,7 @@ export default async function PricingPage() {
               </div>
               <div className="mt-6">
                 <Link
-                  href="/auth/login"
+                  href={buildLoginCheckoutHref()}
                   className="inline-flex rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
                 >
                   {t("migration.cta")}
@@ -343,7 +350,7 @@ export default async function PricingPage() {
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-4">
               <Link
-                href="/auth/login"
+                href={buildLoginCheckoutHref()}
                 className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
               >
                 {t("closing.ctaPrimary")}

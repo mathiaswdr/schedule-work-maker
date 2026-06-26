@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, LayoutDashboard } from "lucide-react";
 import type { ExtendUser } from "@/next-auth";
 import { scrollToSection } from "@/utils/tools";
+import { buildLoginCheckoutHref } from "@/lib/checkout-intent";
 
 const ANCHOR_SCROLL_OFFSET = -40;
 
@@ -136,7 +137,7 @@ export default function NavClient({ user, labels }: NavClientProps) {
                     {labels.login}
                   </Link>
                   <Link
-                    href="/auth/login"
+                    href={buildLoginCheckoutHref()}
                     className="rounded-full bg-neutral-900 px-5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
                   >
                     {labels.trial}
@@ -213,7 +214,7 @@ export default function NavClient({ user, labels }: NavClientProps) {
                     {labels.login}
                   </Link>
                   <Link
-                    href="/auth/login"
+                    href={buildLoginCheckoutHref()}
                     onClick={() => setMobileOpen(false)}
                     className="flex items-center justify-center rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
                   >

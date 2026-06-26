@@ -8,6 +8,7 @@ import {
   buildMarketingMetadata,
   serializeJsonLd,
 } from "@/lib/seo";
+import { buildLoginCheckoutHref } from "@/lib/checkout-intent";
 import { PricingCards } from "./pricing/pricing-cards";
 
 const display = DM_Serif_Display({
@@ -194,13 +195,12 @@ export default async function Home() {
               className="flex flex-wrap items-center gap-4 motion-safe:opacity-0 motion-safe:animate-[fade-up_1s_ease-out_forwards]"
               style={{ animationDelay: "320ms" }}
             >
-              <ScrollSectionButton
-                sectionId="pricing"
-                offsetY={SITE_SECTION_OFFSET}
+              <Link
+                href={buildLoginCheckoutHref()}
                 className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] hover:shadow-[0_20px_44px_-22px_rgba(249,115,22,0.95)]"
               >
                 {t("hero.ctaPrimary")}
-              </ScrollSectionButton>
+              </Link>
               <ScrollSectionButton
                 sectionId="home-features"
                 offsetY={SITE_SECTION_OFFSET}
@@ -557,8 +557,14 @@ export default async function Home() {
               plans={pricingPlans}
               userPlan={null}
               ctaLabelTemplate={t("pricing.cta", { plan: "{plan}" })}
+              ctaFreeLabel={t("pricing.ctaFree")}
+              ctaTrialLabel={t("pricing.ctaTrial", { plan: "{plan}" })}
+              ctaLifetimeLabel={t("pricing.ctaLifetime", { plan: "{plan}" })}
               ctaCurrentLabel=""
               ctaManageLabel=""
+              freeNote={t("pricing.planNotes.free")}
+              trialNote={t("pricing.planNotes.trial")}
+              lifetimeNote={t("pricing.planNotes.lifetime")}
               toggleMonthly={t("pricing.billingToggle.monthly")}
               toggleYearly={t("pricing.billingToggle.yearly")}
               toggleBadge={t("pricing.billingToggle.badge")}
@@ -619,7 +625,7 @@ export default async function Home() {
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-4">
               <Link
-                href="/auth/login"
+                href={buildLoginCheckoutHref()}
                 className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
               >
                 {t("closing.ctaPrimary")}

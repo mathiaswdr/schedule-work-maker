@@ -14,7 +14,7 @@ const display = DM_Serif_Display({
 });
 
 export default async function DashboardInvoicesPage() {
-  const { userId, userPlan } = await getDashboardViewer();
+  const { userId, userPlan, currency } = await getDashboardViewer();
   const invoiceLimit = await checkInvoiceMonthlyLimit(userId, userPlan);
 
   const initialInvoices = await prisma.invoice.findMany({
@@ -46,6 +46,7 @@ export default async function DashboardInvoicesPage() {
     <InvoicesClient
       displayClassName={display.className}
       userPlan={userPlan}
+      currency={currency}
       invoiceLimit={invoiceLimit}
       initialInvoices={serializeForClient(paginatedInitialInvoices)}
       initialHasMore={hasMoreInitialInvoices}

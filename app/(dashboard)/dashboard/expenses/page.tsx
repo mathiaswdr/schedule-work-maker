@@ -33,6 +33,7 @@ export default async function DashboardExpensesPage() {
     <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="expenses">
       <ExpensesClient
         displayClassName={display.className}
+        userPlan={userPlan}
         currency={currency}
         initialExpenses={serializeForClient(initialExpenses)}
       />

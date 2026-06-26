@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { VitalsPayload } from "@/types/vitals";
 
+const shouldLogVitals = process.env.WEB_VITALS_LOG_TO_CONSOLE === "true";
+
 export async function POST(request: Request) {
   const payload = (await request.json()) as Partial<VitalsPayload>;
 
@@ -12,7 +14,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  console.info("[vitals]", JSON.stringify(payload));
+  if (shouldLogVitals) {
+    console.info("[vitals]", JSON.stringify(payload));
+  }
 
   return new NextResponse(null, {
     status: 204,

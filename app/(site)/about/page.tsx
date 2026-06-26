@@ -7,6 +7,7 @@ import {
   buildMarketingMetadata,
   serializeJsonLd,
 } from "@/lib/seo";
+import { buildLoginCheckoutHref } from "@/lib/checkout-intent";
 
 const display = DM_Serif_Display({
   subsets: ["latin"],
@@ -100,7 +101,7 @@ export default async function AboutPage() {
               </p>
               <div className="mt-6 flex flex-wrap gap-4">
                 <Link
-                  href="/auth/login"
+                  href={buildLoginCheckoutHref()}
                   className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
                 >
                   {t("hero.ctaPrimary")}
@@ -237,7 +238,7 @@ export default async function AboutPage() {
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-4">
               <Link
-                href="/auth/login"
+                href={buildLoginCheckoutHref()}
                 className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
               >
                 {t("closing.ctaPrimary")}

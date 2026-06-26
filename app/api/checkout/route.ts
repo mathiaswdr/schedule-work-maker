@@ -8,12 +8,14 @@ import {
   getStripePriceId,
   canUpgrade,
   normalizePlanId,
+  PLANS,
   type PlanId,
   type BillingPeriod,
 } from "@/lib/plans";
+import { SUBSCRIPTION_TRIAL_DAYS } from "@/lib/checkout-intent";
 
 const CheckoutBody = z.object({
-  plan: z.enum(["STARTER", "PRO"]),
+  plan: z.enum(["STARTER", "PRO", "LIFETIME"]),
   billing: z.enum(["monthly", "yearly"]).default("monthly"),
 });
 
@@ -23,8 +25,6 @@ const isResourceMissingError = (error: unknown): error is { code: string } =>
   "code" in error &&
   typeof error.code === "string" &&
   error.code === "resource_missing";
-
-const SUBSCRIPTION_TRIAL_DAYS = 7;
 
 export async function POST(req: NextRequest) {
   try {
@@ -76,56 +76,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Price not configured.", success: false }, { status: 500 });
     }
 
+    const planDefinition = PLANS.find((plan) => plan.id === targetPlan);
+    const isLifetime = planDefinition?.billingType === "lifetime";
+
     let session;
     try {
-      session = await stripe.checkout.sessions.create({
+      session = await createCheckoutSession({
         customer: stripeCustomerId,
-        mode: "subscription",
-        payment_method_types: ["card", "link"],
-        billing_address_collection: "auto",
-        customer_update: {
-          address: "auto",
-          name: "auto",
-        },
-        tax_id_collection: {
-          enabled: true,
-        },
-        line_items: [
-          {
-            price: priceId,
-            quantity: 1,
-          }
-        ],
-        subscription_data: {
-          trial_period_days: SUBSCRIPTION_TRIAL_DAYS,
-        },
-        metadata: { planId: targetPlan },
-        success_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription?success=true`,
-        cancel_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
+        priceId,
+        targetPlan,
+        isLifetime,
       });
     } catch (stripeError: unknown) {
       if (isResourceMissingError(stripeError)) {
         stripeCustomerId = await createStripeCustomer(authSession.user.id, user.email, user.name);
 
-        session = await stripe.checkout.sessions.create({
+        session = await createCheckoutSession({
           customer: stripeCustomerId,
-          mode: "subscription",
-          payment_method_types: ["card", "link"],
-          billing_address_collection: "auto",
-          customer_update: {
-            address: "auto",
-            name: "auto",
-          },
-          tax_id_collection: {
-            enabled: true,
-          },
-          line_items: [{ price: priceId, quantity: 1 }],
-          subscription_data: {
-            trial_period_days: SUBSCRIPTION_TRIAL_DAYS,
-          },
-          metadata: { planId: targetPlan },
-          success_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription?success=true`,
-          cancel_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
+          priceId,
+          targetPlan,
+          isLifetime,
         });
       } else {
         throw stripeError;
@@ -160,4 +130,46 @@ async function createStripeCustomer(userId: string, email: string, name: string 
   });
 
   return stripeCustomer.id;
+}
+
+function createCheckoutSession({
+  customer,
+  priceId,
+  targetPlan,
+  isLifetime,
+}: {
+  customer: string;
+  priceId: string;
+  targetPlan: PlanId;
+  isLifetime: boolean;
+}) {
+  return stripe.checkout.sessions.create({
+    customer,
+    mode: isLifetime ? "payment" : "subscription",
+    payment_method_types: ["card", "link"],
+    billing_address_collection: "auto",
+    customer_update: {
+      address: "auto",
+      name: "auto",
+    },
+    tax_id_collection: {
+      enabled: true,
+    },
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+    ...(isLifetime
+      ? {}
+      : {
+          subscription_data: {
+            trial_period_days: SUBSCRIPTION_TRIAL_DAYS,
+          },
+        }),
+    metadata: { planId: targetPlan },
+    success_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription?success=true`,
+    cancel_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
+  });
 }

@@ -19,8 +19,8 @@ import { useState } from "react"
 import { Switch } from "../ui/switch"
 import { useRouter } from "next/navigation"
 
-import BuyButtonClient from "../payment/BuyButtonClient"
 import PaymentDashboardClient from "../payment/PaymentDashboardClient"
+import { buildSubscriptionCheckoutPath } from "@/lib/checkout-intent"
 
 export const UserButton = ({user}: Session) => {
 
@@ -70,14 +70,14 @@ export const UserButton = ({user}: Session) => {
             </DropdownMenuItem>
 
             {user.plan === "FREE" ? (
-                <DropdownMenuItem className="py-2 cursor-pointer font-medium transition-all duration-500 group ease-in-out">
+                <DropdownMenuItem onClick={() => router.push(buildSubscriptionCheckoutPath("PRO"))} className="py-2 cursor-pointer font-medium transition-all duration-500 group ease-in-out">
                     <Captions size={14} className="mr-3 group-hover:scale-105 transition-all duration-300 ease-in-out" />
-                    <BuyButtonClient plan="STARTER" />
+                    Try Pro 7 days
                 </DropdownMenuItem>
             ) : user.plan === "STARTER" ? (
-                <DropdownMenuItem onClick={() => router.push("/dashboard/subscription")} className="py-2 cursor-pointer font-medium transition-all duration-500 group ease-in-out">
+                <DropdownMenuItem onClick={() => router.push(buildSubscriptionCheckoutPath("PRO"))} className="py-2 cursor-pointer font-medium transition-all duration-500 group ease-in-out">
                     <ChartNoAxesGantt size={14} className="mr-3 group-hover:scale-105 transition-all duration-300 ease-in-out" />
-                    Upgrade to Pro
+                    Try Pro 7 days
                 </DropdownMenuItem>
             ) : (
                 <DropdownMenuItem className="py-2 cursor-pointer font-medium transition-all duration-500 group ease-in-out">

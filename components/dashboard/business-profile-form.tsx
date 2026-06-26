@@ -22,6 +22,7 @@ import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { upsertBusinessProfile } from "@/server/actions/business-profile";
 import { EASE } from "@/lib/motion-variants";
+import { cn } from "@/lib/utils";
 
 const CloudinaryUploadButton = dynamic(
   () =>
@@ -127,6 +128,7 @@ const BusinessProfileForm = forwardRef<
       label: t("settingsPage.businessProfile.address"),
       placeholder: t("settingsPage.businessProfile.addressPlaceholder"),
       required: true,
+      className: "md:col-span-2",
     },
     {
       name: "city" as const,
@@ -169,85 +171,39 @@ const BusinessProfileForm = forwardRef<
       label: t("settingsPage.businessProfile.vatMention"),
       placeholder: t("settingsPage.businessProfile.vatMentionPlaceholder"),
       required: false,
+      className: "md:col-span-2 xl:col-span-3",
     },
   ];
+  const logoUrl = form.watch("logoUrl");
 
   return (
     <Form {...form}>
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        {/* Fields */}
-        <div className="rounded-3xl border border-line bg-white/80 p-6">
-          <p className="text-sm font-semibold">
-            {t("settingsPage.businessProfile.title")}
-          </p>
-          <p className="mt-1 text-xs text-ink-muted">
-            {t("settingsPage.businessProfile.subtitle")}
-          </p>
-          <motion.div
-            className="mt-5 space-y-4"
-            variants={listVariants}
-            initial="hidden"
-            animate="show"
-          >
-            {fields.map((f) => (
-              <motion.div key={f.name} variants={itemVariants}>
-                <FormField
-                  control={form.control}
-                  name={f.name}
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="rounded-2xl border border-line bg-white/70 px-4 py-3">
-                        <label
-                          htmlFor={`business-profile-${f.name}`}
-                          className="text-xs uppercase text-ink-muted"
-                        >
-                          {f.label}
-                          {f.required && <span className="text-brand ml-0.5">*</span>}
-                        </label>
-                        <FormControl>
-                          <Input
-                            id={`business-profile-${f.name}`}
-                            disabled={status === "executing"}
-                            placeholder={f.placeholder}
-                            className="mt-1.5 border-line bg-white/60 focus:bg-white"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-
+      <div className="space-y-6">
         {/* Logo */}
-        <div className="rounded-3xl border border-line bg-panel p-6">
+        <div className="overflow-hidden rounded-3xl border border-line bg-white/80 p-4 sm:p-6">
           <p className="text-sm font-semibold">
             {t("settingsPage.businessProfile.logo")}
           </p>
           <motion.div
-            className="mt-4 space-y-4"
+            className="mt-4"
             variants={listVariants}
             initial="hidden"
             animate="show"
           >
             <motion.div variants={itemVariants}>
               <div className="rounded-2xl border border-line bg-white/70 px-4 py-4">
-                <div className="flex items-center gap-4">
-                  {form.watch("logoUrl") ? (
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  {logoUrl ? (
                     <Image
                       className="h-16 w-16 rounded-2xl border border-line object-contain"
-                      src={form.watch("logoUrl")!}
+                      src={logoUrl}
                       alt="company logo"
                       width={64}
                       height={64}
                       quality={100}
                     />
                   ) : (
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-line bg-white/60 text-xs text-ink-muted">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-dashed border-line bg-white/60 text-xs text-ink-muted">
                       Logo
                     </div>
                   )}
@@ -278,6 +234,58 @@ const BusinessProfileForm = forwardRef<
                 />
               </div>
             </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Fields */}
+        <div className="overflow-hidden rounded-3xl border border-line bg-white/80 p-4 sm:p-6">
+          <p className="text-sm font-semibold">
+            {t("settingsPage.businessProfile.title")}
+          </p>
+          <p className="mt-1 text-xs text-ink-muted">
+            {t("settingsPage.businessProfile.subtitle")}
+          </p>
+          <motion.div
+            className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3"
+            variants={listVariants}
+            initial="hidden"
+            animate="show"
+          >
+            {fields.map((f) => (
+              <motion.div
+                key={f.name}
+                variants={itemVariants}
+                className={cn("min-w-0", f.className)}
+              >
+                <FormField
+                  control={form.control}
+                  name={f.name}
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="h-full rounded-2xl border border-line bg-white/70 px-4 py-3">
+                        <label
+                          htmlFor={`business-profile-${f.name}`}
+                          className="text-xs uppercase text-ink-muted"
+                        >
+                          {f.label}
+                          {f.required && <span className="text-brand ml-0.5">*</span>}
+                        </label>
+                        <FormControl>
+                          <Input
+                            id={`business-profile-${f.name}`}
+                            disabled={status === "executing"}
+                            placeholder={f.placeholder}
+                            className="mt-1.5 border-line bg-white/60 focus:bg-white"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </div>

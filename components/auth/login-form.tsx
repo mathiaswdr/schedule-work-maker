@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { AuthCard } from "./auth-card";
 import { Button } from "../ui/button";
@@ -21,6 +22,12 @@ export const LoginForm = ({
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const t = useTranslations("auth");
+  const searchParams = useSearchParams();
+  const rawCallbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl =
+    rawCallbackUrl?.startsWith("/") && !rawCallbackUrl.startsWith("//")
+      ? rawCallbackUrl
+      : "/dashboard";
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -35,7 +42,7 @@ export const LoginForm = ({
     const result = await signIn("email", {
       email: safeEmail,
       redirect: false,
-      callbackUrl: "/",
+      callbackUrl,
     });
 
     if (result?.error) {
@@ -90,7 +97,7 @@ export const LoginForm = ({
   return (
     <AuthCard
       cardTitle={t("title")}
-      backButtonHref="/auth/register"
+      backButtonHref="/"
       backButtonLabel={t("backLabel")}
       showSocial
     >

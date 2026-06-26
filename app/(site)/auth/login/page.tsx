@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import {
   isEmailAuthEnabled,
@@ -17,10 +18,12 @@ export const metadata: Metadata = buildMarketingMetadata({
 export default function Login() {
   return (
     <section className="min-h-screen w-full flex items-center justify-center px-4 py-10">
-      <LoginForm
-        showEmailLogin={isEmailAuthEnabled}
-        showLocalMagicLinkTools={isLocalMagicLinkMode}
-      />
+      <Suspense fallback={null}>
+        <LoginForm
+          showEmailLogin={isEmailAuthEnabled}
+          showLocalMagicLinkTools={isLocalMagicLinkMode}
+        />
+      </Suspense>
     </section>
   );
 }

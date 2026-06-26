@@ -28,6 +28,7 @@ export const getDashboardUser = cache(async () => {
     select: {
       currency: true,
       hourlyRate: true,
+      onboardingCompletedAt: true,
       plan: true,
       stripeCustomerId: true,
     },
@@ -46,6 +47,7 @@ export const getDashboardViewer = cache(async () => {
     userPlan: ((user?.plan ?? session.user.plan ?? "FREE") as PlanId),
     currency: user?.currency ?? "CHF",
     hourlyRate: user?.hourlyRate ?? 0,
+    onboardingCompletedAt: user?.onboardingCompletedAt ?? null,
     stripeCustomerId: user?.stripeCustomerId ?? null,
   };
 });

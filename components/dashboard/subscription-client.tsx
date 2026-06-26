@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { EASE, pickVariants } from "@/lib/motion-variants";
@@ -28,7 +28,11 @@ export default function SubscriptionClient({
   const t = useTranslations("dashboard");
   const shouldReduceMotion = useReducedMotion();
   const searchParams = useSearchParams();
-  const [billing, setBilling] = useState<BillingPeriod>("monthly");
+  const requestedBilling =
+    searchParams.get("billing") === "yearly" ? "yearly" : "monthly";
+  const [billing, setBilling] = useState<BillingPeriod>(requestedBilling);
+  const [checkoutLoadingPlan, setCheckoutLoadingPlan] = useState<PlanId | null>(null);
+  const autoCheckoutStarted = useRef(false);
   const currentPlan = normalizePlanId(plan);
   const visiblePlans = getVisiblePlans();
   const isYearly = billing === "yearly";
@@ -39,12 +43,17 @@ export default function SubscriptionClient({
     }
   }, [searchParams, t]);
 
-  const handleUpgrade = async (targetPlan: PlanId) => {
+  const handleUpgrade = useCallback(async (
+    targetPlan: PlanId,
+    billingOverride: BillingPeriod = billing,
+  ) => {
+    setCheckoutLoadingPlan(targetPlan);
+
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: targetPlan, billing }),
+        body: JSON.stringify({ plan: targetPlan, billing: billingOverride }),
       });
 
       const data = await response.json();
@@ -56,8 +65,10 @@ export default function SubscriptionClient({
       }
     } catch {
       toast.error("An error occurred");
+    } finally {
+      setCheckoutLoadingPlan(null);
     }
-  };
+  }, [billing]);
 
   const handleManageBilling = async () => {
     try {
@@ -78,6 +89,26 @@ export default function SubscriptionClient({
   };
 
   const v = pickVariants(shouldReduceMotion);
+
+  useEffect(() => {
+    if (autoCheckoutStarted.current || searchParams.get("success") === "true") {
+      return;
+    }
+
+    const requestedPlan = searchParams.get("checkout");
+    if (requestedPlan !== "PRO" && requestedPlan !== "STARTER" && requestedPlan !== "LIFETIME") {
+      return;
+    }
+
+    const targetPlan = normalizePlanId(requestedPlan);
+    if (!canUpgrade(currentPlan, targetPlan)) {
+      return;
+    }
+
+    autoCheckoutStarted.current = true;
+    setBilling(requestedBilling);
+    void handleUpgrade(targetPlan, requestedBilling);
+  }, [currentPlan, handleUpgrade, requestedBilling, searchParams]);
 
   return (
     <main className="w-full">
@@ -155,13 +186,16 @@ export default function SubscriptionClient({
               {visiblePlans.map((planDef) => {
                 const isCurrent = currentPlan === planDef.id;
                 const isUpgrade = canUpgrade(currentPlan, planDef.id);
-                const i18nKey = planDef.i18nKey as "free" | "pro";
+                const i18nKey = planDef.i18nKey as "free" | "pro" | "lifetime";
                 const perks = t.raw(`subscriptionPage.plans.${i18nKey}.perks`) as string[];
+                const isLifetime = planDef.billingType === "lifetime";
                 const monthlyPrice = planDef.priceAmount;
                 const yearlyPrice = planDef.yearlyPriceAmount;
-                const displayPrice = isYearly ? yearlyPrice : monthlyPrice;
+                const compareAtPrice = isLifetime ? planDef.compareAtPriceAmount : undefined;
+                const displayPrice = isLifetime ? monthlyPrice : isYearly ? yearlyPrice : monthlyPrice;
                 const isPaid = monthlyPrice > 0;
-                const suffix = isPaid
+                const isSubscription = isPaid && !isLifetime;
+                const suffix = isSubscription
                   ? isYearly
                     ? t("subscriptionPage.billingToggle.suffixYearly")
                     : t("subscriptionPage.billingToggle.suffixMonthly")
@@ -179,7 +213,7 @@ export default function SubscriptionClient({
                   >
                     {/* "2 months free" badge on paid cards when yearly */}
                     <AnimatePresence>
-                      {isYearly && isPaid && (
+                      {isYearly && isSubscription && (
                         <motion.div
                           initial={{ opacity: 0, scale: 0.8, y: -4 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -207,17 +241,22 @@ export default function SubscriptionClient({
                     <div className="mt-3 h-10 overflow-hidden">
                       <AnimatePresence mode="wait">
                         <motion.p
-                          key={isPaid ? `${planDef.id}-${billing}` : planDef.id}
+                          key={isSubscription ? `${planDef.id}-${billing}` : planDef.id}
                           initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -12 }}
                           transition={{ duration: 0.25, ease: EASE }}
-                          className="whitespace-nowrap text-3xl font-semibold text-ink"
+                          className="flex items-baseline gap-2 whitespace-nowrap text-3xl font-semibold text-ink"
                         >
-                          {displayPrice === 0 ? "0" : displayPrice} CHF
+                          <span>{displayPrice === 0 ? "0" : displayPrice} CHF</span>
                           {suffix && (
                             <span className="text-sm font-normal text-ink-muted">
                               {suffix}
+                            </span>
+                          )}
+                          {compareAtPrice && (
+                            <span className="text-sm font-semibold text-ink-muted line-through decoration-brand/70 decoration-2">
+                              {compareAtPrice} CHF
                             </span>
                           )}
                         </motion.p>
@@ -226,7 +265,7 @@ export default function SubscriptionClient({
 
                     {/* Monthly equivalent hint — fixed height to avoid layout shift */}
                     <div className="mt-1 min-h-4">
-                      {isPaid && (
+                      {isSubscription ? (
                         <AnimatePresence mode="wait">
                           <motion.p
                             key={billing}
@@ -241,7 +280,11 @@ export default function SubscriptionClient({
                               : t("subscriptionPage.billingToggle.monthlyHint").replace("__price__", String(yearlyPrice))}
                           </motion.p>
                         </AnimatePresence>
-                      )}
+                      ) : isLifetime ? (
+                        <p className="text-xs font-medium text-brand">
+                          {t("subscriptionPage.billingToggle.lifetimeHint")}
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="mt-5 space-y-2 text-sm">
@@ -281,13 +324,18 @@ export default function SubscriptionClient({
                       ) : isUpgrade ? (
                         <button
                           onClick={() => handleUpgrade(planDef.id)}
+                          disabled={checkoutLoadingPlan === planDef.id}
                           className={`flex w-full items-center justify-center text-center rounded-full px-4 py-3 text-sm leading-tight font-semibold transition ${
                             planDef.highlight
                               ? "bg-brand text-white hover:translate-y-[-1px]"
                               : "border border-line-strong bg-white/70 text-ink hover:bg-white"
                           }`}
                         >
-                          {t("subscriptionPage.upgrade")}
+                          {checkoutLoadingPlan === planDef.id
+                            ? t("subscriptionPage.redirecting")
+                            : isLifetime
+                              ? t("subscriptionPage.buyLifetime")
+                              : t("subscriptionPage.upgrade")}
                         </button>
                       ) : (
                         <div className="flex w-full items-center justify-center text-center rounded-full border border-line bg-panel px-4 py-3 text-sm leading-tight font-medium text-ink-muted">

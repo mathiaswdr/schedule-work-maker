@@ -25,7 +25,7 @@ export default function BuyButton(){
 
                 if(!user) throw new Error("No user found");
 
-                if(user.plan === "PRO") throw new Error("User use already PRO version")
+                if(user.plan === "PRO" || user.plan === "LIFETIME") throw new Error("User already has paid access")
 
                 const stripeCustomerId = user?.stripeCustomerId ?? undefined;
 

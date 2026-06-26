@@ -8,6 +8,7 @@ import {
   type PlanId,
   type BillingPeriod,
 } from "@/lib/plans";
+import { buildLoginCheckoutHref } from "@/lib/checkout-intent";
 
 type PricingCtaProps = {
   planId: PlanId;
@@ -33,7 +34,11 @@ export function PricingCta({
   if (!userPlan) {
     return (
       <Link
-        href="/auth/login"
+        href={
+          planId === "FREE"
+            ? "/auth/login?callbackUrl=%2Fdashboard"
+            : buildLoginCheckoutHref(planId, billing)
+        }
         className={`mt-auto flex w-full items-center justify-center text-center rounded-full px-4 py-3 text-sm leading-tight font-semibold transition ${
           highlight
             ? "bg-brand text-white hover:translate-y-[-1px]"

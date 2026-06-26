@@ -2,7 +2,7 @@ import { Space_Grotesk } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import DashboardSidebar from "@/components/dashboard/sidebar";
-import BusinessProfilePrompt from "@/components/dashboard/business-profile-prompt";
+import DashboardOnboardingModal from "@/components/dashboard/dashboard-onboarding-modal";
 import { prisma } from "@/server/prisma";
 import { getDashboardViewer } from "@/server/dashboard-viewer";
 import { pickMessages } from "@/lib/i18n";
@@ -29,7 +29,13 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [{ session, userPlan }, locale, messages, t, tc] = await Promise.all([
+  const [
+    { session, userPlan, currency, hourlyRate, onboardingCompletedAt },
+    locale,
+    messages,
+    t,
+    tc,
+  ] = await Promise.all([
     getDashboardViewer(),
     getLocale(),
     getMessages(),
@@ -37,20 +43,33 @@ export default async function DashboardLayout({
     getTranslations("common"),
   ]);
 
-  const businessProfile = await prisma.businessProfile.findUnique({
-    where: { userId: session.user.id },
-    select: {
-      companyName: true,
-      address: true,
-      city: true,
-      postalCode: true,
-      country: true,
-      email: true,
-    },
-  });
+  const [businessProfile, bankAccountCount] = await Promise.all([
+    prisma.businessProfile.findUnique({
+      where: { userId: session.user.id },
+      select: {
+        companyName: true,
+        address: true,
+        city: true,
+        postalCode: true,
+        country: true,
+        siret: true,
+        email: true,
+        phone: true,
+        vatMention: true,
+      },
+    }),
+    prisma.bankAccount.count({
+      where: { userId: session.user.id },
+    }),
+  ]);
   const shouldPromptForBusinessProfile = REQUIRED_PROFILE_FIELDS.some(
     (field) => !businessProfile?.[field]
   );
+  const shouldPromptForOnboarding =
+    !onboardingCompletedAt &&
+    (shouldPromptForBusinessProfile ||
+      !session.user.name?.trim() ||
+      hourlyRate <= 0);
 
   const sidebarLabels = {
     subtitle: t("sidebar.subtitle"),
@@ -76,13 +95,6 @@ export default async function DashboardLayout({
     },
   };
 
-  const businessProfilePromptLabels = {
-    title: t("sidebar.profilePrompt.title"),
-    subtitle: t("sidebar.profilePrompt.subtitle"),
-    cta: t("sidebar.profilePrompt.cta"),
-    dismiss: t("sidebar.profilePrompt.dismiss"),
-  };
-
   return (
     <NextIntlClientProvider
       locale={locale}
@@ -102,9 +114,16 @@ export default async function DashboardLayout({
             {children}
           </div>
         </div>
-        <BusinessProfilePrompt
-          shouldPrompt={shouldPromptForBusinessProfile}
-          labels={businessProfilePromptLabels}
+        <DashboardOnboardingModal
+          shouldPrompt={shouldPromptForOnboarding}
+          initialData={{
+            name: session.user.name ?? null,
+            email: session.user.email ?? null,
+            currency,
+            hourlyRate,
+            businessProfile,
+            hasBankAccount: bankAccountCount > 0,
+          }}
         />
       </div>
     </NextIntlClientProvider>

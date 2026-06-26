@@ -122,28 +122,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 
     async jwt({ token }) {
-      if (!token.sub) return token;
-
       try {
-        const existingUser = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            isTwoFactorEnabled: true,
-            image: true,
-            plan: true,
-          },
-        });
+        const userSelect = {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          isTwoFactorEnabled: true,
+          image: true,
+          plan: true,
+        } as const;
+
+        let existingUser = token.sub
+          ? await prisma.user.findUnique({
+              where: { id: token.sub },
+              select: userSelect,
+            })
+          : null;
+
+        if (!existingUser && token.email) {
+          existingUser = await prisma.user.findUnique({
+            where: { email: String(token.email) },
+            select: userSelect,
+          });
+        }
 
         if (!existingUser) return token;
 
         const existingAccount = await prisma.account.findFirst({
           where: { userId: existingUser.id },
+          select: {
+            provider: true,
+          },
         });
 
+        token.sub = existingUser.id;
         token.isOAuth = !!existingAccount;
         token.name = existingUser.name;
         token.email = existingUser.email;

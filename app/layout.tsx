@@ -9,6 +9,9 @@ import WebVitalsReporter from "@/components/telemetry/web-vitals-reporter";
 import { getSiteUrl } from "@/lib/seo";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
+const shouldReportWebVitals =
+  process.env.NODE_ENV === "production" ||
+  process.env.WEB_VITALS_ENABLED === "true";
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
@@ -64,7 +67,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <WebVitalsReporter locale={locale} />
+          {shouldReportWebVitals ? <WebVitalsReporter locale={locale} /> : null}
           {children}
           <Toaster />
           <Analytics />

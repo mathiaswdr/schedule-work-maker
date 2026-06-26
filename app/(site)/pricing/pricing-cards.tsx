@@ -20,8 +20,14 @@ type PricingCardsProps = {
   plans: PricingPlan[];
   userPlan: string | null;
   ctaLabelTemplate: string;
+  ctaFreeLabel: string;
+  ctaTrialLabel: string;
+  ctaLifetimeLabel: string;
   ctaCurrentLabel: string;
   ctaManageLabel: string;
+  freeNote: string;
+  trialNote: string;
+  lifetimeNote: string;
   toggleMonthly: string;
   toggleYearly: string;
   toggleBadge: string;
@@ -36,8 +42,14 @@ export function PricingCards({
   plans,
   userPlan,
   ctaLabelTemplate,
+  ctaFreeLabel,
+  ctaTrialLabel,
+  ctaLifetimeLabel,
   ctaCurrentLabel,
   ctaManageLabel,
+  freeNote,
+  trialNote,
+  lifetimeNote,
   toggleMonthly,
   toggleYearly,
   toggleBadge,
@@ -99,11 +111,19 @@ export function PricingCards({
       <div className={`mx-auto grid max-w-[860px] gap-6 ${gridClassName}`}>
         {plans.map((plan) => {
           const planDef = PLANS.find((p) => p.id === plan.planId);
+          const isLifetime = planDef?.billingType === "lifetime";
           const monthlyPrice = planDef?.priceAmount ?? 0;
           const yearlyPrice = planDef?.yearlyPriceAmount ?? 0;
-          const displayPrice = isYearly ? yearlyPrice : monthlyPrice;
+          const compareAtPrice = isLifetime ? planDef?.compareAtPriceAmount : undefined;
+          const displayPrice = isLifetime ? monthlyPrice : isYearly ? yearlyPrice : monthlyPrice;
           const isPaid = monthlyPrice > 0;
-          const suffix = isPaid
+          const isSubscription = isPaid && !isLifetime;
+          const ctaLabel = isLifetime
+            ? ctaLifetimeLabel.replace("{plan}", plan.name)
+            : isPaid
+            ? ctaTrialLabel.replace("{plan}", plan.name)
+            : ctaFreeLabel;
+          const suffix = isSubscription
             ? isYearly ? suffixYearly : suffixMonthly
             : undefined;
 
@@ -118,7 +138,7 @@ export function PricingCards({
             >
               {/* "2 months free" badge on paid cards when yearly */}
               <AnimatePresence>
-                {isYearly && isPaid && (
+                {isYearly && isSubscription && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8, y: -4 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -139,17 +159,22 @@ export function PricingCards({
               <div className="mt-3 h-10 overflow-hidden">
                 <AnimatePresence mode="wait">
                   <motion.p
-                    key={isPaid ? `${plan.planId}-${billing}` : plan.planId}
+                    key={isSubscription ? `${plan.planId}-${billing}` : plan.planId}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.25, ease: EASE }}
-                    className="text-3xl font-semibold text-ink"
+                    className="flex items-baseline gap-2 whitespace-nowrap text-3xl font-semibold text-ink"
                   >
-                    {displayPrice === 0 ? "0" : displayPrice} CHF
+                    <span>{displayPrice === 0 ? "0" : displayPrice} CHF</span>
                     {suffix && (
                       <span className="text-sm font-normal text-ink-muted">
                         {suffix}
+                      </span>
+                    )}
+                    {compareAtPrice && (
+                      <span className="text-sm font-semibold text-ink-muted line-through decoration-brand/70 decoration-2">
+                        {compareAtPrice} CHF
                       </span>
                     )}
                   </motion.p>
@@ -158,7 +183,7 @@ export function PricingCards({
 
               {/* Monthly equivalent hint — min height to avoid layout shift */}
               <div className="mt-1 min-h-4">
-                {isPaid && (
+                {isSubscription ? (
                   <AnimatePresence mode="wait">
                     <motion.p
                       key={billing}
@@ -173,10 +198,21 @@ export function PricingCards({
                         : monthlyHint.replace("__price__", String(yearlyPrice))}
                     </motion.p>
                   </AnimatePresence>
-                )}
+                ) : isLifetime ? (
+                  <p className="text-xs font-medium text-brand">{lifetimeNote}</p>
+                ) : null}
               </div>
 
               <p className="mt-2 text-sm text-ink-muted">{plan.desc}</p>
+              <p
+                className={`mt-3 rounded-2xl px-3 py-2 text-xs font-semibold ${
+                  isPaid
+                    ? "bg-brand/10 text-brand"
+                    : "bg-ink-soft text-ink-muted"
+                }`}
+              >
+                {isLifetime ? lifetimeNote : isPaid ? trialNote : freeNote}
+              </p>
 
               <div className="mt-5 space-y-2 text-sm">
                 {plan.perks.map((perk) => {
@@ -210,7 +246,7 @@ export function PricingCards({
                 highlight={!!plan.highlight}
                 userPlan={userPlan}
                 billing={billing}
-                ctaLabel={ctaLabelTemplate.replace("{plan}", plan.name)}
+                ctaLabel={ctaLabel || ctaLabelTemplate.replace("{plan}", plan.name)}
                 ctaCurrentLabel={ctaCurrentLabel}
                 ctaManageLabel={ctaManageLabel}
               />
