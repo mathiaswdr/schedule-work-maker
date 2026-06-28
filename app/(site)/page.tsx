@@ -1,141 +1,719 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DM_Serif_Display, Space_Grotesk } from "next/font/google";
-import { getLocale, getTranslations } from "next-intl/server";
+import {
+  ArrowRight,
+  BarChart3,
+  BriefcaseBusiness,
+  Check,
+  CheckCircle2,
+  CircleDollarSign,
+  Clock3,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  FolderKanban,
+  HelpCircle,
+  LayoutDashboard,
+  ListChecks,
+  ReceiptText,
+  Sparkles,
+  Users,
+  X,
+} from "lucide-react";
+import { getLocale } from "next-intl/server";
+
+import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
+import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
+import { MagicCard } from "@/components/magicui/magic-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import ScrollSectionButton from "@/components/ui/scroll-section-button";
 import {
-  absoluteUrl,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { buildSignupCheckoutHref } from "@/lib/checkout-intent";
+import { localizedPath } from "@/lib/i18n-routing";
+import { getVisiblePlans } from "@/lib/plans";
+import {
   buildMarketingMetadata,
+  localizedAbsoluteUrl,
   serializeJsonLd,
 } from "@/lib/seo";
-import { buildLoginCheckoutHref } from "@/lib/checkout-intent";
-import { PricingCards } from "./pricing/pricing-cards";
 
-const display = DM_Serif_Display({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
+const sectionLabel =
+  "text-xs font-semibold uppercase tracking-[0.18em] text-brand";
+const sectionTitle =
+  "mt-3 max-w-3xl text-3xl font-semibold leading-tight text-ink sm:text-4xl lg:text-5xl";
+const sectionIntro = "mt-4 max-w-2xl text-base leading-7 text-ink-muted";
+const LANDING_SECTION_OFFSET = -96;
+const DEMO_VIDEO_SRC =
+  "https://res.cloudinary.com/dwxnpxmyw/video/upload/f_auto,q_auto:good,vc_auto,c_limit,w_1600/v1782680543/saas/kronoma_demo_web_j0qkxa.mp4";
 
-const body = Space_Grotesk({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
+const copy = {
+  fr: {
+    metadata: {
+      title:
+        "Kronoma | Gestion simple pour indépendants, freelances et petites structures",
+      description:
+        "Centralisez vos clients, projets, prestations, frais, revenus, factures et temps passé dans un outil simple pensé pour gérer votre activité avec plus de clarté.",
+    },
+    nav: {
+      home: "Accueil",
+      features: "Fonctions",
+      pricing: "Tarifs",
+      blog: "Blog",
+      about: "A propos",
+      faq: "F.A.Q",
+      signIn: "Connexion",
+      cta: "Essayer gratuitement",
+      menu: "Ouvrir la navigation",
+    },
+    hero: {
+      title: "Gardez une vue claire sur votre activité.",
+      subtitle: "Sans notes éparpillées, fichiers séparés ni outils compliqués.",
+      subtitleLines: [
+        "Sans notes éparpillées, fichiers séparés",
+        "ni outils compliqués.",
+      ],
+      paragraph:
+        "Kronoma rassemble vos clients, projets, frais, factures, revenus et temps utile dans un espace simple.",
+      ctaPrimary: "Essayer gratuitement",
+      ctaSecondary: "Voir comment ça marche",
+      videoLabel: "Vidéo de démonstration",
+      videoTitle: "Aperçu de Kronoma",
+      videoMeta: "2 min",
+    },
+    problem: {
+      eyebrow: "Le vrai problème",
+      title: "Quand tout est dispersé, vous perdez vite en clarté.",
+      text: "Un client dans vos messages, une prestation dans un fichier, un reçu dans votre boîte mail, une facture dans un dossier, une relance dans votre tête... À force, il devient difficile de savoir où en est vraiment votre activité.",
+      beforeTitle: "Aujourd'hui",
+      afterTitle: "Avec Kronoma",
+      before: [
+        "Des infos client dans plusieurs endroits",
+        "Des frais ou reçus difficiles à retrouver",
+        "Des factures suivies à la main",
+        "Des revenus approximatifs",
+        "Du temps ou des prestations parfois oubliés",
+      ],
+      after: [
+        "Clients, projets et prestations centralisés",
+        "Frais et justificatifs au bon endroit",
+        "Factures suivies clairement",
+        "Revenus et dépenses visibles",
+        "Temps passé disponible quand c'est utile",
+      ],
+    },
+    benefits: {
+      eyebrow: "Bénéfices",
+      title: "Une gestion plus claire, sans outil compliqué.",
+      subtitle:
+        "Kronoma vous aide à suivre l'essentiel de votre activité au quotidien, sans transformer votre administratif en usine à gaz.",
+      cards: [
+        {
+          title: "Centralisez vos clients et projets",
+          text: "Gardez toutes les informations importantes au même endroit : clients, projets, prestations, statuts et historique.",
+          icon: Users,
+        },
+        {
+          title: "Suivez vos frais professionnels",
+          text: "Ajoutez vos dépenses, conservez vos justificatifs et gardez une trace claire de ce que vous dépensez pour votre activité.",
+          icon: ReceiptText,
+        },
+        {
+          title: "Gérez vos factures plus sereinement",
+          text: "Créez vos factures, suivez leur statut et voyez rapidement ce qui est payé, envoyé ou encore à facturer.",
+          icon: FileText,
+        },
+        {
+          title: "Gardez une vue sur vos revenus",
+          text: "Comprenez ce que vous gagnez, ce que vous dépensez et ce qui reste à encaisser.",
+          icon: BarChart3,
+        },
+        {
+          title: "Suivez le temps quand c'est utile",
+          text: "Travaillez à l'heure, au forfait ou par projet. Le suivi du temps est là quand vous en avez besoin, sans imposer votre façon de travailler.",
+          icon: Clock3,
+        },
+        {
+          title: "Exportez vos données",
+          text: "Gardez la main sur vos informations et exportez ce dont vous avez besoin pour vos suivis ou votre administratif.",
+          icon: Download,
+        },
+      ],
+    },
+    steps: {
+      eyebrow: "Comment ça marche",
+      title: "De l'activité quotidienne à une vision claire.",
+      subtitle:
+        "Ajoutez ce que vous faites au fil de l'eau, puis retrouvez une vue structurée sur vos clients, projets, frais, factures et revenus.",
+      items: [
+        {
+          title: "Ajoutez vos clients et projets",
+          text: "Créez votre base client, organisez vos projets et gardez vos informations importantes au même endroit.",
+        },
+        {
+          title: "Suivez vos prestations, frais et temps",
+          text: "Ajoutez ce que vous réalisez, ce que vous dépensez et le temps passé lorsque c'est nécessaire.",
+        },
+        {
+          title: "Facturez et suivez vos revenus",
+          text: "Créez vos factures, suivez les paiements et gardez une vue claire sur ce qui est payé ou encore à encaisser.",
+        },
+      ],
+    },
+    midCta: {
+      title: "Prêt à structurer votre activité ?",
+      text: "Commencez par centraliser vos clients, projets, frais et factures dans un espace clair.",
+      ctaPrimary: "Commencer gratuitement",
+      ctaSecondary: "Voir les tarifs",
+    },
+    features: {
+      eyebrow: "Fonctionnalités",
+      title: "Tout l'essentiel pour suivre votre activité.",
+      subtitle:
+        "Des fonctions simples, pensées pour garder le fil sans basculer dans un outil trop lourd.",
+      items: [
+        {
+          title: "Clients",
+          text: "Regroupez les informations de vos clients et retrouvez facilement leurs projets, prestations, factures et dépenses associées.",
+          icon: Users,
+        },
+        {
+          title: "Projets",
+          text: "Organisez votre travail par client ou par mission, avec une vue claire sur ce qui est en cours, terminé ou à facturer.",
+          icon: FolderKanban,
+        },
+        {
+          title: "Prestations",
+          text: "Gardez une trace de ce que vous réalisez, que vous facturiez à l'heure, au forfait ou par projet.",
+          icon: ListChecks,
+        },
+        {
+          title: "Frais professionnels",
+          text: "Ajoutez vos dépenses, associez-les à un client ou à un projet, et conservez une trace de vos justificatifs.",
+          icon: ReceiptText,
+        },
+        {
+          title: "Factures",
+          text: "Créez vos factures, suivez leur statut et évitez les oublis de paiement ou de relance.",
+          icon: FileText,
+        },
+        {
+          title: "Revenus et dépenses",
+          text: "Visualisez plus facilement ce que votre activité génère et ce qu'elle vous coûte.",
+          icon: CircleDollarSign,
+        },
+        {
+          title: "Suivi du temps",
+          text: "Lancez un timer ou ajoutez du temps manuellement lorsque vous devez suivre des heures pour un client ou un projet.",
+          icon: Clock3,
+        },
+        {
+          title: "Exports",
+          text: "Exportez vos données lorsque vous devez les transmettre, les archiver ou les analyser.",
+          icon: Download,
+        },
+      ],
+    },
+    import: {
+      eyebrow: "Import clients",
+      title: "Importez vos clients et démarrez sans repartir de zéro.",
+      text: "Vous avez déjà une liste de clients dans un fichier Excel ou CSV ? Importez-la dans Kronoma et retrouvez rapidement votre base client dans un espace plus clair.",
+      bullets: [
+        "Importez vos clients existants en quelques minutes",
+        "Évitez la saisie manuelle",
+        "Gardez une base propre pour vos projets, prestations et factures",
+      ],
+      cta: "Commencer gratuitement",
+      file: "clients-actuels.csv",
+      preview: ["Client", "Projet", "Statut"],
+    },
+    audience: {
+      eyebrow: "Pour qui ?",
+      title:
+        "Pensé pour celles et ceux qui gèrent leur activité au quotidien.",
+      items: [
+        {
+          title: "Freelances et consultants",
+          text: "Suivez vos clients, missions, prestations, frais et factures sans multiplier les fichiers.",
+          icon: BriefcaseBusiness,
+        },
+        {
+          title: "Créatifs et prestataires",
+          text: "Gardez une trace claire de vos projets, forfaits, dépenses et livrables.",
+          icon: Sparkles,
+        },
+        {
+          title: "Coachs, formateurs et indépendants",
+          text: "Centralisez vos clients, séances, revenus et factures dans un outil simple.",
+          icon: Users,
+        },
+        {
+          title: "Petites structures",
+          text: "Gardez une vision claire de votre activité sans passer sur un logiciel trop lourd.",
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    pricing: {
+      eyebrow: "Tarifs",
+      title: "Des offres simples pour gérer votre activité.",
+      subtitle:
+        "Commencez gratuitement, puis choisissez l'offre adaptée à votre façon de travailler.",
+      notes: {
+        FREE: "Pour découvrir Kronoma et centraliser les bases de votre activité.",
+        PRO: "Pour gérer vos clients, projets, prestations, frais, factures et suivis avec plus de confort.",
+        LIFETIME:
+          "Un accès complet en paiement unique, pour celles et ceux qui préfèrent éviter l'abonnement.",
+      },
+      perks: {
+        FREE: [
+          "✓ 1 utilisateur",
+          "✓ Suivi du temps basique",
+          "✓ Clients limites",
+          "✓ Factures limitees / mois",
+          "✗ QR facture",
+          "✗ Exports",
+          "✗ Analytics avancees",
+          "✗ Suivi des depenses",
+        ],
+        PRO: [
+          "✓ Time tracking complet",
+          "✓ Clients illimites",
+          "✓ Projets",
+          "✓ Generation de factures",
+          "✓ QR-facture suisse pour profils CH",
+          "✓ Rappels de paiement",
+          "✓ Historique complet des sessions",
+          "✓ Analytics avancees",
+          "✓ Suivi des depenses",
+          "✓ Exports CSV",
+          "✓ Templates de facture personnalises",
+          "✓ Reporting avance",
+        ],
+        LIFETIME: [
+          "✓ Time tracking complet",
+          "✓ Clients illimites",
+          "✓ Projets",
+          "✓ Generation de factures",
+          "✓ QR-facture suisse pour profils CH",
+          "✓ Rappels de paiement",
+          "✓ Historique complet des sessions",
+          "✓ Analytics avancees",
+          "✓ Suivi des depenses",
+          "✓ Exports CSV",
+          "✓ Templates de facture personnalises",
+          "✓ Reporting avance",
+          "✓ Acces Pro à vie",
+        ],
+      },
+      cta: "Choisir cette offre",
+      freeCta: "Commencer gratuitement",
+      suffixMonthly: "/ mois",
+      suffixLifetime: "paiement unique",
+    },
+    faq: {
+      eyebrow: "FAQ",
+      title: "Questions fréquentes.",
+      items: [
+        {
+          q: "Kronoma est-il seulement un outil de suivi du temps ?",
+          a: "Non. Le suivi du temps fait partie de Kronoma, mais l'objectif principal est de vous aider à centraliser votre activité : clients, projets, prestations, frais, revenus et factures.",
+        },
+        {
+          q: "Puis-je utiliser Kronoma si je ne facture pas à l'heure ?",
+          a: "Oui. Kronoma convient aussi aux indépendants qui travaillent au forfait, à la prestation ou par projet. Le temps peut être suivi quand c'est utile, mais il n'est pas obligatoire.",
+        },
+        {
+          q: "Puis-je gérer mes clients et projets ?",
+          a: "Oui. Vous pouvez organiser votre activité par client et par projet, puis y associer prestations, frais, temps passé et factures.",
+        },
+        {
+          q: "Puis-je suivre mes frais professionnels ?",
+          a: "Oui. Kronoma vous permet de garder une trace de vos dépenses et de vos justificatifs afin de mieux suivre ce que coûte votre activité.",
+        },
+        {
+          q: "Puis-je créer et suivre mes factures ?",
+          a: "Oui. Vous pouvez créer vos factures, suivre leur statut et garder une vue claire sur ce qui est payé, envoyé ou encore à facturer.",
+        },
+        {
+          q: "Kronoma est-il adapté aux petites structures ?",
+          a: "Oui. Kronoma est pensé pour les indépendants, freelances et petites structures qui veulent une solution claire sans outil trop lourd.",
+        },
+        {
+          q: "Puis-je exporter mes données ?",
+          a: "Oui. Vous pouvez exporter vos données pour les conserver, les partager ou les utiliser dans votre suivi administratif.",
+        },
+        {
+          q: "Kronoma remplace-t-il un logiciel de comptabilité complet ?",
+          a: "Non. Kronoma vous aide surtout à mieux suivre votre activité quotidienne, vos clients, vos prestations, vos frais et vos factures.",
+        },
+      ],
+    },
+    closing: {
+      title: "Reprenez une vue claire sur votre activité.",
+      text: "Centralisez vos clients, projets, prestations, frais et factures dans un outil simple, pensé pour les indépendants, freelances et petites structures.",
+      ctaPrimary: "Essayer gratuitement",
+      ctaSecondary: "Voir les tarifs",
+      microcopy: "Démarrez en quelques minutes. Sans complexité inutile.",
+    },
+    footer:
+      "Kronoma aide les indépendants, freelances et petites structures à centraliser leur activité : clients, projets, prestations, frais, revenus et factures.",
+  },
+  en: {
+    metadata: {
+      title: "Kronoma | Simple business management for freelancers and small teams",
+      description:
+        "Manage clients, projects, services, expenses, invoices, revenue and time in one clear workspace built for freelancers and small teams.",
+    },
+    nav: {
+      home: "Home",
+      features: "Features",
+      pricing: "Pricing",
+      blog: "Blog",
+      about: "About",
+      faq: "F.A.Q",
+      signIn: "Sign in",
+      cta: "Start free",
+      menu: "Open navigation",
+    },
+    hero: {
+      title: "Keep a clear view of your business.",
+      subtitle: "No scattered notes, separate files or complicated tools.",
+      subtitleLines: [
+        "No scattered notes, separate files",
+        "or complicated tools.",
+      ],
+      paragraph:
+        "Kronoma brings clients, projects, expenses, invoices, revenue and useful tracked time into one simple workspace.",
+      ctaPrimary: "Start free",
+      ctaSecondary: "See how it works",
+      videoLabel: "Demo video",
+      videoTitle: "Kronoma overview",
+      videoMeta: "2 min",
+    },
+    problem: {
+      eyebrow: "The real problem",
+      title: "When everything is scattered, clarity disappears.",
+      text: "A client in your messages, a receipt in your inbox, a service in a spreadsheet, an invoice in a folder, a reminder in your head... Kronoma brings everything together so you can manage your business with more confidence.",
+      beforeTitle: "Today",
+      afterTitle: "With Kronoma",
+      before: [
+        "Client details spread across tools",
+        "Expenses and receipts hard to find",
+        "Invoices followed by hand",
+        "Approximate revenue",
+        "Time or services sometimes forgotten",
+      ],
+      after: [
+        "Clients, projects and services centralized",
+        "Expenses and receipts in the right place",
+        "Invoices tracked clearly",
+        "Revenue and expenses visible",
+        "Tracked time available when useful",
+      ],
+    },
+    benefits: {
+      eyebrow: "Benefits",
+      title: "Clearer management, without a complicated tool.",
+      subtitle:
+        "Kronoma helps you track the essentials of your business day to day, without turning admin into a heavy system.",
+      cards: [
+        {
+          title: "Centralize clients and projects",
+          text: "Keep important information in one place: clients, projects, services, statuses and history.",
+          icon: Users,
+        },
+        {
+          title: "Track business expenses",
+          text: "Add expenses, keep receipts and maintain a clear record of what your business costs.",
+          icon: ReceiptText,
+        },
+        {
+          title: "Manage invoices more calmly",
+          text: "Create invoices, track their status and quickly see what is paid, sent or still to invoice.",
+          icon: FileText,
+        },
+        {
+          title: "Keep an eye on revenue",
+          text: "Understand what you earn, what you spend and what is still waiting to be paid.",
+          icon: BarChart3,
+        },
+        {
+          title: "Track time when useful",
+          text: "Work hourly, fixed-fee or by project. Time tracking is there when you need it, without forcing your workflow.",
+          icon: Clock3,
+        },
+        {
+          title: "Export your data",
+          text: "Stay in control of your information and export what you need for your admin follow-up.",
+          icon: Download,
+        },
+      ],
+    },
+    steps: {
+      eyebrow: "How it works",
+      title: "From daily work to a clear view.",
+      subtitle:
+        "Add what you do as you go, then get a structured view of your clients, projects, expenses, invoices and revenue.",
+      items: [
+        {
+          title: "Add clients and projects",
+          text: "Create your client base, organize projects and keep important information in one place.",
+        },
+        {
+          title: "Track services, expenses and time",
+          text: "Add what you deliver, what you spend and the time spent whenever needed.",
+        },
+        {
+          title: "Invoice and follow revenue",
+          text: "Create invoices, track payments and keep a clear view of what is paid or still outstanding.",
+        },
+      ],
+    },
+    midCta: {
+      title: "Ready to structure your business?",
+      text: "Start by centralizing clients, projects, expenses and invoices in one clear workspace.",
+      ctaPrimary: "Start free",
+      ctaSecondary: "See pricing",
+    },
+    features: {
+      eyebrow: "Features",
+      title: "The essentials to track your business.",
+      subtitle:
+        "Simple features designed to help you keep track without moving into a heavy tool.",
+      items: [
+        {
+          title: "Clients",
+          text: "Group client information and easily find their projects, services, invoices and related expenses.",
+          icon: Users,
+        },
+        {
+          title: "Projects",
+          text: "Organize work by client or mission, with a clear view of what is active, done or ready to invoice.",
+          icon: FolderKanban,
+        },
+        {
+          title: "Services",
+          text: "Keep track of what you deliver, whether you invoice hourly, fixed-fee or by project.",
+          icon: ListChecks,
+        },
+        {
+          title: "Business expenses",
+          text: "Add expenses, connect them to a client or project, and keep a record of receipts.",
+          icon: ReceiptText,
+        },
+        {
+          title: "Invoices",
+          text: "Create invoices, track their status and reduce forgotten payments or reminders.",
+          icon: FileText,
+        },
+        {
+          title: "Revenue and expenses",
+          text: "See more easily what your business generates and what it costs.",
+          icon: CircleDollarSign,
+        },
+        {
+          title: "Time tracking",
+          text: "Start a timer or add time manually when you need to track hours for a client or project.",
+          icon: Clock3,
+        },
+        {
+          title: "Exports",
+          text: "Export data when you need to share, archive or analyze it.",
+          icon: Download,
+        },
+      ],
+    },
+    import: {
+      eyebrow: "Client import",
+      title: "Import clients and start without rebuilding everything.",
+      text: "Already have a client list in Excel or CSV? Import it into Kronoma and quickly move your client base into a clearer workspace.",
+      bullets: [
+        "Import existing clients in minutes",
+        "Avoid manual entry",
+        "Keep a clean base for projects, services and invoices",
+      ],
+      cta: "Start free",
+      file: "current-clients.csv",
+      preview: ["Client", "Project", "Status"],
+    },
+    audience: {
+      eyebrow: "Who it is for",
+      title: "Built for people who manage client work every day.",
+      items: [
+        {
+          title: "Freelancers and consultants",
+          text: "Track clients, missions, services, expenses and invoices without multiplying files.",
+          icon: BriefcaseBusiness,
+        },
+        {
+          title: "Creatives and service providers",
+          text: "Keep a clear trace of projects, packages, expenses and deliverables.",
+          icon: Sparkles,
+        },
+        {
+          title: "Coaches, trainers and independents",
+          text: "Centralize clients, sessions, revenue and invoices in one simple tool.",
+          icon: Users,
+        },
+        {
+          title: "Small teams",
+          text: "Keep a clear view of the business without moving to a tool that feels too heavy.",
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    pricing: {
+      eyebrow: "Pricing",
+      title: "Simple plans to manage your business.",
+      subtitle:
+        "Start free, then choose the plan that fits the way you work.",
+      notes: {
+        FREE: "To discover Kronoma and centralize the basics of your business.",
+        PRO: "To manage clients, projects, services, expenses, invoices and follow-up more comfortably.",
+        LIFETIME:
+          "Complete access with a one-time payment, for people who prefer to avoid subscriptions.",
+      },
+      perks: {
+        FREE: [
+          "✓ 1 user",
+          "✓ Basic time tracking",
+          "✓ Limited clients",
+          "✓ Limited invoices / month",
+          "✗ QR invoice",
+          "✗ Exports",
+          "✗ Advanced analytics",
+          "✗ Expense tracking",
+        ],
+        PRO: [
+          "✓ Full time tracking",
+          "✓ Unlimited clients",
+          "✓ Projects",
+          "✓ Invoice generation",
+          "✓ Swiss QR invoice for CH profiles",
+          "✓ Payment reminders",
+          "✓ Full session history",
+          "✓ Advanced analytics",
+          "✓ Expense tracking",
+          "✓ CSV exports",
+          "✓ Custom invoice templates",
+          "✓ Advanced reporting",
+        ],
+        LIFETIME: [
+          "✓ Full time tracking",
+          "✓ Unlimited clients",
+          "✓ Projects",
+          "✓ Invoice generation",
+          "✓ Swiss QR invoice for CH profiles",
+          "✓ Payment reminders",
+          "✓ Full session history",
+          "✓ Advanced analytics",
+          "✓ Expense tracking",
+          "✓ CSV exports",
+          "✓ Custom invoice templates",
+          "✓ Advanced reporting",
+          "✓ Pro access for life",
+        ],
+      },
+      cta: "Choose this plan",
+      freeCta: "Start free",
+      suffixMonthly: "/ month",
+      suffixLifetime: "one-time payment",
+    },
+    faq: {
+      eyebrow: "FAQ",
+      title: "Common questions.",
+      items: [
+        {
+          q: "Is Kronoma only a time tracking tool?",
+          a: "No. Time tracking is part of Kronoma, but the main goal is to help you centralize your activity: clients, projects, services, expenses, revenue and invoices.",
+        },
+        {
+          q: "Can I use Kronoma if I do not bill hourly?",
+          a: "Yes. Kronoma also works for fixed-fee, service-based or project-based work. Time can be tracked when useful, but it is not mandatory.",
+        },
+        {
+          q: "Can I manage clients and projects?",
+          a: "Yes. You can organize work by client and project, then connect services, expenses, tracked time and invoices.",
+        },
+        {
+          q: "Can I track business expenses?",
+          a: "Yes. Kronoma helps you keep a record of expenses and receipts so you can better follow what your business costs.",
+        },
+        {
+          q: "Can I create and track invoices?",
+          a: "Yes. You can create invoices, follow their status and keep a clear view of what is paid, sent or still to invoice.",
+        },
+        {
+          q: "Is Kronoma suitable for small teams?",
+          a: "Yes. Kronoma is designed for independents, freelancers and small teams that want clarity without a heavy tool.",
+        },
+        {
+          q: "Can I export my data?",
+          a: "Yes. You can export data to keep it, share it or use it in your administrative follow-up.",
+        },
+        {
+          q: "Does Kronoma replace full accounting software?",
+          a: "No. Kronoma is mainly here to help you track daily business activity, clients, services, expenses and invoices.",
+        },
+      ],
+    },
+    closing: {
+      title: "Get a clearer view of your business.",
+      text: "Centralize your clients, projects, services, expenses and invoices in one simple workspace built for freelancers and small teams.",
+      ctaPrimary: "Start free",
+      ctaSecondary: "See pricing",
+      microcopy: "Start in a few minutes. No unnecessary complexity.",
+    },
+    footer:
+      "Kronoma helps freelancers, independents and small teams centralize clients, projects, services, expenses, revenue and invoices.",
+  },
+} as const;
 
-type DemoEvent = {
-  label: string;
-  time: string;
-};
-
-type DemoStat = {
-  title: string;
-  value: string;
-};
-
-type SummaryStat = {
-  label: string;
-  value: string;
-};
-
-type ImportTableHeaders = {
-  name: string;
-  email: string;
-  city: string;
-};
-
-type ImportPreviewRow = {
-  name: string;
-  email: string;
-  city: string;
-};
-
-type QuickStat = {
-  value: string;
-  label: string;
-};
-
-type FeatureCard = {
-  title: string;
-  copy: string;
-};
-
-type PricingPlan = {
-  name: string;
-  planId: string;
-  price: string;
-  suffix?: string;
-  desc: string;
-  perks: string[];
-  highlight?: boolean;
-};
-
-type StepItem = {
-  title: string;
-  description: string;
-};
-
-type FaqItem = {
-  q: string;
-  a: string;
-};
-
-const SITE_SECTION_OFFSET = -112;
+type LandingCopy = (typeof copy)[keyof typeof copy];
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
+  const pageCopy = getCopy(locale);
 
   return buildMarketingMetadata({
-    title: "Kronoma | Logiciel suisse de suivi du temps pour freelances",
-    description:
-      "Suivez vos heures, gerez vos projets et generez vos factures avec QR-facture suisse. Kronoma aide les freelances suisses a transformer leur temps en factures.",
+    title: pageCopy.metadata.title,
+    description: pageCopy.metadata.description,
     path: "/",
-    index: locale === "fr",
+    locale,
   });
 }
 
-export default async function Home() {
-  const locale = await getLocale();
-  const t = await getTranslations("home");
-  const heroBullets = t.raw("hero.bullets") as string[];
-  const demoEvents = t.raw("demo.events") as DemoEvent[];
-  const demoStats = t.raw("demo.stats") as DemoStat[];
-  const quickStats = t.raw("quickStats") as QuickStat[];
-  const featureCards = t.raw("features.cards") as FeatureCard[];
-  const steps = t.raw("steps.items") as StepItem[];
-  const days = t.raw("steps.days") as string[];
-  const summaryStats = t.raw("steps.summaryStats") as SummaryStat[];
-  const importBenefits = t.raw("importCta.benefits") as string[];
-  const importAcceptedFormats = t.raw("importCta.acceptedFormats") as string[];
-  const importTableHeaders = t.raw("importCta.tableHeaders") as ImportTableHeaders;
-  const importPreviewRows = t.raw("importCta.previewRows") as ImportPreviewRow[];
-  const importSummaryStats = t.raw("importCta.summaryStats") as QuickStat[];
-  const pricingPlans = t.raw("pricing.plans") as PricingPlan[];
-  const faqItems = t.raw("faq.items") as FaqItem[];
+function getCopy(locale: string): LandingCopy {
+  return locale === "en" ? copy.en : copy.fr;
+}
 
-  const barValues = [84, 72, 91, 65, 78];
-  const eventTones = [
-    "bg-brand",
-    "bg-brand-3",
-    "bg-brand-2",
-    "bg-ink",
-  ];
-  const canonicalUrl = absoluteUrl("/");
-  const homeJsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: "Kronoma",
-      url: canonicalUrl,
-      description: t("hero.subtitle"),
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      name: "Kronoma",
-      url: canonicalUrl,
-      inLanguage: locale,
-    },
+function planDisplayName(planId: string) {
+  if (planId === "LIFETIME") return "Lifetime";
+  return planId === "PRO" ? "Pro" : "Free";
+}
+
+function formatPrice(plan: ReturnType<typeof getVisiblePlans>[number]) {
+  if (plan.priceAmount === 0) return "0 CHF";
+  return `${plan.priceAmount} CHF`;
+}
+
+export default async function LandingPage() {
+  const locale = await getLocale();
+  const c = getCopy(locale);
+  const visiblePlans = getVisiblePlans();
+  const canonicalUrl = localizedAbsoluteUrl("/", locale);
+  const signInHref = localizedPath("/auth/login", locale);
+  const startHref = localizedPath(buildSignupCheckoutHref(), locale);
+  const pricingHref = localizedPath("/pricing", locale);
+
+  const jsonLd = [
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
@@ -144,12 +722,12 @@ export default async function Home() {
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       inLanguage: locale,
-      description: t("features.subtitle"),
+      description: c.metadata.description,
     },
     {
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      mainEntity: faqItems.map((item) => ({
+      mainEntity: c.faq.items.map((item) => ({
         "@type": "Question",
         name: item.q,
         acceptedAnswer: {
@@ -161,486 +739,529 @@ export default async function Home() {
   ];
 
   return (
-    <main className={`${body.className} w-full bg-paper text-ink`}>
+    <main className="min-h-screen bg-white text-ink">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(homeJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
-      <div className="relative w-full overflow-hidden">
-        <div className="pointer-events-none absolute -top-28 right-[-6rem] h-[320px] w-[320px] sm:h-[420px] sm:w-[420px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.35),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_10s_ease-in-out_infinite]" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-10rem] h-[320px] w-[320px] sm:h-[520px] sm:w-[520px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.3),transparent_60%)] blur-2xl will-change-transform motion-safe:animate-[float_12s_ease-in-out_infinite]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.08)_1px,transparent_0)] bg-[length:18px_18px] opacity-30" />
-
-        <section className="relative mx-auto flex w-full maxW flex-col gap-12 px-6 pb-16 pt-32 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="relative z-10 flex flex-col gap-6">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-line-strong bg-white/70 px-4 py-1 text-xs uppercase text-ink-muted motion-safe:opacity-0 motion-safe:animate-[fade-up_0.8s_ease-out_forwards]">
-              {t("hero.badge")}
-            </span>
-            <h1
-              className={`${display.className} text-4xl font-semibold leading-tight text-ink motion-safe:opacity-0 motion-safe:animate-[fade-up_0.9s_ease-out_forwards] sm:text-5xl lg:text-6xl`}
-              style={{ animationDelay: "120ms", whiteSpace: "pre-line" }}
-            >
-              {t("hero.title")}
-              <span className="block text-brand-2">
-                {t("hero.titleAccent")}
-              </span>
+      <div className="relative overflow-hidden">
+        <section className="relative mx-auto flex w-full maxW flex-col items-center px-6 pb-14 pt-28 text-center sm:pt-32 lg:pb-20 lg:pt-36">
+          <div className="mx-auto flex max-w-4xl flex-col items-center">
+            <h1 className="max-w-4xl text-4xl font-semibold leading-[1.06] text-ink sm:text-6xl lg:text-7xl">
+              <AnimatedGradientText>{c.hero.title}</AnimatedGradientText>
             </h1>
-            <p
-              className="max-w-xl text-base text-ink-muted motion-safe:opacity-0 motion-safe:animate-[fade-up_1s_ease-out_forwards] sm:text-lg"
-              style={{ animationDelay: "220ms" }}
-            >
-              {t("hero.subtitle")}
+            <p className="mt-5 max-w-2xl text-xl font-medium leading-snug text-ink sm:text-2xl">
+              {c.hero.subtitleLines.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
             </p>
-            <div
-              className="flex flex-wrap items-center gap-4 motion-safe:opacity-0 motion-safe:animate-[fade-up_1s_ease-out_forwards]"
-              style={{ animationDelay: "320ms" }}
-            >
-              <Link
-                href={buildLoginCheckoutHref()}
-                className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] hover:shadow-[0_20px_44px_-22px_rgba(249,115,22,0.95)]"
+            <p className="mt-4 max-w-2xl text-base leading-7 text-ink-muted sm:text-lg">
+              {c.hero.paragraph}
+            </p>
+            <div className="mt-7 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+              <Button
+                asChild
+                className="h-12 rounded-full bg-brand px-6 text-sm font-semibold text-white shadow-[0_18px_44px_-24px_rgba(249,115,22,0.95)] hover:bg-brand/90"
               >
-                {t("hero.ctaPrimary")}
-              </Link>
+                <Link href={startHref}>
+                  {c.hero.ctaPrimary}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
               <ScrollSectionButton
-                sectionId="home-features"
-                offsetY={SITE_SECTION_OFFSET}
-                className="rounded-full border border-line-strong bg-white/70 px-6 py-3 text-sm font-semibold text-ink transition hover:translate-y-[-1px] hover:bg-white"
+                sectionId="how"
+                offsetY={LANDING_SECTION_OFFSET}
+                className="inline-flex h-12 items-center justify-center rounded-full border border-line-strong bg-white/70 px-6 text-sm font-semibold text-ink hover:bg-white"
               >
-                {t("hero.ctaSecondary")}
+                {c.hero.ctaSecondary}
               </ScrollSectionButton>
             </div>
-            <ul className="mt-2 grid gap-3 text-sm text-ink-muted sm:grid-cols-3">
-              {heroBullets.map((item, index) => (
-                <li
-                  key={item}
-                  className="flex items-center gap-2 motion-safe:opacity-0 motion-safe:animate-[fade-up_0.9s_ease-out_forwards]"
-                  style={{ animationDelay: `${420 + index * 80}ms` }}
-                >
-                  <span className="h-2 w-2 rounded-full bg-brand-2" />
-                  {item}
-                </li>
-              ))}
-            </ul>
           </div>
 
-          <div
-            id="demo"
-            className="relative z-10 rounded-3xl border border-line bg-panel p-6 shadow-[0_32px_70px_-50px_rgba(15,118,110,0.6)] motion-safe:opacity-0 motion-safe:animate-[fade-up_1s_ease-out_forwards]"
-            style={{ animationDelay: "200ms" }}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase text-ink-muted">
-                  {t("demo.eyebrow")}
-                </p>
-                <p className="text-2xl font-semibold text-ink">
-                  {t("demo.hours")}
-                </p>
-              </div>
-              <span className="rounded-full bg-brand-2/10 px-3 py-1 text-xs font-semibold text-brand-2">
-                {t("demo.status")}
-              </span>
-            </div>
-            <div className="mt-6 space-y-4">
-              {demoEvents.map((event, index) => (
-                <div
-                  key={event.label}
-                  className="flex items-center justify-between rounded-2xl border border-line bg-white/60 px-4 py-3 text-sm"
-                >
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${
-                        eventTones[index] ?? eventTones[0]
-                      }`}
-                    />
-                    <span className="font-medium text-ink">
-                      {event.label}
-                    </span>
-                  </div>
-                  <span className="text-ink-muted">{event.time}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              {demoStats.map((stat) => (
-                <div
-                  key={stat.title}
-                  className="rounded-2xl border border-line bg-white/70 px-4 py-3"
-                >
-                  <p className="text-xs uppercase text-ink-muted">
-                    {stat.title}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-ink">
-                    {stat.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <DemoVideoCard c={c} />
         </section>
 
-        <section className="mx-auto w-full maxW px-6 py-10">
-          <div className="grid gap-4 text-center sm:grid-cols-3">
-            {quickStats.map((stat) => (
-              <div
-                key={stat.value}
-                className="rounded-2xl border border-line bg-white/70 px-5 py-6"
-              >
-                <p className="text-3xl font-semibold text-ink">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-sm text-ink-muted">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
+        <section className="relative mx-auto w-full maxW px-6 py-16">
+          <div className="max-w-3xl">
+            <p className={sectionLabel}>{c.problem.eyebrow}</p>
+            <h2 className={sectionTitle}>{c.problem.title}</h2>
+            <p className={sectionIntro}>{c.problem.text}</p>
           </div>
-        </section>
-
-        <section
-          id="home-features"
-          className="mx-auto w-full maxW scroll-mt-28 px-6 py-16"
-        >
-          <div className="flex flex-col gap-4">
-            <p className="text-xs uppercase text-ink-muted">
-              {t("features.eyebrow")}
-            </p>
-            <h2
-              className={`${display.className} text-3xl font-semibold text-ink sm:text-4xl`}
-            >
-              {t("features.title")}
-            </h2>
-            <p className="max-w-2xl text-ink-muted">
-              {t("features.subtitle")}
-            </p>
-          </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featureCards.map((feature) => (
-              <div
-                key={feature.title}
-                className="rounded-2xl border border-line bg-white/70 p-6 shadow-[0_22px_50px_-40px_rgba(29,27,22,0.25)]"
-              >
-                <h3 className="text-lg font-semibold text-ink">
-                  {feature.title}
-                </h3>
-                <p className="mt-2 text-sm text-ink-muted">
-                  {feature.copy}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto w-full maxW px-6 py-12">
-          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div>
-              <p className="text-xs uppercase text-ink-muted">
-                {t("steps.eyebrow")}
-              </p>
-              <h2
-                className={`${display.className} mt-3 text-3xl font-semibold text-ink sm:text-4xl`}
-              >
-                {t("steps.title")}
-              </h2>
-              <p className="mt-3 text-ink-muted">
-                {t("steps.subtitle")}
-              </p>
-              <div className="mt-6 space-y-4">
-                {steps.map((step, index) => (
-                  <div
-                    key={step.title}
-                    className="flex gap-4 rounded-2xl border border-line bg-white/70 px-4 py-4"
-                  >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-2/10 text-sm font-semibold text-brand-2">
-                      0{index + 1}
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold text-ink">{step.title}</p>
-                      <p className="mt-0.5 text-sm text-ink-muted">{step.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-line bg-white/80 p-6 shadow-[0_28px_60px_-48px_rgba(15,118,110,0.5)]">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-ink">
-                  {t("steps.summaryTitle")}
-                </p>
-                <span className="text-xs text-ink-muted">
-                  {t("steps.summaryRange")}
-                </span>
-              </div>
-              <div className="mt-6 space-y-4">
-                {days.map((day, index) => (
-                  <div key={day} className="flex items-center gap-4">
-                    <span className="w-10 text-xs text-ink-muted">
-                      {day}
-                    </span>
-                    <div className="h-2 flex-1 rounded-full bg-ink-soft">
-                      <div
-                        className="h-2 rounded-full bg-brand"
-                        style={{ width: `${barValues[index] ?? 60}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-ink-muted">
-                      {Math.round((barValues[index] ?? 60) / 10)}h
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {summaryStats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="rounded-2xl border border-line bg-panel px-4 py-3"
-                  >
-                    <p className="text-xs uppercase text-ink-muted">
-                      {stat.label}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-ink">
-                      {stat.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto w-full maxW px-6 py-12">
-          <div className="relative overflow-hidden rounded-[32px] border border-line bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(255,247,237,0.96))] px-6 py-8 shadow-[0_28px_70px_-52px_rgba(249,115,22,0.45)] sm:px-8 lg:grid lg:grid-cols-[1fr_0.95fr] lg:items-center lg:gap-10">
-            <div className="pointer-events-none absolute right-[-5rem] top-[-5rem] h-40 w-40 rounded-full bg-brand/15 blur-3xl" />
-            <div className="pointer-events-none absolute bottom-[-6rem] left-[-3rem] h-44 w-44 rounded-full bg-brand-2/10 blur-3xl" />
-
-            <div className="relative z-10">
-              <p className="text-xs uppercase text-ink-muted">
-                {t("importCta.eyebrow")}
-              </p>
-              <h2
-                className={`${display.className} mt-3 max-w-2xl text-3xl font-semibold text-ink sm:text-4xl`}
-              >
-                {t("importCta.title")}
-              </h2>
-              <p className="mt-4 max-w-2xl text-ink-muted">
-                {t("importCta.subtitle")}
-              </p>
-
-              <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-                {importBenefits.map((benefit) => (
-                  <li
-                    key={benefit}
-                    className="flex items-start gap-3 rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm text-ink-muted"
-                  >
-                    <span className="mt-1 h-2.5 w-2.5 rounded-full bg-brand" />
-                    <span>{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-6 flex flex-wrap items-center gap-4">
-                <Link
-                  href="/auth/login"
-                  className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] hover:shadow-[0_20px_44px_-22px_rgba(249,115,22,0.95)]"
-                >
-                  {t("importCta.ctaPrimary")}
-                </Link>
-                <ScrollSectionButton
-                  sectionId="pricing"
-                  offsetY={SITE_SECTION_OFFSET}
-                  className="rounded-full border border-line-strong bg-white/75 px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white"
-                >
-                  {t("importCta.ctaSecondary")}
-                </ScrollSectionButton>
-              </div>
-            </div>
-
-            <div className="relative z-10 mt-8 lg:mt-0">
-              <div className="rounded-[28px] border border-line bg-ink p-4 text-white shadow-[0_24px_64px_-40px_rgba(29,27,22,0.8)]">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-white/60">
-                      {t("importCta.fileBadge")}
-                    </p>
-                    <p className="mt-1 text-base font-semibold">
-                      {t("importCta.fileName")}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap justify-end gap-2">
-                    {importAcceptedFormats.map((format) => (
-                      <span
-                        key={format}
-                        className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-medium text-white/80"
-                      >
-                        {format}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-5 rounded-3xl bg-white/95 p-4 text-ink">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs uppercase text-ink-muted">
-                      {t("importCta.acceptedLabel")}
-                    </p>
-                    <span className="rounded-full bg-brand-2/10 px-3 py-1 text-xs font-semibold text-brand-2">
-                      {t("importCta.summaryLabel")}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 overflow-hidden rounded-2xl border border-line">
-                    <div className="grid grid-cols-[1.1fr_1.25fr_0.8fr] gap-3 bg-panel px-4 py-3 text-xs font-semibold uppercase text-ink-muted">
-                      <span>{importTableHeaders.name}</span>
-                      <span>{importTableHeaders.email}</span>
-                      <span>{importTableHeaders.city}</span>
-                    </div>
-                    <div className="divide-y divide-line">
-                      {importPreviewRows.map((row) => (
-                        <div
-                          key={`${row.name}-${row.email}`}
-                          className="grid grid-cols-[1.1fr_1.25fr_0.8fr] gap-3 px-4 py-3 text-sm"
-                        >
-                          <span className="font-medium text-ink">{row.name}</span>
-                          <span className="truncate text-ink-muted">{row.email}</span>
-                          <span className="text-ink-muted">{row.city}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 rounded-2xl bg-panel p-4">
-                    <p className="text-sm font-semibold text-ink">
-                      {t("importCta.summaryTitle")}
-                    </p>
-                    <p className="mt-1 text-sm text-ink-muted">
-                      {t("importCta.summaryCopy")}
-                    </p>
-
-                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                      {importSummaryStats.map((stat) => (
-                        <div
-                          key={stat.label}
-                          className="rounded-2xl border border-line bg-white px-3 py-3"
-                        >
-                          <p className="text-lg font-semibold text-ink">{stat.value}</p>
-                          <p className="text-xs text-ink-muted">{stat.label}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="pricing" className="mx-auto w-full maxW px-6 py-16">
-          <p className="mb-6 text-center text-sm font-medium text-ink-muted">
-            {t("pricing.socialProof")}
-          </p>
-          <div className="flex flex-col gap-4 text-center">
-            <p className="text-xs uppercase text-ink-muted">
-              {t("pricing.eyebrow")}
-            </p>
-            <h2
-              className={`${display.className} text-3xl font-semibold text-ink sm:text-4xl`}
-            >
-              {t("pricing.title")}
-            </h2>
-            <p className="mx-auto max-w-2xl text-ink-muted">
-              {t("pricing.subtitle")}
-            </p>
-          </div>
-          <div className="mt-10">
-            <PricingCards
-              plans={pricingPlans}
-              userPlan={null}
-              ctaLabelTemplate={t("pricing.cta", { plan: "{plan}" })}
-              ctaFreeLabel={t("pricing.ctaFree")}
-              ctaTrialLabel={t("pricing.ctaTrial", { plan: "{plan}" })}
-              ctaLifetimeLabel={t("pricing.ctaLifetime", { plan: "{plan}" })}
-              ctaCurrentLabel=""
-              ctaManageLabel=""
-              freeNote={t("pricing.planNotes.free")}
-              trialNote={t("pricing.planNotes.trial")}
-              lifetimeNote={t("pricing.planNotes.lifetime")}
-              toggleMonthly={t("pricing.billingToggle.monthly")}
-              toggleYearly={t("pricing.billingToggle.yearly")}
-              toggleBadge={t("pricing.billingToggle.badge")}
-              toggleHint={t("pricing.billingToggle.yearlyHint")}
-              suffixMonthly={t("pricing.billingToggle.suffixMonthly")}
-              suffixYearly={t("pricing.billingToggle.suffixYearly")}
-              monthlyHint={t("pricing.billingToggle.monthlyHint")}
-              yearlyEquivalent={t("pricing.billingToggle.yearlyEquivalent")}
+          <div className="mt-10 grid gap-5 lg:grid-cols-2">
+            <ComparisonCard
+              title={c.problem.beforeTitle}
+              items={c.problem.before}
+              variant="muted"
+            />
+            <ComparisonCard
+              title={c.problem.afterTitle}
+              items={c.problem.after}
+              variant="positive"
             />
           </div>
         </section>
 
-        <section id="faq" className="mx-auto w-full maxW px-6 py-16">
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+        <section id="features" className="mx-auto w-full maxW scroll-mt-24 px-6 py-16">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-xs uppercase text-ink-muted">
-                {t("faq.eyebrow")}
-              </p>
-              <h2
-                className={`${display.className} mt-3 text-3xl font-semibold text-ink sm:text-4xl`}
-              >
-                {t("faq.title")}
-              </h2>
-              <p className="mt-3 max-w-xl text-ink-muted">
-                {t("faq.subtitle")}
-              </p>
+              <p className={sectionLabel}>{c.benefits.eyebrow}</p>
+              <h2 className={sectionTitle}>{c.benefits.title}</h2>
             </div>
-            <div className="space-y-4">
-              {faqItems.map((item) => (
-                <div
-                  key={item.q}
-                  className="rounded-2xl border border-line bg-white/70 px-5 py-4"
+            <p className="max-w-xl text-base leading-7 text-ink-muted">
+              {c.benefits.subtitle}
+            </p>
+          </div>
+          <BentoGrid className="mt-10">
+            {c.benefits.cards.map((benefit, index) => {
+              const Icon = benefit.icon;
+              return (
+                <BentoCard
+                  key={benefit.title}
+                  className={
+                    index === 0 || index === 2
+                      ? "md:col-span-3"
+                      : "md:col-span-2"
+                  }
                 >
-                  <p className="text-sm font-semibold text-ink">
-                    {item.q}
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold text-ink">
+                    {benefit.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-ink-muted">
+                    {benefit.text}
                   </p>
-                  <p className="mt-2 text-sm text-ink-muted">
-                    {item.a}
-                  </p>
-                </div>
+                </BentoCard>
+              );
+            })}
+          </BentoGrid>
+        </section>
+
+        <section id="how" className="mx-auto w-full maxW scroll-mt-24 px-6 py-16">
+          <div className="grid gap-10 rounded-[28px] border border-line bg-white p-6 shadow-[0_28px_80px_-66px_rgba(29,27,22,0.42)] lg:grid-cols-[0.8fr_1.2fr] lg:p-8">
+            <div>
+              <p className={sectionLabel}>{c.steps.eyebrow}</p>
+              <h2 className={sectionTitle}>{c.steps.title}</h2>
+              <p className={sectionIntro}>{c.steps.subtitle}</p>
+            </div>
+            <div className="grid gap-4">
+              {c.steps.items.map((step, index) => (
+                <MagicCard key={step.title} className="p-5">
+                  <div className="flex gap-4">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-semibold text-white">
+                      0{index + 1}
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-ink">
+                        {step.title}
+                      </h3>
+                      <p className="mt-1 text-sm leading-6 text-ink-muted">
+                        {step.text}
+                      </p>
+                    </div>
+                  </div>
+                </MagicCard>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="mx-auto w-full maxW px-6 pb-24">
-          <div className="rounded-[32px] border border-line bg-brand-2/10 px-6 py-12 text-center sm:px-12">
-            <p className="text-xs uppercase text-ink-muted">
-              {t("closing.eyebrow")}
-            </p>
-            <h2
-              className={`${display.className} mt-4 text-3xl font-semibold text-ink sm:text-4xl`}
-            >
-              {t("closing.title")}
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-ink-muted">
-              {t("closing.subtitle")}
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-4">
-              <Link
-                href={buildLoginCheckoutHref()}
-                className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px]"
+        <section className="mx-auto w-full maxW px-6 py-8">
+          <div className="mx-auto max-w-5xl rounded-[28px] bg-ink px-6 py-9 text-center text-white shadow-[0_26px_90px_-64px_rgba(29,27,22,0.86)] sm:px-8">
+            <div className="mx-auto max-w-2xl">
+              <h2 className="text-2xl font-semibold leading-tight sm:text-3xl">
+                {c.midCta.title}
+              </h2>
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/68 sm:text-base">
+                {c.midCta.text}
+              </p>
+            </div>
+            <div className="mt-6 flex w-full flex-col justify-center gap-3 sm:flex-row">
+              <Button
+                asChild
+                className="h-11 rounded-full bg-brand px-5 text-white hover:bg-brand/90"
               >
-                {t("closing.ctaPrimary")}
-              </Link>
-              <ScrollSectionButton
-                sectionId="demo"
-                offsetY={SITE_SECTION_OFFSET}
-                className="rounded-full border border-line-strong bg-white/70 px-6 py-3 text-sm font-semibold text-ink transition hover:bg-white"
+                <Link href={startHref}>
+                  {c.midCta.ctaPrimary}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="h-11 rounded-full border-white/18 bg-transparent px-5 text-white hover:bg-white/10 hover:text-white"
               >
-                {t("closing.ctaSecondary")}
-              </ScrollSectionButton>
+                <Link href={pricingHref}>{c.midCta.ctaSecondary}</Link>
+              </Button>
             </div>
           </div>
         </section>
+
+        <section className="mx-auto w-full maxW px-6 py-16">
+          <div className="max-w-3xl">
+            <p className={sectionLabel}>{c.features.eyebrow}</p>
+            <h2 className={sectionTitle}>{c.features.title}</h2>
+            <p className={sectionIntro}>{c.features.subtitle}</p>
+          </div>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {c.features.items.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <Card
+                  key={feature.title}
+                  className="border-line bg-white shadow-[0_18px_55px_-48px_rgba(29,27,22,0.38)]"
+                >
+                  <CardHeader>
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-lg leading-tight text-ink">
+                      {feature.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-sm leading-6 text-ink-muted">
+                      {feature.text}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mx-auto w-full maxW px-6 py-16">
+          <div className="grid gap-8 overflow-hidden rounded-[28px] border border-line bg-ink p-6 text-white shadow-[0_28px_90px_-62px_rgba(29,27,22,0.85)] lg:grid-cols-[0.95fr_1.05fr] lg:p-8">
+            <div className="flex flex-col justify-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
+                {c.import.eyebrow}
+              </p>
+              <h2 className="mt-3 max-w-2xl text-3xl font-semibold leading-tight sm:text-4xl">
+                {c.import.title}
+              </h2>
+              <p className="mt-4 max-w-xl text-base leading-7 text-white/70">
+                {c.import.text}
+              </p>
+              <ul className="mt-6 grid gap-3">
+                {c.import.bullets.map((bullet) => (
+                  <li key={bullet} className="flex items-start gap-3 text-sm text-white/75">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+              <Button
+                asChild
+                className="mt-7 h-11 w-fit rounded-full bg-brand px-5 text-white hover:bg-brand/90"
+              >
+                <Link href={startHref}>{c.import.cta}</Link>
+              </Button>
+            </div>
+            <MagicCard className="bg-white/95 p-4 text-ink">
+              <div className="rounded-2xl border border-line bg-neutral-50 p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
+                      <FileSpreadsheet className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-ink">
+                        {c.import.file}
+                      </p>
+                      <p className="text-xs text-ink-muted">CSV / Excel</p>
+                    </div>
+                  </div>
+                  <Badge className="border-line bg-white text-ink-muted hover:bg-white">
+                    Import
+                  </Badge>
+                </div>
+                <div className="mt-5 overflow-hidden rounded-xl border border-line bg-white">
+                  <div className="grid grid-cols-3 bg-ink-soft px-4 py-3 text-xs font-semibold uppercase text-ink-muted">
+                    {c.import.preview.map((item) => (
+                      <span key={item}>{item}</span>
+                    ))}
+                  </div>
+                  {[
+                    ["Studio Nera", "Shooting produit", "Actif"],
+                    ["Atelier Bloom", "Identité visuelle", "À facturer"],
+                    ["Cabinet Lenoir", "Formation", "Payé"],
+                  ].map((row) => (
+                    <div
+                      key={row.join("-")}
+                      className="grid grid-cols-3 border-t border-line px-4 py-3 text-sm"
+                    >
+                      {row.map((cell) => (
+                        <span key={cell} className="truncate text-ink-muted">
+                          {cell}
+                        </span>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </MagicCard>
+          </div>
+        </section>
+
+        <section className="mx-auto w-full maxW px-6 py-16">
+          <div className="max-w-3xl">
+            <p className={sectionLabel}>{c.audience.eyebrow}</p>
+            <h2 className={sectionTitle}>{c.audience.title}</h2>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {c.audience.items.map((item) => {
+              const Icon = item.icon;
+              return (
+                <MagicCard key={item.title} className="p-5">
+                  <Icon className="h-5 w-5 text-brand" />
+                  <h3 className="mt-5 text-base font-semibold text-ink">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-ink-muted">
+                    {item.text}
+                  </p>
+                </MagicCard>
+              );
+            })}
+          </div>
+        </section>
+
+        <section id="pricing" className="mx-auto w-full maxW scroll-mt-24 px-6 py-16">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className={sectionLabel}>{c.pricing.eyebrow}</p>
+            <h2 className="mt-3 text-3xl font-semibold leading-tight text-ink sm:text-4xl lg:text-5xl">
+              {c.pricing.title}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-ink-muted">
+              {c.pricing.subtitle}
+            </p>
+          </div>
+          <div className="mt-10 grid gap-5 lg:grid-cols-3">
+            {visiblePlans.map((plan) => {
+              const note =
+                c.pricing.notes[plan.id as keyof typeof c.pricing.notes] ??
+                c.pricing.notes.PRO;
+              const perks =
+                c.pricing.perks[plan.id as keyof typeof c.pricing.perks] ??
+                c.pricing.perks.PRO;
+              const isLifetime = plan.billingType === "lifetime";
+              const isFree = plan.priceAmount === 0;
+
+              return (
+                <Card
+                  key={plan.id}
+                  className={`flex min-h-[430px] flex-col border-line bg-white ${
+                    plan.highlight
+                      ? "shadow-[0_26px_80px_-50px_rgba(249,115,22,0.65)] ring-1 ring-brand/30"
+                      : "shadow-[0_20px_60px_-52px_rgba(29,27,22,0.55)]"
+                  }`}
+                >
+                  <CardHeader>
+                    <div className="flex items-center justify-between gap-4">
+                      <CardTitle className="text-xl text-ink">
+                        {planDisplayName(plan.id)}
+                      </CardTitle>
+                      {plan.highlight ? (
+                        <Badge className="border-brand/20 bg-brand/10 text-brand hover:bg-brand/10">
+                          Premium
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <div className="mt-4">
+                      <span className="text-4xl font-semibold text-ink">
+                        {formatPrice(plan)}
+                      </span>
+                      {!isFree ? (
+                        <span className="ml-2 text-sm text-ink-muted">
+                          {isLifetime
+                            ? c.pricing.suffixLifetime
+                            : c.pricing.suffixMonthly}
+                        </span>
+                      ) : null}
+                    </div>
+                    <CardDescription className="min-h-[72px] text-sm leading-6 text-ink-muted">
+                      {note}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-1 flex-col gap-8">
+                    <div className="space-y-3">
+                      {perks.map((perk) => {
+                        const included = perk.startsWith("✓");
+                        const label = perk.replace(/^[✓✗]\s*/, "");
+
+                        return (
+                          <div
+                            key={perk}
+                            className={`flex items-center gap-2 text-sm ${
+                              included ? "text-ink-muted" : "text-ink-muted/45"
+                            }`}
+                          >
+                            {included ? (
+                              <CheckCircle2 className="h-4 w-4 shrink-0 text-brand" />
+                            ) : (
+                              <X className="h-4 w-4 shrink-0 text-ink-muted/35" />
+                            )}
+                            <span className={!included ? "line-through" : ""}>
+                              {label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Button
+                      asChild
+                      className="mt-auto h-11 rounded-full bg-brand text-white hover:bg-brand/90"
+                    >
+                      <Link href={isFree ? startHref : localizedPath(`/auth/login?plan=${plan.id}`, locale)}>
+                        {isFree ? c.pricing.freeCta : c.pricing.cta}
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </section>
+
+        <section id="faq" className="mx-auto w-full maxW scroll-mt-24 px-6 py-16">
+          <div className="max-w-3xl">
+            <p className={sectionLabel}>{c.faq.eyebrow}</p>
+            <h2 className={sectionTitle}>{c.faq.title}</h2>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            {c.faq.items.map((item) => (
+              <Card key={item.q} className="h-full border-line bg-white">
+                <CardHeader className="p-5">
+                  <div className="flex items-start gap-3">
+                    <HelpCircle className="mt-1 h-4 w-4 shrink-0 text-brand" />
+                    <div>
+                      <CardTitle className="text-base leading-6 text-ink">
+                        {item.q}
+                      </CardTitle>
+                      <CardDescription className="mt-2 text-sm leading-6 text-ink-muted">
+                        {item.a}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto w-full maxW px-6 py-16">
+          <div className="overflow-hidden rounded-[32px] border border-line bg-ink px-6 py-12 text-center text-white shadow-[0_30px_100px_-65px_rgba(29,27,22,0.9)] sm:px-10 lg:py-16">
+            <h2 className="mx-auto max-w-3xl text-3xl font-semibold leading-tight sm:text-5xl">
+              {c.closing.title}
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-white/70">
+              {c.closing.text}
+            </p>
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button asChild className="h-12 rounded-full bg-brand px-6 text-white hover:bg-brand/90">
+                <Link href={startHref}>{c.closing.ctaPrimary}</Link>
+              </Button>
+              <ScrollSectionButton
+                sectionId="pricing"
+                offsetY={LANDING_SECTION_OFFSET}
+                className="inline-flex h-12 items-center justify-center rounded-full border border-white/20 bg-white/5 px-6 text-white hover:bg-white/10 hover:text-white"
+              >
+                {c.closing.ctaSecondary}
+              </ScrollSectionButton>
+            </div>
+            <p className="mt-5 text-sm text-white/55">{c.closing.microcopy}</p>
+          </div>
+        </section>
+
+        <footer className="border-t border-line bg-white">
+          <div className="mx-auto flex w-full maxW flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-ink">Kronoma</p>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-muted">
+                {c.footer}
+              </p>
+            </div>
+            <div className="flex gap-4 text-sm text-ink-muted">
+              <Link href={pricingHref} className="hover:text-ink">
+                {c.nav.pricing}
+              </Link>
+              <Link href={signInHref} className="hover:text-ink">
+                {c.nav.signIn}
+              </Link>
+            </div>
+          </div>
+        </footer>
       </div>
     </main>
+  );
+}
+
+function DemoVideoCard({ c }: { c: LandingCopy }) {
+  return (
+    <div className="relative z-10 mt-12 aspect-[16/10] w-full max-w-4xl overflow-hidden rounded-[22px] bg-ink shadow-[0_28px_90px_-58px_rgba(29,27,22,0.72)] [clip-path:inset(0_round_22px)] sm:mt-14">
+      <video
+        aria-label={c.hero.videoTitle}
+        autoPlay
+        className="pointer-events-none absolute inset-0 z-10 h-full w-full scale-[1.012] object-cover"
+        disablePictureInPicture
+        loop
+        muted
+        playsInline
+        preload="auto"
+        tabIndex={-1}
+      >
+        <source src={DEMO_VIDEO_SRC} />
+      </video>
+    </div>
+  );
+}
+
+function ComparisonCard({
+  title,
+  items,
+  variant,
+}: {
+  title: string;
+  items: readonly string[];
+  variant: "muted" | "positive";
+}) {
+  const isPositive = variant === "positive";
+
+  return (
+    <MagicCard
+      className={`p-5 ${
+        isPositive ? "bg-white ring-1 ring-brand/20" : "bg-white"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+            isPositive ? "bg-brand/10 text-brand" : "bg-ink-soft text-ink-muted"
+          }`}
+        >
+          {isPositive ? (
+            <CheckCircle2 className="h-5 w-5" />
+          ) : (
+            <FileText className="h-5 w-5" />
+          )}
+        </div>
+        <h3 className="text-lg font-semibold text-ink">{title}</h3>
+      </div>
+      <ul className="mt-5 grid gap-3">
+        {items.map((item) => (
+          <li key={item} className="flex items-start gap-3 text-sm leading-6 text-ink-muted">
+            <span
+              className={`mt-2 h-2 w-2 shrink-0 rounded-full ${
+                isPositive ? "bg-brand" : "bg-ink-muted/35"
+              }`}
+            />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </MagicCard>
   );
 }

@@ -294,9 +294,6 @@ export default function EmailInvoiceInboxClient({
 
             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
               <div className="space-y-2">
-                <p className="text-xs uppercase text-ink-muted">
-                  {t("eyebrow")}
-                </p>
                 <h1
                   className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}
                 >

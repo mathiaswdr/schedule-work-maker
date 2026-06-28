@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Kronoma",
     short_name: "Kronoma",
     description:
-      "Logiciel suisse de suivi du temps pour freelances avec facturation et QR-facture suisse.",
+      "Logiciel de suivi du temps pour freelances avec facturation internationale et QR-facture pour les profils suisses.",
     start_url: "/dashboard",
     scope: "/",
     display: "standalone",

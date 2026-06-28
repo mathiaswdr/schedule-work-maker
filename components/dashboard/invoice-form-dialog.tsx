@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import {
   Dialog,
@@ -26,6 +26,10 @@ import InvoiceItemsEditor, {
   type InvoiceItemRow,
 } from "@/components/dashboard/invoice-items-editor";
 import { toast } from "sonner";
+import {
+  getBusinessProfileForCountry,
+  type CountryUiLocale,
+} from "@/lib/country";
 // import { CloudinaryUploadButton } from "@/components/ui/cloudinary-upload-button";
 // import { Trash2, Download, ChevronDown, ChevronUp } from "lucide-react";
 
@@ -88,6 +92,8 @@ type InvoiceFormDialogProps = {
   onOpenChange: (open: boolean) => void;
   invoice?: InvoiceData | null;
   draft?: InvoiceDraftDefaults | null;
+  businessCountry?: string | null;
+  currency: string;
   onSuccess: () => void;
 };
 
@@ -96,9 +102,14 @@ export default function InvoiceFormDialog({
   onOpenChange,
   invoice,
   draft,
+  businessCountry,
+  currency,
   onSuccess,
 }: InvoiceFormDialogProps) {
   const t = useTranslations("dashboard.invoices");
+  const locale = useLocale();
+  const uiLocale: CountryUiLocale = locale.startsWith("fr") ? "fr" : "en";
+  const countryProfile = getBusinessProfileForCountry(businessCountry, uiLocale);
   const [step, setStep] = useState(0);
 
   // Form state
@@ -493,6 +504,9 @@ export default function InvoiceFormDialog({
             <InvoiceItemsEditor
               items={items}
               taxRate={taxRate}
+              currency={currency}
+              taxRateLabel={countryProfile.taxRateLabel}
+              taxAmountLabel={countryProfile.taxLabel}
               onChange={setItems}
               onTaxRateChange={setTaxRate}
             />
@@ -540,7 +554,7 @@ export default function InvoiceFormDialog({
               <textarea
                 value={paymentTerms}
                 onChange={(e) => setPaymentTerms(e.target.value)}
-                placeholder={t("form.paymentTermsPlaceholder")}
+                placeholder={countryProfile.paymentTermsPlaceholder}
                 rows={3}
                 className="w-full rounded-2xl border border-line bg-white/60 px-4 py-3 text-sm focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand"
               />
@@ -592,13 +606,13 @@ export default function InvoiceFormDialog({
                 <Input
                   value={iban}
                   onChange={(e) => setIban(e.target.value)}
-                  placeholder={t("form.ibanPlaceholder")}
+                  placeholder={countryProfile.bankAccountPlaceholder}
                   className="border-line"
                 />
                 <Input
                   value={bic}
                   onChange={(e) => setBic(e.target.value)}
-                  placeholder={t("form.bicPlaceholder")}
+                  placeholder={countryProfile.bankCodePlaceholder}
                   className="border-line"
                 />
               </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle2, X } from "lucide-react";
 import { type PlanId, type BillingPeriod, PLANS } from "@/lib/plans";
 import { EASE } from "@/lib/motion-variants";
 import { PricingCta } from "./pricing-cta";
@@ -36,6 +37,7 @@ type PricingCardsProps = {
   suffixYearly: string;
   monthlyHint: string;
   yearlyEquivalent: string;
+  gridMaxWidthClassName?: string;
 };
 
 export function PricingCards({
@@ -58,6 +60,7 @@ export function PricingCards({
   suffixYearly,
   monthlyHint,
   yearlyEquivalent,
+  gridMaxWidthClassName = "max-w-none",
 }: PricingCardsProps) {
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
   const isYearly = billing === "yearly";
@@ -65,12 +68,13 @@ export function PricingCards({
 
   return (
     <>
-      {/* Billing toggle */}
-      <div className="mb-8 flex flex-col items-center gap-3">
-        <div className="relative flex items-center overflow-hidden rounded-full border border-line bg-white/70 p-1">
+      <div className="mb-10 flex flex-col items-center gap-3">
+        <div className="relative flex items-center overflow-hidden rounded-full border border-line bg-white p-1 shadow-[0_18px_55px_-48px_rgba(29,27,22,0.38)]">
           <button
-            onClick={() => setBilling(isYearly ? "monthly" : "yearly")}
-            className={`relative z-10 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+            type="button"
+            aria-pressed={!isYearly}
+            onClick={() => setBilling("monthly")}
+            className={`relative z-10 min-h-10 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
               !isYearly ? "text-white" : "text-ink-muted hover:text-ink"
             }`}
           >
@@ -84,8 +88,10 @@ export function PricingCards({
             <span className="relative z-10">{toggleMonthly}</span>
           </button>
           <button
-            onClick={() => setBilling(isYearly ? "monthly" : "yearly")}
-            className={`relative z-10 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+            type="button"
+            aria-pressed={isYearly}
+            onClick={() => setBilling("yearly")}
+            className={`relative z-10 min-h-10 rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
               isYearly ? "text-white" : "text-ink-muted hover:text-ink"
             }`}
           >
@@ -99,7 +105,7 @@ export function PricingCards({
             <span className="relative z-10">{toggleYearly}</span>
           </button>
         </div>
-        <div className="flex flex-col items-center gap-1 text-sm text-ink-muted lg:flex-row lg:gap-2">
+        <div className="flex flex-col items-center gap-1 text-sm leading-6 text-ink-muted lg:flex-row lg:gap-2">
           <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">
             {toggleBadge}
           </span>
@@ -107,8 +113,7 @@ export function PricingCards({
         </div>
       </div>
 
-      {/* Cards grid */}
-      <div className={`mx-auto grid max-w-[860px] gap-6 ${gridClassName}`}>
+      <div className={`mx-auto grid ${gridMaxWidthClassName} gap-5 ${gridClassName}`}>
         {plans.map((plan) => {
           const planDef = PLANS.find((p) => p.id === plan.planId);
           const isLifetime = planDef?.billingType === "lifetime";
@@ -130,13 +135,12 @@ export function PricingCards({
           return (
             <div
               key={plan.name}
-              className={`relative flex min-h-[600px] flex-col rounded-3xl border p-6 ${
+              className={`relative flex min-h-[560px] flex-col rounded-2xl border bg-white p-6 transition duration-300 hover:-translate-y-0.5 hover:border-line-strong ${
                 plan.highlight
-                  ? "border-brand bg-white shadow-[0_26px_70px_-45px_rgba(249,115,22,0.55)] order-first lg:order-none"
-                  : "border-line bg-white/70"
+                  ? "order-first border-line shadow-[0_26px_80px_-50px_rgba(249,115,22,0.65)] ring-1 ring-brand/30 lg:order-none"
+                  : "border-line shadow-[0_20px_60px_-52px_rgba(29,27,22,0.55)]"
               }`}
             >
-              {/* "2 months free" badge on paid cards when yearly */}
               <AnimatePresence>
                 {isYearly && isSubscription && (
                   <motion.div
@@ -144,19 +148,23 @@ export function PricingCards({
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.8, y: -4 }}
                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    className="absolute -top-3 right-4 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white shadow-[0_4px_12px_-2px_rgba(249,115,22,0.5)]"
+                    className="absolute -top-3 right-4 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white shadow-[0_14px_32px_-18px_rgba(249,115,22,0.95)]"
                   >
                     {toggleBadge}
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <p className="text-xs uppercase text-ink-muted">
-                {plan.name}
-              </p>
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-xl font-semibold text-ink">{plan.name}</p>
+                {plan.highlight ? (
+                  <span className="rounded-full border border-brand/20 bg-brand/10 px-3 py-1 text-xs font-semibold text-brand">
+                    Premium
+                  </span>
+                ) : null}
+              </div>
 
-              {/* Price with animation */}
-              <div className="mt-3 h-10 overflow-hidden">
+              <div className="mt-5 h-12 overflow-hidden">
                 <AnimatePresence mode="wait">
                   <motion.p
                     key={isSubscription ? `${plan.planId}-${billing}` : plan.planId}
@@ -164,7 +172,7 @@ export function PricingCards({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.25, ease: EASE }}
-                    className="flex items-baseline gap-2 whitespace-nowrap text-3xl font-semibold text-ink"
+                    className="flex items-baseline gap-2 whitespace-nowrap text-4xl font-semibold text-ink"
                   >
                     <span>{displayPrice === 0 ? "0" : displayPrice} CHF</span>
                     {suffix && (
@@ -181,8 +189,7 @@ export function PricingCards({
                 </AnimatePresence>
               </div>
 
-              {/* Monthly equivalent hint — min height to avoid layout shift */}
-              <div className="mt-1 min-h-4">
+              <div className="mt-1 min-h-5">
                 {isSubscription ? (
                   <AnimatePresence mode="wait">
                     <motion.p
@@ -191,7 +198,7 @@ export function PricingCards({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="text-xs font-medium text-brand"
+                      className="text-xs font-medium leading-5 text-brand"
                     >
                       {isYearly
                         ? yearlyEquivalent.replace("__price__", (yearlyPrice / 12).toFixed(2))
@@ -199,13 +206,13 @@ export function PricingCards({
                     </motion.p>
                   </AnimatePresence>
                 ) : isLifetime ? (
-                  <p className="text-xs font-medium text-brand">{lifetimeNote}</p>
+                  <p className="text-xs font-medium leading-5 text-brand">{lifetimeNote}</p>
                 ) : null}
               </div>
 
-              <p className="mt-2 text-sm text-ink-muted">{plan.desc}</p>
+              <p className="mt-3 min-h-[48px] text-sm leading-6 text-ink-muted">{plan.desc}</p>
               <p
-                className={`mt-3 rounded-2xl px-3 py-2 text-xs font-semibold ${
+                className={`mt-4 rounded-2xl px-3 py-2 text-xs font-semibold leading-5 ${
                   isPaid
                     ? "bg-brand/10 text-brand"
                     : "bg-ink-soft text-ink-muted"
@@ -214,27 +221,23 @@ export function PricingCards({
                 {isLifetime ? lifetimeNote : isPaid ? trialNote : freeNote}
               </p>
 
-              <div className="mt-5 space-y-2 text-sm">
+              <div className="mt-6 space-y-3 text-sm">
                 {plan.perks.map((perk) => {
                   const included = perk.startsWith("✓");
                   const label = perk.replace(/^[✓✗]\s*/, "");
                   return (
                     <div
                       key={perk}
-                      className={`flex items-center gap-2 ${
+                      className={`flex items-start gap-2 ${
                         included ? "text-ink-muted" : "text-ink-muted/40"
                       }`}
                     >
                       {included ? (
-                        <svg className="h-4 w-4 shrink-0 text-brand-2" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
                       ) : (
-                        <svg className="h-4 w-4 shrink-0 text-ink-muted/30" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
+                        <X className="mt-0.5 h-4 w-4 shrink-0 text-ink-muted/35" />
                       )}
-                      <span className={!included ? "line-through" : ""}>{label}</span>
+                      <span className={`leading-6 ${!included ? "line-through" : ""}`}>{label}</span>
                     </div>
                   );
                 })}

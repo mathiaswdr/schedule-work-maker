@@ -6,32 +6,66 @@
   },
   "nav": {
     "home": "Home",
+    "features": "Features",
     "pricing": "Pricing",
+    "blog": "Blog",
     "about": "About",
     "faq": "F.A.Q",
     "dashboard": "Dashboard",
     "login": "Sign in",
-    "trial": "Try Pro 7 days"
+    "trial": "Try Pro 7 days",
+    "menu": "Open navigation"
   },
   "footer": {
     "tagline": "The simplest way to turn your hours into invoices.",
+    "productTitle": "Product",
+    "trustTitle": "Trust",
     "linksTitle": "Links",
     "links": {
       "home": "Home",
       "pricing": "Pricing",
+      "blog": "Blog",
       "about": "About",
+      "timeTracking": "Time tracking",
+      "invoicing": "Freelance invoicing",
+      "qrBill": "Swiss QR-bill",
+      "freelancers": "Freelancers",
+      "excelCompare": "Kronoma vs Excel",
+      "contact": "Contact",
+      "privacy": "Privacy",
+      "terms": "Terms",
       "login": "Sign in"
     },
     "languageLabel": "Language",
     "copy": "Kronoma. Time tracking and freelance invoicing."
   },
   "auth": {
-    "title": "Sign in to continue",
-    "subtitle": "Your account is created automatically with Google or a magic link. Your Pro trial stays ready after sign-in.",
-    "backLabel": "Back to home",
+    "eyebrow": "Kronoma workspace",
+    "loginTab": "Sign in",
+    "signupTab": "Sign up",
+    "loginHeroTitle": "Pick up your work tracking exactly where you left it.",
+    "loginHeroSubtitle": "Access your workspace to track hours, manage clients, and turn completed work into invoices.",
+    "signupHeroTitle": "Create your work hub in a few seconds.",
+    "signupHeroSubtitle": "Start with a Kronoma account ready for time tracking, projects, clients, and freelance invoicing.",
+    "loginKicker": "Sign in",
+    "signupKicker": "Sign up",
+    "loginTitle": "Welcome back",
+    "signupTitle": "Start with Kronoma",
+    "loginSubtitle": "Sign in with Google or receive a secure magic link by email.",
+    "signupSubtitle": "Your account is created automatically with Google or a magic link. No password to remember.",
+    "loginSwitchText": "No account yet?",
+    "loginSwitchLink": "Create an account",
+    "signupSwitchText": "Already have an account?",
+    "signupSwitchLink": "Sign in",
+    "highlightTime": "Simple time tracking for every workday.",
+    "highlightInvoices": "Invoices and clients ready in the same workspace.",
+    "highlightTrial": "7-day Pro trial available when you start.",
+    "securityNote": "Secure sign-in, without a password to manage.",
+    "emailDivider": "or by email",
     "emailLabel": "Email",
     "emailPlaceholder": "name@company.com",
-    "magicLink": "Send magic link",
+    "loginMagicLink": "Send my sign-in link",
+    "signupMagicLink": "Create my account with a link",
     "sending": "Sending...",
     "helperIdle": "Receive a sign-in link by email.",
     "helperSent": "Magic link sent if the account exists.",
@@ -41,19 +75,20 @@
     "openLocalMagicLink": "Open local magic link",
     "localMagicLinkMode": "Local mode is active: the magic link is captured in the app instead of being sent by email.",
     "magicLinkUnavailable": "Magic link sign-in is not configured in this environment.",
-    "google": "Sign in with Google"
+    "loginGoogle": "Sign in with Google",
+    "signupGoogle": "Sign up with Google"
   },
   "home": {
     "hero": {
       "badge": "Time tracking software for freelancers",
       "title": "Track your hours.\nGenerate your invoices.",
       "titleAccent": "Get paid.",
-      "subtitle": "Kronoma is a simple time tracking software for freelancers and small teams. Try Pro free for 7 days, then track hours, manage projects and generate invoices with Swiss QR invoice in a few clicks.",
+      "subtitle": "Kronoma is a simple time tracking software for freelancers and small teams. Try Pro free for 7 days, then track hours, manage projects and generate international invoices, with Swiss QR-bills when your profile is based in Switzerland.",
       "ctaPrimary": "Try Pro 7 days",
       "ctaSecondary": "Learn more",
       "bullets": [
         "Simple time tracking",
-        "Invoices with Swiss QR invoice",
+        "International invoices",
         "7 free days of Pro"
       ]
     },
@@ -81,7 +116,7 @@
     "features": {
       "eyebrow": "Key features",
       "title": "Simple time tracking for freelancers and teams.",
-      "subtitle": "Kronoma is a time tracking software built for freelancers and small teams who want to track their hours and generate Swiss QR invoices.",
+      "subtitle": "Kronoma is a time tracking software built for freelancers and small teams who want to track their hours and generate invoices that work internationally.",
       "cards": [
         {
           "title": "Simple time tracking",
@@ -96,8 +131,8 @@
           "copy": "Turn your work hours into an invoice in seconds."
         },
         {
-          "title": "Swiss QR invoice",
-          "copy": "Generate invoices compatible with Swiss standards."
+          "title": "Country-aware invoices",
+          "copy": "Use standard invoices internationally, with Swiss QR-bills enabled for Swiss CHF profiles."
         },
         {
           "title": "Clean exports",
@@ -201,7 +236,7 @@
         "badge": "2 months free",
         "yearlyHint": "Save with annual billing",
         "suffixMonthly": " /month",
-        "suffixYearly": " /user/year",
+        "suffixYearly": " /year",
         "monthlyHint": "or __price__ CHF/yr with annual billing",
         "yearlyEquivalent": "~__price__ CHF/month equivalent"
       },
@@ -233,7 +268,7 @@
             "✓ Unlimited clients",
             "✓ Projects",
             "✓ Invoice generation",
-            "✓ Swiss QR invoice",
+            "✓ Swiss QR invoice for CH profiles",
             "✓ Payment reminders",
             "✓ Full session history",
             "✓ Advanced analytics",
@@ -254,7 +289,7 @@
             "✓ Unlimited clients",
             "✓ Projects",
             "✓ Invoice generation",
-            "✓ Swiss QR invoice",
+            "✓ Swiss QR invoice for CH profiles",
             "✓ Payment reminders",
             "✓ Full session history",
             "✓ Advanced analytics",
@@ -275,7 +310,7 @@
       "items": [
         {
           "q": "Can I generate a Swiss QR invoice?",
-          "a": "Yes, Kronoma lets you generate invoices compatible with Swiss QR invoice standards."
+          "a": "Yes. Swiss QR-bills are available when your business profile is in Switzerland and your account currency is CHF; other profiles keep standard international invoices."
         },
         {
           "q": "Is this a time tracking software for freelancers?",
@@ -324,7 +359,7 @@
       "badge": "2 months free",
       "yearlyHint": "Save with annual billing",
       "suffixMonthly": " /month",
-      "suffixYearly": " /user/year",
+      "suffixYearly": " /year",
       "monthlyHint": "or __price__ CHF/yr with annual billing",
       "yearlyEquivalent": "~__price__ CHF/month equivalent"
     },
@@ -357,7 +392,7 @@
           "✓ Excel/CSV client import",
           "✓ Projects",
           "✓ Invoice generation",
-          "✓ Swiss QR invoice",
+          "✓ Swiss QR invoice for CH profiles",
           "✓ Payment reminders",
           "✓ Full session history",
           "✓ Advanced analytics",
@@ -379,7 +414,7 @@
           "✓ Excel/CSV client import",
           "✓ Projects",
           "✓ Invoice generation",
-          "✓ Swiss QR invoice",
+          "✓ Swiss QR invoice for CH profiles",
           "✓ Payment reminders",
           "✓ Full session history",
           "✓ Advanced analytics",
@@ -468,12 +503,12 @@
       "ctaSecondary": "See pricing"
     },
     "impact": {
-      "title": "Impact in numbers",
+      "title": "Positioning",
       "stats": [
-        {"label": "Hours tracked", "value": "1.2M"},
-        {"label": "Active teams", "value": "480"},
-        {"label": "Countries covered", "value": "12"},
-        {"label": "Time saved", "value": "22%"}
+        {"label": "Audience", "value": "Freelancers"},
+        {"label": "Core market", "value": "Switzerland"},
+        {"label": "Use case", "value": "Time + invoices"},
+        {"label": "QR currency", "value": "CHF"}
       ]
     },
     "mission": {
@@ -582,12 +617,12 @@
         "phone": "Phone",
         "currency": "Currency",
         "hourlyRate": "Hourly rate",
-        "siret": "SIRET / business number",
-        "vatMention": "VAT mention",
+        "siret": "Tax ID / business ID",
+        "vatMention": "Tax mention",
         "bankLabel": "Account label",
         "bankName": "Bank",
-        "iban": "IBAN",
-        "bic": "BIC / SWIFT"
+        "iban": "Account / IBAN",
+        "bic": "Bank code / SWIFT"
       }
     },
     "time": {
@@ -829,10 +864,10 @@
         "labelPlaceholder": "Main account, PostFinance...",
         "bankName": "Bank name",
         "bankNamePlaceholder": "Bank name",
-        "iban": "IBAN",
-        "ibanPlaceholder": "CH00 0000 0000 0000 0000 0",
-        "bic": "BIC / SWIFT",
-        "bicPlaceholder": "POFICHBEXXX",
+        "iban": "Account / IBAN",
+        "ibanPlaceholder": "IBAN or account number",
+        "bic": "Bank code / SWIFT",
+        "bicPlaceholder": "BIC, SWIFT, routing number...",
         "defaultAccount": "Default account",
         "cancel": "Cancel",
         "create": "Add account",
@@ -861,8 +896,8 @@
         "addressPlaceholder": "123 Street, City, Country",
         "city": "City",
         "cityPlaceholder": "Paris",
-        "siret": "SIRET / Business number",
-        "siretPlaceholder": "123 456 789 00012",
+        "siret": "Tax ID / Business ID",
+        "siretPlaceholder": "VAT number, registry number, or local tax ID",
         "email": "Email",
         "emailPlaceholder": "billing@company.com",
         "phone": "Phone",
@@ -870,9 +905,9 @@
         "postalCode": "Postal code",
         "postalCodePlaceholder": "1000",
         "country": "Country",
-        "countryPlaceholder": "CH",
-        "vatMention": "VAT mention",
-        "vatMentionPlaceholder": "VAT not applicable, art. 293B du CGI",
+        "countryPlaceholder": "Select a country",
+        "vatMention": "Tax mention",
+        "vatMentionPlaceholder": "Tax not applicable, reverse charge, exempt...",
         "logo": "Company logo",
         "uploadLogo": "Upload logo",
         "uploading": "Uploading...",
@@ -1097,6 +1132,11 @@
     "invoices": {
       "title": "Invoices",
       "subtitle": "Create, manage and export invoices for your clients.",
+      "quickActions": {
+        "export": "Export",
+        "create": "Create",
+        "upload": "Upload"
+      },
       "addInvoice": "New invoice",
       "editInvoice": "Edit invoice",
       "deleteInvoice": "Delete invoice",
@@ -1146,8 +1186,8 @@
         "manualEntry": "Enter manually",
         "defaultLabel": "default",
         "bankNamePlaceholder": "Bank name",
-        "ibanPlaceholder": "IBAN",
-        "bicPlaceholder": "BIC / SWIFT",
+        "ibanPlaceholder": "IBAN or account number",
+        "bicPlaceholder": "BIC, SWIFT, routing number...",
         "paymentTerms": "Payment terms",
         "paymentTermsPlaceholder": "50% on order, balance on delivery..."
       },
@@ -1225,7 +1265,8 @@
         "amount": "Amount",
         "reference": "Reference",
         "generate": "Generate QR-bill",
-        "generating": "Generating..."
+        "generating": "Generating...",
+        "swissOnly": "QR-bills are only available for Swiss CHF profiles."
       },
       "uploadInvoice": "Upload invoice",
       "uploaded": "Uploaded",
@@ -1389,7 +1430,7 @@
         "badge": "2 months free",
         "yearlyHint": "Save with annual billing",
         "suffixMonthly": " /month",
-        "suffixYearly": " /user/year",
+        "suffixYearly": " /year",
         "monthlyHint": "or __price__ CHF/yr with annual billing",
         "yearlyEquivalent": "~__price__ CHF/month equivalent",
         "lifetimeHint": "One-time payment, Pro access for life"
@@ -1416,7 +1457,7 @@
           "✓ Excel/CSV client import",
           "✓ Projects",
           "✓ Invoice generation",
-            "✓ Swiss QR invoice",
+            "✓ Swiss QR invoice for CH profiles",
             "✓ Payment reminders",
             "✓ Full session history",
             "✓ Advanced analytics",
@@ -1435,7 +1476,7 @@
             "✓ Excel/CSV client import",
             "✓ Projects",
             "✓ Invoice generation",
-            "✓ Swiss QR invoice",
+            "✓ Swiss QR invoice for CH profiles",
             "✓ Payment reminders",
             "✓ Full session history",
             "✓ Advanced analytics",

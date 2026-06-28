@@ -2,22 +2,39 @@
 
 import type { ChangeEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-
-const options = [
-  { value: "fr", label: "Francais" },
-  { value: "en", label: "English" },
-];
+import { usePathname, useSearchParams } from "next/navigation";
+import {
+  localeCookieName,
+  localeLabels,
+  localizedPath,
+  locales,
+  shouldLocalePrefixPath,
+  unlocalizedPath,
+} from "@/lib/i18n-routing";
 
 export default function LanguageSwitcher() {
   const locale = useLocale();
-  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = useTranslations("footer");
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const nextLocale = event.target.value;
-    document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000`;
-    router.refresh();
+    document.cookie = `${localeCookieName}=${nextLocale}; path=/; max-age=31536000; samesite=lax`;
+
+    const basePathname = unlocalizedPath(pathname);
+    if (!shouldLocalePrefixPath(basePathname)) {
+      window.location.reload();
+      return;
+    }
+
+    const queryString = searchParams.toString();
+    const targetPath = localizedPath(
+      `${basePathname}${queryString ? `?${queryString}` : ""}`,
+      nextLocale,
+    );
+
+    window.location.assign(targetPath);
   };
 
   return (
@@ -27,9 +44,9 @@ export default function LanguageSwitcher() {
       value={locale}
       onChange={handleChange}
     >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
+      {locales.map((option) => (
+        <option key={option} value={option}>
+          {localeLabels[option]}
         </option>
       ))}
     </select>

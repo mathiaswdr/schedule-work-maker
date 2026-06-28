@@ -11,8 +11,9 @@ import {
   UserRound,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { type ComponentProps, useEffect, useMemo, useState } from "react";
+import { type ComponentProps, useEffect, useMemo, useRef, useState } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -42,10 +43,18 @@ import {
 import { completeOnboarding } from "@/server/actions/onboarding";
 import { OnboardingSchema } from "@/types/onboarding-schema";
 import { useAction } from "next-safe-action/hooks";
+import {
+  COUNTRY_OPTIONS,
+  SUPPORTED_CURRENCIES,
+  getBusinessProfileForCountry,
+  getCountryOptionLabel,
+  getCurrencyOptionLabel,
+  getDefaultCurrencyForCountry,
+  normalizeCountryCode,
+  type CountryUiLocale,
+} from "@/lib/country";
 
 const DEFER_KEY = "kronoma-onboarding-deferred";
-
-const CURRENCIES = ["CHF", "EUR", "USD", "GBP", "CAD", "JPY"] as const;
 
 type OnboardingValues = z.infer<typeof OnboardingSchema>;
 type StepField = keyof OnboardingValues;
@@ -79,9 +88,12 @@ export default function DashboardOnboardingModal({
   initialData,
 }: DashboardOnboardingModalProps) {
   const t = useTranslations("dashboard.onboardingModal");
+  const locale = useLocale();
+  const uiLocale: CountryUiLocale = locale.startsWith("fr") ? "fr" : "en";
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const previousCountryRef = useRef<string | null>(null);
 
   const form = useForm<OnboardingValues>({
     resolver: zodResolver(OnboardingSchema),
@@ -92,7 +104,7 @@ export default function DashboardOnboardingModal({
       address: initialData.businessProfile?.address || "",
       city: initialData.businessProfile?.city || "",
       postalCode: initialData.businessProfile?.postalCode || "",
-      country: initialData.businessProfile?.country || "CH",
+      country: normalizeCountryCode(initialData.businessProfile?.country) || "CH",
       email: initialData.businessProfile?.email || initialData.email || "",
       phone: initialData.businessProfile?.phone || "",
       siret: initialData.businessProfile?.siret || "",
@@ -153,6 +165,8 @@ export default function DashboardOnboardingModal({
   const step = steps[stepIndex];
   const isLastStep = stepIndex === steps.length - 1;
   const progress = ((stepIndex + 1) / steps.length) * 100;
+  const selectedCountry = form.watch("country");
+  const countryProfile = getBusinessProfileForCountry(selectedCountry, uiLocale);
 
   const { execute, status } = useAction(completeOnboarding, {
     onSuccess: (result) => {
@@ -183,6 +197,23 @@ export default function DashboardOnboardingModal({
     if (sessionStorage.getItem(DEFER_KEY)) return;
     setOpen(true);
   }, [shouldPrompt]);
+
+  useEffect(() => {
+    const normalizedCountry = normalizeCountryCode(selectedCountry);
+    if (!normalizedCountry) return;
+
+    if (previousCountryRef.current === null) {
+      previousCountryRef.current = normalizedCountry;
+      return;
+    }
+
+    if (previousCountryRef.current === normalizedCountry) return;
+    previousCountryRef.current = normalizedCountry;
+    form.setValue("currency", getDefaultCurrencyForCountry(normalizedCountry), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }, [form, selectedCountry]);
 
   const handleDefer = () => {
     sessionStorage.setItem(DEFER_KEY, "1");
@@ -313,11 +344,10 @@ export default function DashboardOnboardingModal({
                       form={form}
                     />
                     <TextField name="city" label={t("fields.city")} form={form} />
-                    <TextField
-                      name="country"
-                      label={t("fields.country")}
+                    <CountryField
                       form={form}
-                      maxLength={2}
+                      label={t("fields.country")}
+                      locale={uiLocale}
                     />
                     <TextField
                       name="email"
@@ -336,7 +366,11 @@ export default function DashboardOnboardingModal({
 
                 {stepIndex === 2 && (
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <CurrencyField form={form} label={t("fields.currency")} />
+                    <CurrencyField
+                      form={form}
+                      label={t("fields.currency")}
+                      locale={uiLocale}
+                    />
                     <TextField
                       name="hourlyRate"
                       label={t("fields.hourlyRate")}
@@ -347,14 +381,16 @@ export default function DashboardOnboardingModal({
                     />
                     <TextField
                       name="siret"
-                      label={t("fields.siret")}
+                      label={countryProfile.taxIdLabel}
                       form={form}
+                      placeholder={countryProfile.taxIdPlaceholder}
                       optional
                     />
                     <TextField
                       name="vatMention"
-                      label={t("fields.vatMention")}
+                      label={countryProfile.taxMentionLabel}
                       form={form}
+                      placeholder={countryProfile.taxMentionPlaceholder}
                       optional
                     />
                   </div>
@@ -376,15 +412,17 @@ export default function DashboardOnboardingModal({
                     />
                     <TextField
                       name="iban"
-                      label={t("fields.iban")}
+                      label={countryProfile.bankAccountLabel}
                       form={form}
                       className="sm:col-span-2"
+                      placeholder={countryProfile.bankAccountPlaceholder}
                       optional
                     />
                     <TextField
                       name="bic"
-                      label={t("fields.bic")}
+                      label={countryProfile.bankCodeLabel}
                       form={form}
+                      placeholder={countryProfile.bankCodePlaceholder}
                       optional
                     />
                   </div>
@@ -494,9 +532,11 @@ function TextField({
 function CurrencyField({
   form,
   label,
+  locale,
 }: {
   form: UseFormReturn<OnboardingValues>;
   label: string;
+  locale: CountryUiLocale;
 }) {
   return (
     <FormField
@@ -521,9 +561,58 @@ function CurrencyField({
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {CURRENCIES.map((currency) => (
-                <SelectItem key={currency} value={currency}>
-                  {currency}
+              {SUPPORTED_CURRENCIES.map((currency) => (
+                <SelectItem key={currency.code} value={currency.code}>
+                  {getCurrencyOptionLabel(currency.code, locale)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function CountryField({
+  form,
+  label,
+  locale,
+}: {
+  form: UseFormReturn<OnboardingValues>;
+  label: string;
+  locale: CountryUiLocale;
+}) {
+  return (
+    <FormField
+      control={form.control}
+      name="country"
+      render={({ field }) => (
+        <FormItem>
+          <label
+            htmlFor="onboarding-country"
+            className="text-xs font-semibold uppercase text-ink-muted"
+          >
+            {label}
+            <span className="ml-0.5 text-brand">*</span>
+          </label>
+          <Select
+            value={normalizeCountryCode(field.value) || "CH"}
+            onValueChange={field.onChange}
+          >
+            <FormControl>
+              <SelectTrigger
+                id="onboarding-country"
+                className="mt-1.5 border-line bg-white/75 focus:bg-white"
+              >
+                <SelectValue />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {COUNTRY_OPTIONS.map((country) => (
+                <SelectItem key={country.code} value={country.code}>
+                  {getCountryOptionLabel(country.code, locale)}
                 </SelectItem>
               ))}
             </SelectContent>

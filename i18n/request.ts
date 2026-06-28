@@ -1,30 +1,26 @@
 import { cookies, headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
-
-const locales = ["fr", "en"] as const;
+import {
+  localeCookieName,
+  localeHeaderName,
+  locales,
+  normalizeLocale,
+} from "@/lib/i18n-routing";
 
 const resolveLocale = async () => {
+  const headerStore = await headers();
+  const headerLocale = headerStore.get(localeHeaderName);
+  if (headerLocale && locales.includes(headerLocale as (typeof locales)[number])) {
+    return headerLocale;
+  }
+
   const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value;
+  const cookieLocale = cookieStore.get(localeCookieName)?.value;
   if (cookieLocale && locales.includes(cookieLocale as (typeof locales)[number])) {
     return cookieLocale;
   }
 
-  const headerStore = await headers();
-  const acceptLanguage = headerStore.get("accept-language") ?? "";
-  const accepted = acceptLanguage
-    .split(",")
-    .map((part) => part.trim().split(";")[0]?.toLowerCase())
-    .filter(Boolean) as string[];
-
-  for (const entry of accepted) {
-    const base = entry.split("-")[0];
-    if (locales.includes(base as (typeof locales)[number])) {
-      return base;
-    }
-  }
-
-  return "fr";
+  return normalizeLocale(null);
 };
 
 export default getRequestConfig(async () => {

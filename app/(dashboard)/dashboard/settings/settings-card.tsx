@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -39,6 +39,12 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { EASE } from "@/lib/motion-variants";
 import { getPlanDisplayName } from "@/lib/plans";
+import {
+  SUPPORTED_CURRENCIES,
+  getCurrencyOptionLabel,
+  getDefaultCurrencyForCountry,
+  type CountryUiLocale,
+} from "@/lib/country";
 
 const CloudinaryUploadButton = dynamic(
   () =>
@@ -50,15 +56,6 @@ const CloudinaryUploadButton = dynamic(
 const BankAccountFormDialog = dynamic(
   () => import("@/components/dashboard/bank-account-form-dialog")
 );
-
-const CURRENCIES = [
-  { code: "CHF", label: "CHF – Franc suisse" },
-  { code: "EUR", label: "EUR – Euro" },
-  { code: "USD", label: "USD – US Dollar" },
-  { code: "GBP", label: "GBP – British Pound" },
-  { code: "CAD", label: "CAD – Canadian Dollar" },
-  { code: "JPY", label: "JPY – Yen" },
-];
 
 type BusinessProfileData = {
   companyName: string | null;
@@ -105,6 +102,8 @@ export default function SettingsCard({
 }: SettingsCardProps) {
   const t = useTranslations("dashboard");
   const tc = useTranslations("common");
+  const locale = useLocale();
+  const uiLocale: CountryUiLocale = locale.startsWith("fr") ? "fr" : "en";
   const shouldReduceMotion = useReducedMotion();
   const router = useRouter();
   const { confirm, ConfirmDialogElement } = useConfirm();
@@ -223,6 +222,14 @@ export default function SettingsCard({
     businessProfileRef.current?.submit();
   };
 
+  const handleBusinessCountryChange = (country: string) => {
+    const defaultCurrency = getDefaultCurrencyForCountry(country);
+    form.setValue("currency", defaultCurrency, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
   const handleDeleteAccount = async () => {
     const confirmed = await confirm({
       title: t("settingsPage.account.deleteConfirmTitle"),
@@ -336,9 +343,6 @@ export default function SettingsCard({
             className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
           >
             <div className="space-y-2">
-              <p className="text-xs uppercase text-ink-muted">
-                {t("eyebrow")}
-              </p>
               <h1
                 className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}
               >
@@ -587,9 +591,9 @@ export default function SettingsCard({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {CURRENCIES.map((c) => (
+                          {SUPPORTED_CURRENCIES.map((c) => (
                             <SelectItem key={c.code} value={c.code}>
-                              {c.label}
+                              {getCurrencyOptionLabel(c.code, uiLocale)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -812,6 +816,7 @@ export default function SettingsCard({
               open={bankDialogOpen}
               onOpenChange={setBankDialogOpen}
               account={editingBankAccount}
+              businessCountry={businessProfile?.country ?? null}
               onSuccess={refreshBankAccounts}
             />
           </motion.section>
@@ -821,6 +826,7 @@ export default function SettingsCard({
             <BusinessProfileForm
               ref={businessProfileRef}
               profile={businessProfile}
+              onCountryChange={handleBusinessCountryChange}
             />
           </motion.section>
         </motion.div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useAction } from "next-safe-action/hooks";
 import {
   Dialog,
@@ -15,6 +15,10 @@ import {
   updateBankAccount,
 } from "@/server/actions/bank-accounts";
 import { toast } from "sonner";
+import {
+  getBusinessProfileForCountry,
+  type CountryUiLocale,
+} from "@/lib/country";
 
 type BankAccountData = {
   id: string;
@@ -29,6 +33,7 @@ type BankAccountFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   account?: BankAccountData | null;
+  businessCountry?: string | null;
   onSuccess: () => void;
 };
 
@@ -36,9 +41,13 @@ export default function BankAccountFormDialog({
   open,
   onOpenChange,
   account,
+  businessCountry,
   onSuccess,
 }: BankAccountFormDialogProps) {
   const t = useTranslations("dashboard.settingsPage.bankAccounts");
+  const locale = useLocale();
+  const uiLocale: CountryUiLocale = locale.startsWith("fr") ? "fr" : "en";
+  const countryProfile = getBusinessProfileForCountry(businessCountry, uiLocale);
 
   const [label, setLabel] = useState("");
   const [bankName, setBankName] = useState("");
@@ -148,24 +157,24 @@ export default function BankAccountFormDialog({
 
           <div className="space-y-2">
             <label className="text-xs uppercase text-ink-muted">
-              {t("iban")}
+              {countryProfile.bankAccountLabel}
             </label>
             <Input
               value={iban}
               onChange={(e) => setIban(e.target.value)}
-              placeholder={t("ibanPlaceholder")}
+              placeholder={countryProfile.bankAccountPlaceholder}
               className="border-line"
             />
           </div>
 
           <div className="space-y-2">
             <label className="text-xs uppercase text-ink-muted">
-              {t("bic")}
+              {countryProfile.bankCodeLabel}
             </label>
             <Input
               value={bic}
               onChange={(e) => setBic(e.target.value)}
-              placeholder={t("bicPlaceholder")}
+              placeholder={countryProfile.bankCodePlaceholder}
               className="border-line"
             />
           </div>

@@ -1,6 +1,49 @@
 # Kronoma - LLM Index
 
-## Core Pages
-- / - Logiciel suisse de suivi du temps pour freelances
-- /pricing - Tarifs, QR-facture suisse et fonctions incluses
-- /about - Presentation de Kronoma et du produit
+## Languages
+- French canonical pages use /fr/ URLs.
+- English canonical pages use /en/ URLs.
+
+## French Core Pages
+- /fr - Logiciel suisse de suivi du temps pour freelances
+- /fr/pricing - Tarifs, QR-facture suisse et fonctions incluses
+- /fr/about - Presentation du produit Kronoma et de son positionnement
+- /fr/features/time-tracking - Suivi du temps par client et projet
+- /fr/features/freelance-invoicing - Facturation freelance depuis les heures suivies
+- /fr/features/swiss-qr-bill - Conditions et usage de la QR-facture suisse
+- /fr/blog - Articles et guides publies
+
+## French Use Cases
+- /fr/use-cases/freelancers - Workflow pour freelances qui facturent au temps
+
+## French Comparisons
+- /fr/compare/excel - Kronoma compare a Excel pour le suivi du temps
+
+## French Help
+- /fr/contact - Contact et support Kronoma
+
+## French Trust
+- /fr/legal/privacy - Confidentialite et donnees
+- /fr/legal/terms - Conditions d'utilisation
+
+## English Core Pages
+- /en - Swiss time tracking software for freelancers
+- /en/pricing - Pricing, Swiss QR-bill support, and included features
+- /en/about - Kronoma product overview and positioning
+- /en/features/time-tracking - Time tracking by client and project
+- /en/features/freelance-invoicing - Freelance invoicing from tracked hours
+- /en/features/swiss-qr-bill - Swiss QR-bill requirements and usage
+- /en/blog - Published guides and articles
+
+## English Use Cases
+- /en/use-cases/freelancers - Workflow for freelancers billing by time
+
+## English Comparisons
+- /en/compare/excel - Kronoma compared with Excel for time tracking
+
+## English Help
+- /en/contact - Kronoma contact and support
+
+## English Trust
+- /en/legal/privacy - Privacy and data policy
+- /en/legal/terms - Terms of service

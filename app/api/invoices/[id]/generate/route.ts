@@ -7,6 +7,7 @@ import { generateQrBillPdf } from "@/lib/invoice-qrbill";
 import { mergePdfs } from "@/lib/pdf-merge";
 import type { QrBillData } from "@/lib/invoice-qrbill";
 import { normalizeInvoiceLocale } from "@/lib/invoice-i18n";
+import { isSwissCountry, supportsSwissQrBill } from "@/lib/country";
 import { cookies } from "next/headers";
 
 type InvoiceFormat = "pdf" | "docx" | "qrbill";
@@ -87,13 +88,20 @@ async function generateInvoiceResponse(
       request.headers.get("accept-language")
   );
 
-  const invoice = await prisma.invoice.findFirst({
-    where: { id, userId: session.user.id },
-    include: {
-      items: { orderBy: { sortOrder: "asc" } },
-      customTemplate: true,
-    },
-  });
+  const [invoice, businessProfile] = await Promise.all([
+    prisma.invoice.findFirst({
+      where: { id, userId: session.user.id },
+      include: {
+        items: { orderBy: { sortOrder: "asc" } },
+        customTemplate: true,
+        user: { select: { currency: true } },
+      },
+    }),
+    prisma.businessProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { country: true },
+    }),
+  ]);
 
   if (!invoice) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -101,6 +109,18 @@ async function generateInvoiceResponse(
 
   // Uploaded invoices: QR-bill generation with client-provided data
   if (invoice.source === "UPLOADED" && format === "qrbill" && bodyQrData) {
+    const canUseQrBill = supportsSwissQrBill({
+      country: businessProfile?.country,
+      currency: invoice.user.currency,
+    });
+
+    if (!canUseQrBill || !isSwissCountry(bodyQrData.creditorCountry)) {
+      return NextResponse.json(
+        { error: "QR-bill is only available for Swiss CHF profiles" },
+        { status: 403 }
+      );
+    }
+
     try {
       const qrBuffer = await generateQrBillPdf(bodyQrData);
       return new Response(qrBuffer, {
@@ -186,6 +206,7 @@ async function generateInvoiceResponse(
     taxRate: invoice.taxRate,
     taxAmount: invoice.taxAmount,
     total: invoice.total,
+    currency: invoice.user.currency,
     templateType: invoice.templateType,
     items: invoice.items.map((item) => ({
       category: item.category,
@@ -200,6 +221,10 @@ async function generateInvoiceResponse(
   const buildQrBillData = (): QrBillData | null => {
     const inv = invoice!;
     if (
+      !supportsSwissQrBill({
+        country: inv.senderCountry,
+        currency: inv.user.currency,
+      }) ||
       !inv.iban ||
       !inv.senderName ||
       !inv.senderAddress ||

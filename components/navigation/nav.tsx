@@ -10,12 +10,15 @@ export default async function Nav() {
       user={session?.user ?? null}
       labels={{
         home: t("home"),
+        features: t("features"),
         pricing: t("pricing"),
+        blog: t("blog"),
         about: t("about"),
         faq: t("faq"),
         login: t("login"),
         trial: t("trial"),
         dashboard: t("dashboard"),
+        menu: t("menu"),
       }}
     />
   );

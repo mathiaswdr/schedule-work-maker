@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Plus, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { computeInvoiceTotals } from "@/lib/invoice-helpers";
@@ -15,6 +15,9 @@ export type InvoiceItemRow = {
 type InvoiceItemsEditorProps = {
   items: InvoiceItemRow[];
   taxRate: number;
+  currency: string;
+  taxRateLabel?: string;
+  taxAmountLabel?: string;
   onChange: (items: InvoiceItemRow[]) => void;
   onTaxRateChange: (rate: number) => void;
 };
@@ -22,10 +25,20 @@ type InvoiceItemsEditorProps = {
 export default function InvoiceItemsEditor({
   items,
   taxRate,
+  currency,
+  taxRateLabel,
+  taxAmountLabel,
   onChange,
   onTaxRateChange,
 }: InvoiceItemsEditorProps) {
   const t = useTranslations("dashboard.invoices.items");
+  const locale = useLocale();
+  const currencyFormatter = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
   const updateItem = (index: number, field: keyof InvoiceItemRow, value: string | number) => {
     const updated = items.map((item, i) =>
@@ -94,7 +107,7 @@ export default function InvoiceItemsEditor({
               className="border-line bg-white/60 text-sm"
             />
             <div className="flex items-center text-sm font-semibold">
-              {amount.toFixed(2)}
+              {currencyFormatter.format(amount)}
             </div>
             <button
               type="button"
@@ -122,10 +135,12 @@ export default function InvoiceItemsEditor({
       <div className="mt-2 space-y-2 rounded-2xl border border-line bg-panel px-4 py-3">
         <div className="flex items-center justify-between text-sm">
           <span className="text-ink-muted">{t("subtotal")}</span>
-          <span className="font-semibold">{totals.subtotal.toFixed(2)}</span>
+          <span className="font-semibold">
+            {currencyFormatter.format(totals.subtotal)}
+          </span>
         </div>
         <div className="flex items-center justify-between gap-4 text-sm">
-          <span className="text-ink-muted">{t("taxRate")}</span>
+          <span className="text-ink-muted">{taxRateLabel ?? t("taxRate")}</span>
           <Input
             type="number"
             min={0}
@@ -137,13 +152,15 @@ export default function InvoiceItemsEditor({
           />
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-ink-muted">{t("taxAmount")}</span>
-          <span>{totals.taxAmount.toFixed(2)}</span>
+          <span className="text-ink-muted">{taxAmountLabel ?? t("taxAmount")}</span>
+          <span>{currencyFormatter.format(totals.taxAmount)}</span>
         </div>
         <div className="border-t border-line pt-2">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold">{t("total")}</span>
-            <span className="text-lg font-semibold">{totals.total.toFixed(2)}</span>
+            <span className="text-lg font-semibold">
+              {currencyFormatter.format(totals.total)}
+            </span>
           </div>
         </div>
       </div>

@@ -3,6 +3,11 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import DashboardSidebar from "@/components/dashboard/sidebar";
 import DashboardOnboardingModal from "@/components/dashboard/dashboard-onboarding-modal";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { prisma } from "@/server/prisma";
 import { getDashboardViewer } from "@/server/dashboard-viewer";
 import { pickMessages } from "@/lib/i18n";
@@ -100,20 +105,27 @@ export default async function DashboardLayout({
       locale={locale}
       messages={pickMessages(messages, DASHBOARD_MESSAGE_NAMESPACES)}
     >
-      <div className={`${body.className} min-h-screen w-full bg-paper text-ink`}>
-        <div className="mx-auto flex w-full maxW flex-col gap-6 px-4 pb-28 pt-6 lg:flex-row lg:items-start lg:gap-8 lg:px-8 lg:pb-10">
+      <div
+        className={`${body.className} min-h-screen w-full bg-white text-ink [--accent:36_35%_95%] [--accent-foreground:35_14%_10%] [--background:0_0%_100%] [--border:34_18%_88%] [--card:0_0%_100%] [--card-foreground:35_14%_10%] [--foreground:35_14%_10%] [--muted:36_35%_95%] [--muted-foreground:28_8%_42%] [--primary:24_95%_53%] [--primary-foreground:0_0%_100%] [--ring:24_95%_53%] [--secondary:36_35%_95%] [--secondary-foreground:35_14%_10%] [--sidebar-accent:36_35%_95%] [--sidebar-accent-foreground:35_14%_10%] [--sidebar-background:0_0%_100%] [--sidebar-border:34_18%_88%] [--sidebar-foreground:28_8%_42%] [--sidebar-primary:24_95%_53%] [--sidebar-primary-foreground:0_0%_100%] [--sidebar-ring:24_95%_53%]`}
+      >
+        <SidebarProvider>
           <DashboardSidebar
+            variant="inset"
             userPlan={userPlan}
             user={{
               name: session.user.name,
+              email: session.user.email,
               image: session.user.image,
             }}
             labels={sidebarLabels}
           />
-          <div className="min-w-0 flex-1 [content-visibility:auto] [contain-intrinsic-size:1px_900px]">
-            {children}
-          </div>
-        </div>
+          <SidebarInset className="bg-white">
+            <div className="@container/main min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-6 [content-visibility:auto] [contain-intrinsic-size:1px_900px]">
+              <SidebarTrigger className="mb-4 -ml-1 text-ink-muted hover:bg-ink-soft hover:text-ink" />
+              {children}
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
         <DashboardOnboardingModal
           shouldPrompt={shouldPromptForOnboarding}
           initialData={{

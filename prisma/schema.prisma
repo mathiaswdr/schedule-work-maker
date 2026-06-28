@@ -51,6 +51,11 @@ enum DetectedInvoiceStatus {
   IGNORED
 }
 
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model User {
   id                 String    @id @default(cuid())
   name               String?
@@ -468,4 +473,29 @@ model AccessCodeRedemption {
 
   @@unique([accessCodeId, userId])
   @@index([userId])
+}
+
+model BlogPost {
+  id              String         @id @default(cuid())
+  translationKey  String
+  slug            String
+  locale          String         @default("fr")
+  title           String
+  excerpt         String
+  content         Json
+  coverImageUrl   String?
+  tags            String[]       @default([])
+  authorName      String         @default("Kronoma")
+  readingMinutes  Int            @default(4)
+  metaTitle       String?
+  metaDescription String?
+  status          BlogPostStatus @default(DRAFT)
+  publishedAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([locale, slug])
+  @@unique([locale, translationKey])
+  @@index([translationKey])
+  @@index([status, publishedAt])
 }

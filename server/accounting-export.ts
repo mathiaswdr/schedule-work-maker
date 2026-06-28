@@ -189,7 +189,10 @@ export async function buildAccountingExportZip({
     }
 
     try {
-      const pdf = await generateInvoicePdf(invoiceToPdfData(invoice), locale);
+      const pdf = await generateInvoicePdf(
+        invoiceToPdfData(invoice, currency),
+        locale
+      );
       zip.file(`factures/${fileBaseName}.pdf`, pdf);
       failures.splice(failureCountBeforeRemoteInvoice);
     } catch (error) {
@@ -367,7 +370,7 @@ function buildReadme({
     `- Factures: ${summary.invoiceCount}`,
     `- Depenses: ${summary.expenseCount}`,
     `- Total facture: ${formatNumber(summary.totalInvoiced)} ${currency}`,
-    `- TVA facturee: ${formatNumber(summary.totalInvoiceTax)} ${currency}`,
+    `- Taxe facturee: ${formatNumber(summary.totalInvoiceTax)} ${currency}`,
     `- Total encaisse: ${formatNumber(summary.totalPaid)} ${currency}`,
     `- Total depenses: ${formatNumber(summary.totalExpenses)} ${currency}`,
     "",
@@ -388,7 +391,10 @@ function buildReadme({
   return `${lines.join("\n")}\n`;
 }
 
-function invoiceToPdfData(invoice: AccountingExportInvoice): InvoiceData {
+function invoiceToPdfData(
+  invoice: AccountingExportInvoice,
+  currency: string
+): InvoiceData {
   return {
     displayNumber: invoice.displayNumber,
     senderName: invoice.senderName,
@@ -421,6 +427,7 @@ function invoiceToPdfData(invoice: AccountingExportInvoice): InvoiceData {
     taxRate: invoice.taxRate,
     taxAmount: invoice.taxAmount,
     total: invoice.total,
+    currency,
     templateType: invoice.templateType,
     items: invoice.items.map((item) => ({
       category: item.category,

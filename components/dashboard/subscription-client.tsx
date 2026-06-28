@@ -125,9 +125,6 @@ export default function SubscriptionClient({
         >
           {/* Header */}
           <motion.section variants={v.fadeUp} className="space-y-2">
-            <p className="text-xs uppercase text-ink-muted">
-              {t("eyebrow")}
-            </p>
             <h1
               className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}
             >
@@ -182,7 +179,7 @@ export default function SubscriptionClient({
 
           {/* Plan cards grid */}
           <motion.section variants={v.fadeUp}>
-            <div className={`mx-auto grid max-w-[860px] gap-6 ${visiblePlans.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
+            <div className={`mx-auto grid w-full max-w-[1180px] gap-5 xl:gap-6 ${visiblePlans.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
               {visiblePlans.map((planDef) => {
                 const isCurrent = currentPlan === planDef.id;
                 const isUpgrade = canUpgrade(currentPlan, planDef.id);
@@ -205,7 +202,7 @@ export default function SubscriptionClient({
                   <motion.div
                     key={planDef.id}
                     variants={v.item}
-                    className={`relative flex min-h-[600px] flex-col rounded-3xl border p-6 ${
+                    className={`relative flex min-h-[600px] flex-col rounded-3xl border p-7 lg:p-8 ${
                       planDef.highlight
                         ? "border-brand bg-white shadow-[0_26px_70px_-45px_rgba(249,115,22,0.55)] order-first lg:order-none"
                         : "border-line bg-white/70"

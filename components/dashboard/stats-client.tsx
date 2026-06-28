@@ -203,9 +203,6 @@ export default function StatsClient({
             className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
           >
             <div className="space-y-2">
-              <p className="text-xs uppercase text-ink-muted">
-                {t("eyebrow")}
-              </p>
               <h1 className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}>
                 {t("statsPage.title")}
               </h1>

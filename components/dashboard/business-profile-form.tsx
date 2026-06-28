@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useState, useImperativeHandle, forwardRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 
 import {
@@ -23,6 +23,20 @@ import { toast } from "sonner";
 import { upsertBusinessProfile } from "@/server/actions/business-profile";
 import { EASE } from "@/lib/motion-variants";
 import { cn } from "@/lib/utils";
+import {
+  COUNTRY_OPTIONS,
+  getBusinessProfileForCountry,
+  getCountryOptionLabel,
+  normalizeCountryCode,
+  type CountryUiLocale,
+} from "@/lib/country";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CloudinaryUploadButton = dynamic(
   () =>
@@ -47,6 +61,7 @@ type BusinessProfileData = {
 
 type BusinessProfileFormProps = {
   profile: BusinessProfileData;
+  onCountryChange?: (country: string) => void;
 };
 
 export type BusinessProfileFormHandle = {
@@ -57,8 +72,10 @@ export type BusinessProfileFormHandle = {
 const BusinessProfileForm = forwardRef<
   BusinessProfileFormHandle,
   BusinessProfileFormProps
->(function BusinessProfileForm({ profile }, ref) {
+>(function BusinessProfileForm({ profile, onCountryChange }, ref) {
   const t = useTranslations("dashboard");
+  const locale = useLocale();
+  const uiLocale: CountryUiLocale = locale.startsWith("fr") ? "fr" : "en";
   const shouldReduceMotion = useReducedMotion();
 
   const [logoUploading, setLogoUploading] = useState(false);
@@ -70,7 +87,7 @@ const BusinessProfileForm = forwardRef<
       address: profile?.address || "",
       city: profile?.city || "",
       postalCode: profile?.postalCode || "",
-      country: profile?.country || "",
+      country: normalizeCountryCode(profile?.country) || "",
       siret: profile?.siret || "",
       email: profile?.email || "",
       phone: profile?.phone || "",
@@ -90,7 +107,10 @@ const BusinessProfileForm = forwardRef<
   });
 
   const onSubmit = (values: z.infer<typeof BusinessProfileSchema>) => {
-    execute(values);
+    execute({
+      ...values,
+      country: normalizeCountryCode(values.country) || values.country,
+    });
   };
 
   useImperativeHandle(ref, () => ({
@@ -115,6 +135,9 @@ const BusinessProfileForm = forwardRef<
       transition: { duration: 0.4, ease: EASE },
     },
   };
+
+  const selectedCountry = form.watch("country");
+  const countryProfile = getBusinessProfileForCountry(selectedCountry, uiLocale);
 
   const fields = [
     {
@@ -150,8 +173,8 @@ const BusinessProfileForm = forwardRef<
     },
     {
       name: "siret" as const,
-      label: t("settingsPage.businessProfile.siret"),
-      placeholder: t("settingsPage.businessProfile.siretPlaceholder"),
+      label: countryProfile.taxIdLabel,
+      placeholder: countryProfile.taxIdPlaceholder,
       required: false,
     },
     {
@@ -168,8 +191,8 @@ const BusinessProfileForm = forwardRef<
     },
     {
       name: "vatMention" as const,
-      label: t("settingsPage.businessProfile.vatMention"),
-      placeholder: t("settingsPage.businessProfile.vatMentionPlaceholder"),
+      label: countryProfile.taxMentionLabel,
+      placeholder: countryProfile.taxMentionPlaceholder,
       required: false,
       className: "md:col-span-2 xl:col-span-3",
     },
@@ -270,15 +293,42 @@ const BusinessProfileForm = forwardRef<
                           {f.label}
                           {f.required && <span className="text-brand ml-0.5">*</span>}
                         </label>
-                        <FormControl>
-                          <Input
-                            id={`business-profile-${f.name}`}
-                            disabled={status === "executing"}
-                            placeholder={f.placeholder}
-                            className="mt-1.5 border-line bg-white/60 focus:bg-white"
-                            {...field}
-                          />
-                        </FormControl>
+                        {f.name === "country" ? (
+                          <Select
+                            value={normalizeCountryCode(field.value) || ""}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              onCountryChange?.(value);
+                            }}
+                          >
+                            <FormControl>
+                              <SelectTrigger
+                                id={`business-profile-${f.name}`}
+                                className="mt-1.5 border-line bg-white/60 focus:bg-white"
+                                disabled={status === "executing"}
+                              >
+                                <SelectValue placeholder={f.placeholder} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {COUNTRY_OPTIONS.map((country) => (
+                                <SelectItem key={country.code} value={country.code}>
+                                  {getCountryOptionLabel(country.code, uiLocale)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <FormControl>
+                            <Input
+                              id={`business-profile-${f.name}`}
+                              disabled={status === "executing"}
+                              placeholder={f.placeholder}
+                              className="mt-1.5 border-line bg-white/60 focus:bg-white"
+                              {...field}
+                            />
+                          </FormControl>
+                        )}
                         <FormMessage />
                       </div>
                     </FormItem>

@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import { SwissQRBill } from "swissqrbill/pdf";
 import type { Data } from "swissqrbill/types";
+import { normalizeCountryCode } from "./country";
 
 export type QrBillData = {
   iban: string;
@@ -19,49 +20,10 @@ export type QrBillData = {
   language?: "DE" | "EN" | "FR" | "IT";
 };
 
-const COUNTRY_TO_ISO: Record<string, string> = {
-  suisse: "CH",
-  schweiz: "CH",
-  svizzera: "CH",
-  switzerland: "CH",
-  france: "FR",
-  frankreich: "FR",
-  deutschland: "DE",
-  germany: "DE",
-  allemagne: "DE",
-  austria: "AT",
-  autriche: "AT",
-  österreich: "AT",
-  italy: "IT",
-  italie: "IT",
-  italia: "IT",
-  italien: "IT",
-  liechtenstein: "LI",
-  luxembourg: "LU",
-  belgique: "BE",
-  belgium: "BE",
-  belgien: "BE",
-  espagne: "ES",
-  spain: "ES",
-  spanien: "ES",
-  portugal: "PT",
-  "pays-bas": "NL",
-  netherlands: "NL",
-  "united kingdom": "GB",
-  "royaume-uni": "GB",
-};
-
-function toCountryCode(value: string): string | null {
-  const trimmed = value.trim();
-  if (trimmed.length === 2) return trimmed.toUpperCase();
-  const mapped = COUNTRY_TO_ISO[trimmed.toLowerCase()];
-  return mapped ?? null;
-}
-
 export async function generateQrBillPdf(
   data: QrBillData
 ): Promise<Buffer> {
-  const creditorIso = toCountryCode(data.creditorCountry) ?? data.creditorCountry;
+  const creditorIso = normalizeCountryCode(data.creditorCountry) ?? data.creditorCountry;
 
   const qrData: Data = {
     creditor: {
@@ -84,7 +46,7 @@ export async function generateQrBillPdf(
     data.debtorCity &&
     data.debtorCountry
   ) {
-    const debtorIso = toCountryCode(data.debtorCountry) ?? data.debtorCountry;
+    const debtorIso = normalizeCountryCode(data.debtorCountry) ?? data.debtorCountry;
     qrData.debtor = {
       name: data.debtorName,
       address: data.debtorAddress,

@@ -43,9 +43,9 @@ const invoiceMessages: Record<InvoiceLocale, InvoiceTemplateMessages> = {
       notes: "NOTES",
       price: "PRIX",
       quantity: "QTE",
-      siret: "SIRET",
+      siret: "ID fiscal",
       subtotal: "Sous-total",
-      tax: "TVA",
+      tax: "Taxe",
       to: "FACTURER A",
       total: "Total",
     },
@@ -66,7 +66,7 @@ const invoiceMessages: Record<InvoiceLocale, InvoiceTemplateMessages> = {
       notes: "NOTES",
       price: "PRICE",
       quantity: "QTY",
-      siret: "SIRET",
+      siret: "Tax ID",
       subtotal: "Subtotal",
       tax: "Tax",
       to: "TO",
@@ -109,4 +109,17 @@ export function formatInvoiceDate(
     month: "2-digit",
     year: "numeric",
   }).format(date);
+}
+
+export function formatInvoiceAmount(
+  amount: number,
+  locale?: string | null,
+  currency = "CHF"
+): string {
+  return new Intl.NumberFormat(normalizeInvoiceLocale(locale), {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
 }

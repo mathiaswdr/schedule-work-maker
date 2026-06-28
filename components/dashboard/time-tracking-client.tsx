@@ -85,6 +85,7 @@ type TimerAction = "start" | "pause" | "resume" | "end";
 type TimeTrackingClientProps = {
   displayClassName: string;
   defaultHourlyRate?: number;
+  currency: string;
   initialData?: ApiResponse;
   initialClients?: ClientOption[];
   initialProjects?: ProjectOption[];
@@ -120,6 +121,7 @@ const getSessionDurationMs = (s: { startedAt: string; endedAt: string | null; br
 export default function TimeTrackingClient({
   displayClassName,
   defaultHourlyRate = 0,
+  currency,
   initialData,
   initialClients,
   initialProjects,
@@ -446,20 +448,15 @@ export default function TimeTrackingClient({
   const refreshTooltip = t("timer.refreshTooltip");
 
   return (
-    <main className="w-full">
-      <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
-        <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.25),transparent_60%)] blur-2xl will-change-transform" />
-        <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.25),transparent_60%)] blur-3xl will-change-transform" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
-
-        <motion.div
-          className="relative z-10 space-y-8"
-          variants={v.container}
-          initial="hidden"
-          animate="show"
-        >
+    <main className="flex w-full flex-col gap-4 md:gap-6">
+      <motion.div
+        className="@container/main flex flex-1 flex-col gap-4 md:gap-6"
+        variants={v.container}
+        initial="hidden"
+        animate="show"
+      >
           {/* ========== MOBILE LAYOUT ========== */}
-          <div className="lg:hidden">
+          <div className="rounded-xl border border-line bg-white p-4 shadow-sm lg:hidden">
             {/* Header compact */}
             <motion.div variants={v.fadeUp} className="flex items-center justify-between">
               <p className="text-[10px] uppercase text-ink-muted">
@@ -842,12 +839,9 @@ export default function TimeTrackingClient({
           {/* ========== DESKTOP LAYOUT ========== */}
           <motion.section
             variants={v.fadeUp}
-            className="hidden lg:flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+              className="hidden flex-col gap-4 lg:flex lg:flex-row lg:items-center lg:justify-between"
           >
             <div className="space-y-2">
-              <p className="text-xs uppercase text-ink-muted">
-                {t("eyebrow")}
-              </p>
               <h1 className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}>
                 {t("time.title")}
               </h1>
@@ -891,7 +885,7 @@ export default function TimeTrackingClient({
                 <motion.div
                   key={card.label}
                   variants={v.item}
-                  className="rounded-2xl border border-line bg-white/80 px-5 py-4"
+                  className="rounded-xl border border-line bg-white px-5 py-4 shadow-sm"
                 >
                   <p className="text-xs uppercase text-ink-muted">
                     {card.label}
@@ -908,7 +902,7 @@ export default function TimeTrackingClient({
             className="hidden lg:grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
           >
             <div className="space-y-6">
-              <div className="rounded-3xl border border-line bg-panel p-6 shadow-[0_30px_60px_-46px_rgba(15,118,110,0.35)]">
+              <div className="rounded-xl border border-line bg-white p-6 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase text-ink-muted">
@@ -1042,7 +1036,7 @@ export default function TimeTrackingClient({
                   {t("timer.hint", { minutes: 6 })}
                 </p>
                 {!session && invoiceDraft && (
-                  <div className="mt-5 rounded-3xl border border-line bg-white/80 p-4">
+                  <div className="mt-5 rounded-xl border border-line bg-white p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-ink">
@@ -1066,7 +1060,7 @@ export default function TimeTrackingClient({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-line bg-white/80 p-6">
+            <div className="rounded-xl border border-line bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold">{t("timeline.title")}</p>
                 <div className="flex items-center gap-2">
@@ -1118,12 +1112,15 @@ export default function TimeTrackingClient({
           {/* Recent sessions (desktop) */}
           {recentSessions.length > 0 && (
             <motion.section variants={v.fadeUp} className="hidden lg:block">
-              <p className="mb-3 text-sm font-semibold">{t("recentSessions.title")}</p>
-              <div className="space-y-2">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-sm font-semibold">{t("recentSessions.title")}</p>
+                <span className="text-xs text-ink-muted">{recentSessions.length}</span>
+              </div>
+              <div className="overflow-hidden rounded-xl border border-line bg-white shadow-sm">
                 {recentSessions.map((rs) => (
                   <div
                     key={rs.id}
-                    className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
+                    className="flex items-center justify-between border-b border-line px-4 py-3 text-sm last:border-b-0"
                   >
                     <div className="flex items-center gap-3">
                       <span className="h-2.5 w-2.5 rounded-full bg-ink-muted" />
@@ -1187,8 +1184,7 @@ export default function TimeTrackingClient({
               <div className="h-10 w-3/4 animate-pulse rounded-2xl bg-ink-soft" />
             </motion.div>
           )}
-        </motion.div>
-      </div>
+      </motion.div>
 
       {editingSession && (
         <SessionEditDialog
@@ -1210,6 +1206,7 @@ export default function TimeTrackingClient({
         open={invoiceDialogOpen}
         onOpenChange={setInvoiceDialogOpen}
         draft={invoiceDraft}
+        currency={currency}
         onSuccess={() => {
           setLastEndedSession(null);
         }}

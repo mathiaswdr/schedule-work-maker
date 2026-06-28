@@ -1,4 +1,3 @@
-import { DM_Serif_Display } from "next/font/google";
 import { notFound } from "next/navigation";
 
 import EmailInvoiceInboxClient from "@/components/dashboard/email-invoice-inbox-client";
@@ -7,12 +6,6 @@ import { isEmailInvoiceImportEnabled } from "@/lib/feature-flags";
 import { serializeForClient } from "@/lib/utils";
 import { getDashboardViewer } from "@/server/dashboard-viewer";
 import { prisma } from "@/server/prisma";
-
-const display = DM_Serif_Display({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
 
 export default async function EmailInvoiceInboxPage() {
   if (!isEmailInvoiceImportEnabled()) {
@@ -51,7 +44,7 @@ export default async function EmailInvoiceInboxPage() {
   return (
     <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="expenses">
       <EmailInvoiceInboxClient
-        displayClassName={display.className}
+        displayClassName="font-sans tracking-tight"
         currency={currency}
         initialConnections={serializeForClient(connections)}
         initialDetectedInvoices={serializeForClient(detectedInvoices)}

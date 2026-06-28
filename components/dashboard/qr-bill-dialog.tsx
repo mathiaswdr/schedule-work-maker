@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { isSwissCountry } from "@/lib/country";
 
 type BankAccount = {
   id: string;
@@ -137,6 +138,11 @@ export default function QrBillDialog({
 
   const handleSubmit = async () => {
     if (!iban || !creditorName || !creditorAddress || !creditorPostalCode || !creditorCity || !creditorCountry) {
+      return;
+    }
+
+    if (!isSwissCountry(creditorCountry)) {
+      toast.error(t("swissOnly"));
       return;
     }
 

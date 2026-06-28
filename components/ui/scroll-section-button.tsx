@@ -3,6 +3,8 @@
 import type { MouseEvent, ReactNode } from "react";
 import { useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { localizedPath } from "@/lib/i18n-routing";
 import { scrollToSection } from "@/utils/tools";
 
 type ScrollSectionButtonProps = {
@@ -22,12 +24,13 @@ export default function ScrollSectionButton({
 }: ScrollSectionButtonProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const locale = useLocale();
 
   const handleClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
 
-      const targetPath = pagePath ?? pathname;
+      const targetPath = pagePath ? localizedPath(pagePath, locale) : pathname;
 
       if (pathname === targetPath) {
         scrollToSection(sectionId, offsetY);
@@ -47,7 +50,7 @@ export default function ScrollSectionButton({
 
       setTimeout(waitForElement, 100);
     },
-    [offsetY, pagePath, pathname, router, sectionId],
+    [locale, offsetY, pagePath, pathname, router, sectionId],
   );
 
   return (

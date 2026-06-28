@@ -1,16 +1,9 @@
 import { Suspense } from "react";
-import { DM_Serif_Display } from "next/font/google";
 import { getBillingStats } from "@/server/billing-stats";
 import BillingStatsClient from "@/components/dashboard/billing-stats-client";
 import PlanGate from "@/components/dashboard/plan-gate";
 import DashboardPageFallback from "@/components/dashboard/dashboard-page-fallback";
 import { getDashboardViewer } from "@/server/dashboard-viewer";
-
-const display = DM_Serif_Display({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
 
 async function BillingStatsContent() {
   const { userId, userPlan, currency } = await getDashboardViewer();
@@ -19,7 +12,7 @@ async function BillingStatsContent() {
   return (
     <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="stats">
       <BillingStatsClient
-        displayClassName={display.className}
+        displayClassName="font-sans tracking-tight"
         currency={currency}
         summary={billingStats.summary}
         dailyPoints={billingStats.dailyPoints}

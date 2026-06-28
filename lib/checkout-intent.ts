@@ -18,3 +18,11 @@ export function buildLoginCheckoutHref(
   const callbackUrl = buildSubscriptionCheckoutPath(plan, billing);
   return `/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 }
+
+export function buildSignupCheckoutHref(
+  plan: PlanId = DEFAULT_TRIAL_PLAN,
+  billing: BillingPeriod = DEFAULT_TRIAL_BILLING,
+) {
+  const callbackUrl = buildSubscriptionCheckoutPath(plan, billing);
+  return `/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+}

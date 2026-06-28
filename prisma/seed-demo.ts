@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import {
+  BlogPostStatus,
   DetectedInvoiceStatus,
   EmailProvider,
   ExpenseRecurrence,
@@ -36,6 +37,583 @@ const BANK_ACCOUNT = {
   iban: "CH9300762011623852957",
   bic: "BCVLCH2LXXX",
 };
+
+const blogPosts = [
+  {
+    translationKey: "freelance-time-tracking",
+    locale: "fr",
+    slug: "comment-suivre-son-temps-de-travail-en-freelance",
+    title: "Comment suivre son temps de travail en freelance sans se compliquer la vie",
+    excerpt:
+      "Une methode simple pour noter ses heures, garder le detail par client et transformer le temps travaille en factures plus fiables.",
+    metaTitle:
+      "Comment suivre son temps de travail en freelance | Guide Kronoma",
+    metaDescription:
+      "Decouvrez une methode simple pour suivre votre temps de travail en freelance, eviter les oublis et preparer vos factures plus rapidement.",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=80",
+    tags: ["Suivi du temps", "Freelance"],
+    readingMinutes: 5,
+    publishedDayOffset: 21,
+    content: {
+      intro:
+        "Le suivi du temps n'a pas besoin d'etre lourd. Pour un freelance, le bon systeme est celui qui capture les heures au moment ou elles sont faites, puis les relie clairement a un client, un projet et une facture.",
+      sections: [
+        {
+          heading: "Pourquoi suivre ses heures meme quand on facture au forfait",
+          body: [
+            "Beaucoup de freelances suivent leurs heures uniquement lorsqu'ils vendent au taux horaire. Pourtant, le suivi du temps reste utile au forfait, car il montre si une mission reste rentable ou si le cadrage doit etre ajuste.",
+            "Il permet aussi de garder une trace objective lorsque le client demande plus de details, de comparer les projets entre eux et de mieux estimer les prochains devis.",
+          ],
+          bullets: [
+            "Identifier les missions qui depassent le temps prevu.",
+            "Comparer le temps estime et le temps reel.",
+            "Garder une base fiable pour les prochains devis.",
+          ],
+        },
+        {
+          heading: "La methode simple en quatre donnees",
+          body: [
+            "Pour que le suivi reste durable, chaque session doit contenir peu d'informations, mais les bonnes. Notez la date, le client, le projet et une courte description de la tache.",
+            "Ces quatre donnees suffisent a comprendre ou part le temps, a retrouver le contexte et a preparer une facture lisible sans reconstruire la semaine de memoire.",
+          ],
+          bullets: [
+            "Date et horaire de la session.",
+            "Client ou projet associe.",
+            "Duree nette, pauses exclues.",
+            "Note courte sur le travail realise.",
+          ],
+        },
+        {
+          heading: "Quand utiliser un outil plutot qu'un tableur",
+          body: [
+            "Un tableur fonctionne au debut, mais il devient fragile lorsque les clients, les projets et les factures se multiplient. Les oublis, doublons et corrections manuelles prennent vite plus de temps que le suivi lui-meme.",
+            "Un outil dedie devient utile des que vous voulez relier vos heures a vos clients, suivre les pauses, consulter des statistiques et generer des factures a partir de donnees deja propres.",
+          ],
+        },
+      ],
+      faq: [
+        {
+          question: "Faut-il suivre chaque minute de travail ?",
+          answer:
+            "Non. L'objectif est d'avoir une base fiable, pas de micro-controler sa journee. Des sessions claires par tache ou par bloc de travail suffisent dans la plupart des cas.",
+        },
+        {
+          question: "Le suivi du temps est-il utile pour les forfaits ?",
+          answer:
+            "Oui, car il aide a mesurer la rentabilite reelle d'un forfait et a mieux estimer les prochaines missions.",
+        },
+        {
+          question: "Quelle est la frequence ideale pour saisir ses heures ?",
+          answer:
+            "Le plus fiable est de lancer le suivi pendant le travail. A defaut, une saisie quotidienne reste beaucoup plus precise qu'une reconstruction en fin de mois.",
+        },
+      ],
+      cta: {
+        title: "Suivez vos heures sans reconstruire votre semaine.",
+        body:
+          "Kronoma relie vos sessions de travail a vos clients, projets et factures pour garder une trace claire de votre activite.",
+        href: "/pricing",
+        label: "Voir les offres",
+      },
+    },
+  },
+  {
+    translationKey: "swiss-freelance-invoicing-hours",
+    locale: "fr",
+    slug: "facturation-freelance-suisse-heures-travaillees",
+    title: "Facturation freelance en Suisse : comment transformer ses heures travaillees en facture",
+    excerpt:
+      "Les points a verifier pour passer d'un suivi d'heures propre a une facture claire, notamment pour les independants bases en Suisse.",
+    metaTitle:
+      "Facturation freelance Suisse : heures travaillees et facture | Kronoma",
+    metaDescription:
+      "Guide pratique pour transformer vos heures travaillees en facture freelance claire, avec les points utiles pour les independants en Suisse.",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1400&q=80",
+    tags: ["Facturation", "Suisse"],
+    readingMinutes: 6,
+    publishedDayOffset: 14,
+    content: {
+      intro:
+        "Une facture fiable commence avant la facture elle-meme. Elle depend d'un suivi d'heures propre, d'une description claire du travail et de donnees client a jour.",
+      sections: [
+        {
+          heading: "Relier chaque heure au bon client",
+          body: [
+            "La premiere source d'erreur vient souvent des heures non attribuees. Si une session n'est pas liee au bon client ou au bon projet, la facture doit etre reconstruite manuellement.",
+            "Un suivi propre garde l'association entre la duree, le projet et la note de travail. La facture devient alors une synthese, pas un travail de recherche.",
+          ],
+        },
+        {
+          heading: "Presenter les lignes de facture clairement",
+          body: [
+            "Une facture n'a pas besoin de reprendre chaque minute, mais elle doit etre comprehensible. Regroupez les heures par prestation, projet ou periode selon ce qui aide le client a verifier.",
+            "La description doit etre assez precise pour rappeler le contexte, sans transformer la facture en rapport detaille.",
+          ],
+          bullets: [
+            "Nom du client et coordonnees a jour.",
+            "Periode ou projet facture.",
+            "Description courte de la prestation.",
+            "Quantite, prix unitaire, total et devise.",
+          ],
+        },
+        {
+          heading: "Cas suisse : devise, coordonnees et QR-facture",
+          body: [
+            "Pour un profil base en Suisse, les donnees de l'entreprise, l'IBAN, la devise et les mentions utiles doivent rester coherents entre le profil et la facture.",
+            "Lorsque le paiement se fait en CHF, une QR-facture peut simplifier le reglement pour le client. L'important est de garder les informations de paiement propres et reutilisables.",
+          ],
+        },
+      ],
+      faq: [
+        {
+          question: "Puis-je facturer plusieurs projets sur une meme facture ?",
+          answer:
+            "Oui, si les lignes restent lisibles. Il est souvent utile de separer les projets ou les types de prestation pour faciliter la validation cote client.",
+        },
+        {
+          question: "Dois-je joindre le detail complet des heures ?",
+          answer:
+            "Pas toujours. Une synthese suffit souvent, mais garder le detail dans votre outil permet de repondre rapidement si le client demande une verification.",
+        },
+        {
+          question: "La QR-facture est-elle obligatoire ?",
+          answer:
+            "Elle depend du contexte de paiement. Pour les independants suisses facturant en CHF, elle peut rendre le paiement plus simple et plus standardise.",
+        },
+      ],
+      cta: {
+        title: "Transformez vos heures en factures plus rapidement.",
+        body:
+          "Avec Kronoma, vos sessions, clients et projets restent connectes jusqu'a la generation de la facture.",
+        href: "/pricing",
+        label: "Comparer les plans",
+      },
+    },
+  },
+  {
+    translationKey: "freelance-hourly-rate",
+    locale: "fr",
+    slug: "calculer-son-taux-horaire-freelance",
+    title: "Calculer son taux horaire freelance : la methode simple pour ne pas vendre son temps trop bas",
+    excerpt:
+      "Un guide pour relier objectifs de revenu, charges, temps facturable et suivi reel des heures afin de fixer un taux horaire defendable.",
+    metaTitle:
+      "Calculer son taux horaire freelance : methode simple | Kronoma",
+    metaDescription:
+      "Apprenez a calculer un taux horaire freelance en tenant compte du revenu cible, des charges et du temps réellement facturable.",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=1400&q=80",
+    tags: ["Taux horaire", "Rentabilite"],
+    readingMinutes: 5,
+    publishedDayOffset: 7,
+    content: {
+      intro:
+        "Un taux horaire freelance ne se calcule pas seulement avec le salaire souhaite. Il doit aussi couvrir les charges, les jours non factures, l'administration et les periodes creuses.",
+      sections: [
+        {
+          heading: "Partir du revenu annuel vise",
+          body: [
+            "Commencez par definir le revenu net ou brut que vous voulez atteindre sur une annee. Ajoutez ensuite les charges professionnelles, les assurances, les abonnements et les frais recurrents.",
+            "Cette base donne le chiffre d'affaires a couvrir avant meme de penser au nombre d'heures vendables.",
+          ],
+        },
+        {
+          heading: "Distinguer heures travaillees et heures facturables",
+          body: [
+            "Toutes les heures travaillees ne sont pas facturables. La prospection, l'administration, les devis, la comptabilite et la formation prennent du temps sans etre directement vendues.",
+            "C'est pour cela que le suivi du temps est utile : il montre la part reelle du temps consacree aux missions clientes.",
+          ],
+          bullets: [
+            "Heures de production client.",
+            "Temps administratif.",
+            "Prospection et avant-vente.",
+            "Formation, veille et maintenance interne.",
+          ],
+        },
+        {
+          heading: "Ajuster le taux avec les donnees reelles",
+          body: [
+            "Le premier calcul donne une hypothese. Apres quelques semaines, comparez le temps prevu, le temps reel et le montant facture.",
+            "Si les missions debordent souvent, le probleme peut venir du taux, du cadrage ou du type de prestation. Les donnees de temps rendent cette discussion beaucoup plus concrete.",
+          ],
+        },
+      ],
+      faq: [
+        {
+          question: "Quel taux horaire choisir quand on debute ?",
+          answer:
+            "Il faut eviter de partir uniquement du marche. Calculez d'abord votre seuil de rentabilite, puis comparez-le aux prix pratiques dans votre specialite.",
+        },
+        {
+          question: "Le taux horaire doit-il apparaitre sur toutes les factures ?",
+          answer:
+            "Pas necessairement. Pour un forfait, vous pouvez facturer une prestation globale tout en suivant vos heures en interne.",
+        },
+        {
+          question: "Quand revoir son taux horaire ?",
+          answer:
+            "Revoyez-le lorsque vos donnees montrent que vos missions sont moins rentables que prevu, ou lorsque votre expertise et votre demande augmentent.",
+        },
+      ],
+      cta: {
+        title: "Mesurez votre rentabilite avec des heures fiables.",
+        body:
+          "Kronoma vous aide a comprendre le temps reel passe par client et par projet avant de fixer ou reviser vos tarifs.",
+        href: "/auth/login",
+        label: "Demarrer gratuitement",
+      },
+    },
+  },
+  {
+    translationKey: "time-tracking-tool-vs-spreadsheet",
+    locale: "fr",
+    slug: "outil-suivi-temps-independant-vs-tableur",
+    title: "Outil de suivi du temps ou tableur : que choisir quand on est independant ?",
+    excerpt:
+      "Un comparatif pragmatique pour savoir quand un tableur suffit et quand un outil dedie devient plus rentable.",
+    metaTitle:
+      "Outil de suivi du temps ou tableur pour independant | Kronoma",
+    metaDescription:
+      "Comparez tableur et outil de suivi du temps pour independants : simplicite, fiabilite, facturation et limites a anticiper.",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80",
+    tags: ["Comparatif", "Productivite"],
+    readingMinutes: 4,
+    publishedDayOffset: 3,
+    content: {
+      intro:
+        "Le meilleur outil est celui qui reste utilise. Un tableur peut suffire au debut, mais un outil dedie devient plus interessant quand le suivi doit alimenter les statistiques et la facturation.",
+      sections: [
+        {
+          heading: "Quand le tableur suffit",
+          body: [
+            "Un tableur est adapte si vous avez peu de clients, peu de projets et une facturation simple. Il permet de commencer sans configuration et de garder une trace minimale.",
+            "Sa limite apparait lorsque vous devez retrouver rapidement le detail d'une mission, calculer des totaux fiables ou transformer les heures en facture.",
+          ],
+        },
+        {
+          heading: "Quand l'outil dedie devient plus rentable",
+          body: [
+            "Un outil de suivi du temps devient utile lorsque la saisie manuelle cree des erreurs ou lorsque vous passez trop de temps a consolider les donnees.",
+            "Le gain n'est pas seulement le chrono. Il vient du lien entre session, client, projet, statistique et facture.",
+          ],
+          bullets: [
+            "Moins d'oublis de saisie.",
+            "Moins de corrections manuelles.",
+            "Factures preparees depuis les heures deja suivies.",
+            "Vision plus claire du temps par client.",
+          ],
+        },
+        {
+          heading: "La bonne transition",
+          body: [
+            "Il n'est pas necessaire de tout migrer d'un coup. Commencez par suivre les nouvelles sessions dans un outil, puis importez ou archivez l'historique utile.",
+            "Le bon critere est simple : si votre systeme actuel vous fait perdre du temps chaque semaine, il ne remplit plus son role.",
+          ],
+        },
+      ],
+      faq: [
+        {
+          question: "Un tableur est-il moins professionnel ?",
+          answer:
+            "Non, tant qu'il reste fiable. Le probleme vient surtout des oublis, des doublons et du temps passe a consolider les donnees.",
+        },
+        {
+          question: "Faut-il importer tout son historique ?",
+          answer:
+            "Pas toujours. Il suffit souvent de garder l'ancien tableur en archive et de commencer proprement avec les nouvelles sessions.",
+        },
+        {
+          question: "Quel est le principal avantage d'un outil dedie ?",
+          answer:
+            "Le lien direct entre temps suivi, clients, projets, statistiques et facturation.",
+        },
+      ],
+      cta: {
+        title: "Passez du tableur au suivi connecte.",
+        body:
+          "Kronoma garde vos heures, clients, projets et factures dans un meme flux de travail.",
+        href: "/pricing",
+        label: "Voir Kronoma",
+      },
+    },
+  },
+  {
+    translationKey: "freelance-time-tracking",
+    locale: "en",
+    slug: "how-to-track-working-time-as-a-freelancer",
+    title: "How to track working time as a freelancer without adding friction",
+    excerpt:
+      "A simple method to record hours, keep client context, and turn tracked time into more reliable invoices.",
+    metaTitle: "How to track working time as a freelancer | Kronoma Guide",
+    metaDescription:
+      "Learn a simple way to track freelance working time, avoid forgotten hours, and prepare invoices faster.",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=80",
+    tags: ["Time tracking", "Freelance"],
+    readingMinutes: 5,
+    publishedDayOffset: 21,
+    content: {
+      intro:
+        "Time tracking does not need to become heavy admin. For freelancers, the best system captures work when it happens and links it to a client, a project, and an invoice.",
+      sections: [
+        {
+          heading: "Why track hours even when you charge fixed fees",
+          body: [
+            "Many freelancers only track time when they bill hourly. Time tracking still matters for fixed-fee work because it shows whether a project remains profitable.",
+            "It also gives you objective context when a client asks for details and helps you estimate future projects with better data.",
+          ],
+          bullets: [
+            "Spot projects that take longer than expected.",
+            "Compare estimated time with real time.",
+            "Build a better base for future quotes.",
+          ],
+        },
+        {
+          heading: "The four data points that are enough",
+          body: [
+            "A sustainable system should capture only what matters: date, client, project, and a short work note.",
+            "Those four fields are usually enough to understand where time went and prepare a clear invoice without rebuilding the week from memory.",
+          ],
+        },
+        {
+          heading: "When a tool becomes better than a spreadsheet",
+          body: [
+            "A spreadsheet works at the beginning, but it becomes fragile when clients, projects, and invoices grow.",
+            "A dedicated tool is useful when you want tracked hours to feed project stats and invoices without repeated manual consolidation.",
+          ],
+        },
+      ],
+      faq: [
+        {
+          question: "Do I need to track every minute?",
+          answer:
+            "No. The goal is reliable context, not minute-by-minute control. Clear sessions by task or work block are enough for most freelancers.",
+        },
+        {
+          question: "Is time tracking useful for fixed-fee projects?",
+          answer:
+            "Yes. It helps measure real profitability and improve future estimates.",
+        },
+        {
+          question: "How often should I log my hours?",
+          answer:
+            "Tracking while you work is best. If that is not possible, a daily review is far more accurate than reconstructing the month later.",
+        },
+      ],
+      cta: {
+        title: "Track hours without rebuilding your week.",
+        body:
+          "Kronoma links work sessions to clients, projects, and invoices so your activity stays clear.",
+        href: "/pricing",
+        label: "See plans",
+      },
+    },
+  },
+  {
+    translationKey: "swiss-freelance-invoicing-hours",
+    locale: "en",
+    slug: "swiss-freelance-invoicing-from-tracked-hours",
+    title: "Swiss freelance invoicing: how to turn tracked hours into an invoice",
+    excerpt:
+      "What to check before turning clean time records into a clear invoice, especially for Swiss-based freelancers.",
+    metaTitle: "Swiss freelance invoicing from tracked hours | Kronoma",
+    metaDescription:
+      "A practical guide to turning tracked hours into a clear freelance invoice, with useful points for Swiss independents.",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1400&q=80",
+    tags: ["Invoicing", "Switzerland"],
+    readingMinutes: 6,
+    publishedDayOffset: 14,
+    content: {
+      intro:
+        "A reliable invoice starts before the invoice itself. It depends on clean tracked hours, clear work descriptions, and up-to-date client details.",
+      sections: [
+        {
+          heading: "Link every hour to the right client",
+          body: [
+            "Unassigned hours are one of the most common sources of invoice errors. If a session is not linked to the right client or project, the invoice has to be rebuilt manually.",
+            "Clean tracking keeps the connection between duration, project, and work note, so invoicing becomes a summary instead of detective work.",
+          ],
+        },
+        {
+          heading: "Make invoice lines easy to verify",
+          body: [
+            "An invoice does not need to list every minute, but it should be understandable. Group hours by service, project, or period depending on what helps the client validate it.",
+            "Descriptions should be specific enough to remind the context without turning the invoice into a long report.",
+          ],
+        },
+        {
+          heading: "Swiss context: currency, payment details, and QR-bills",
+          body: [
+            "For a Swiss profile, company details, IBAN, currency, and invoice mentions should stay consistent between the business profile and the invoice.",
+            "When payment is in CHF, a Swiss QR-bill can make payment easier for the client.",
+          ],
+        },
+      ],
+      faq: [
+        {
+          question: "Can I invoice several projects on one invoice?",
+          answer:
+            "Yes, if the invoice lines remain readable. Separating projects or service types often makes validation easier.",
+        },
+        {
+          question: "Do I need to attach the full time detail?",
+          answer:
+            "Not always. A summary is often enough, but keeping details in your tool helps answer client questions quickly.",
+        },
+        {
+          question: "Is a Swiss QR-bill mandatory?",
+          answer:
+            "It depends on the payment context. For Swiss freelancers invoicing in CHF, it can make payment more standardized.",
+        },
+      ],
+      cta: {
+        title: "Turn tracked hours into invoices faster.",
+        body:
+          "Kronoma keeps sessions, clients, and projects connected until invoice generation.",
+        href: "/pricing",
+        label: "Compare plans",
+      },
+    },
+  },
+  {
+    translationKey: "freelance-hourly-rate",
+    locale: "en",
+    slug: "calculate-your-freelance-hourly-rate",
+    title: "Calculate your freelance hourly rate without underselling your time",
+    excerpt:
+      "A simple way to connect revenue goals, costs, billable time, and real tracked hours before setting your rate.",
+    metaTitle: "Calculate your freelance hourly rate | Kronoma",
+    metaDescription:
+      "Learn how to calculate a freelance hourly rate with revenue goals, costs, and realistic billable time.",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=1400&q=80",
+    tags: ["Hourly rate", "Profitability"],
+    readingMinutes: 5,
+    publishedDayOffset: 7,
+    content: {
+      intro:
+        "A freelance hourly rate is not just a desired salary divided by hours. It also needs to cover costs, non-billable work, admin, and quieter periods.",
+      sections: [
+        {
+          heading: "Start from your annual revenue target",
+          body: [
+            "Define the income you want to reach over a year, then add professional costs, insurance, software subscriptions, and recurring expenses.",
+            "This gives you the revenue that must be covered before estimating billable hours.",
+          ],
+        },
+        {
+          heading: "Separate worked hours from billable hours",
+          body: [
+            "Not every working hour is billable. Sales, admin, quotes, accounting, and learning all take time.",
+            "Tracking time helps reveal how much of your week is actually spent on client work.",
+          ],
+        },
+        {
+          heading: "Adjust the rate with real data",
+          body: [
+            "The first calculation is only a hypothesis. After a few weeks, compare estimated time, real time, and the amount invoiced.",
+            "If projects often overflow, the issue may be pricing, scope, or the type of work sold.",
+          ],
+        },
+      ],
+      faq: [
+        {
+          question: "What rate should I choose when starting out?",
+          answer:
+            "Start with your profitability threshold, then compare it with market rates in your specialty.",
+        },
+        {
+          question: "Does my hourly rate need to appear on every invoice?",
+          answer:
+            "No. For fixed-fee work, you can invoice the service while tracking hours internally.",
+        },
+        {
+          question: "When should I review my hourly rate?",
+          answer:
+            "Review it when tracked data shows that projects are less profitable than expected, or when your expertise and demand increase.",
+        },
+      ],
+      cta: {
+        title: "Measure profitability with reliable hours.",
+        body:
+          "Kronoma helps you understand real time spent by client and project before adjusting your rates.",
+        href: "/auth/login",
+        label: "Start for free",
+      },
+    },
+  },
+  {
+    translationKey: "time-tracking-tool-vs-spreadsheet",
+    locale: "en",
+    slug: "time-tracking-tool-vs-spreadsheet-for-freelancers",
+    title: "Time tracking tool or spreadsheet: what should freelancers choose?",
+    excerpt:
+      "A practical comparison to know when a spreadsheet is enough and when a dedicated tool becomes more profitable.",
+    metaTitle: "Time tracking tool vs spreadsheet for freelancers | Kronoma",
+    metaDescription:
+      "Compare spreadsheets and time tracking tools for freelancers: simplicity, reliability, invoicing, and limits to anticipate.",
+    coverImageUrl:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80",
+    tags: ["Comparison", "Productivity"],
+    readingMinutes: 4,
+    publishedDayOffset: 3,
+    content: {
+      intro:
+        "The best system is the one you keep using. A spreadsheet can work at first, but a dedicated tool becomes more useful when time records feed stats and invoicing.",
+      sections: [
+        {
+          heading: "When a spreadsheet is enough",
+          body: [
+            "A spreadsheet is fine when you have few clients, few projects, and simple invoicing.",
+            "Its limits appear when you need to retrieve project details, calculate reliable totals, or turn hours into invoices.",
+          ],
+        },
+        {
+          heading: "When a dedicated tool becomes more profitable",
+          body: [
+            "A time tracking tool is useful when manual entry creates errors or weekly consolidation takes too much time.",
+            "The benefit is not only the timer. It is the link between session, client, project, statistics, and invoice.",
+          ],
+        },
+        {
+          heading: "The right transition",
+          body: [
+            "You do not need to migrate everything at once. Start tracking new sessions in the tool, then keep your old spreadsheet as an archive.",
+            "The simple rule is this: if your current system costs time every week, it no longer does its job.",
+          ],
+        },
+      ],
+      faq: [
+        {
+          question: "Is a spreadsheet less professional?",
+          answer:
+            "No, as long as it remains reliable. The problem is usually forgotten entries, duplicates, and consolidation time.",
+        },
+        {
+          question: "Do I need to import all my history?",
+          answer:
+            "Not always. Keeping the old spreadsheet as an archive and starting clean is often enough.",
+        },
+        {
+          question: "What is the main benefit of a dedicated tool?",
+          answer:
+            "The direct link between tracked time, clients, projects, statistics, and invoicing.",
+        },
+      ],
+      cta: {
+        title: "Move from spreadsheet to connected tracking.",
+        body:
+          "Kronoma keeps hours, clients, projects, and invoices in one workflow.",
+        href: "/pricing",
+        label: "See Kronoma",
+      },
+    },
+  },
+];
 
 const serviceTypes = [
   { name: "Strategie", color: "#F97316" },
@@ -544,7 +1122,56 @@ function startOfWeek(date: Date) {
   return next;
 }
 
+export async function seedBlogPosts(client: PrismaClient, now = new Date()) {
+  for (const post of blogPosts) {
+    const publishedAt = addDays(now, -post.publishedDayOffset);
+
+    await client.blogPost.upsert({
+      where: {
+        locale_slug: {
+          locale: post.locale,
+          slug: post.slug,
+        },
+      },
+      update: {
+        translationKey: post.translationKey,
+        title: post.title,
+        excerpt: post.excerpt,
+        content: post.content,
+        coverImageUrl: post.coverImageUrl,
+        tags: post.tags,
+        authorName: "Kronoma",
+        readingMinutes: post.readingMinutes,
+        metaTitle: post.metaTitle,
+        metaDescription: post.metaDescription,
+        status: BlogPostStatus.PUBLISHED,
+        publishedAt,
+      },
+      create: {
+        translationKey: post.translationKey,
+        locale: post.locale,
+        slug: post.slug,
+        title: post.title,
+        excerpt: post.excerpt,
+        content: post.content,
+        coverImageUrl: post.coverImageUrl,
+        tags: post.tags,
+        authorName: "Kronoma",
+        readingMinutes: post.readingMinutes,
+        metaTitle: post.metaTitle,
+        metaDescription: post.metaDescription,
+        status: BlogPostStatus.PUBLISHED,
+        publishedAt,
+      },
+    });
+  }
+}
+
 async function main() {
+  const now = new Date();
+
+  await seedBlogPosts(prisma, now);
+
   const user = await prisma.user.findUnique({
     where: { email: DEMO_EMAIL },
     select: { id: true, email: true, name: true },
@@ -555,8 +1182,6 @@ async function main() {
       `Aucun utilisateur trouve pour ${DEMO_EMAIL}. Cree d'abord ce compte dans Kronoma, puis relance npm run seed:demo.`
     );
   }
-
-  const now = new Date();
 
   await prisma.user.update({
     where: { id: user.id },
@@ -1059,19 +1684,22 @@ async function main() {
     prisma.invoice.count({ where: { userId: user.id } }),
     prisma.expense.count({ where: { userId: user.id } }),
     prisma.workSession.count({ where: { userId: user.id } }),
+    prisma.blogPost.count({ where: { status: BlogPostStatus.PUBLISHED } }),
   ]);
 
   console.log(`Compte demo rempli pour ${DEMO_EMAIL}`);
   console.log(
-    `Total compte: ${summary[0]} clients, ${summary[1]} projets, ${summary[2]} factures, ${summary[3]} depenses, ${summary[4]} sessions.`
+    `Total compte: ${summary[0]} clients, ${summary[1]} projets, ${summary[2]} factures, ${summary[3]} depenses, ${summary[4]} sessions, ${summary[5]} articles publies.`
   );
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+if (process.argv[1]?.endsWith("seed-demo.ts")) {
+  main()
+    .catch((error) => {
+      console.error(error);
+      process.exitCode = 1;
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}

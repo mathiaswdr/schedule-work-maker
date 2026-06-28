@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
   title: "Kronoma",
   description:
-    "Kronoma est un logiciel suisse de suivi du temps pour freelances qui transforme vos heures en factures avec QR-facture suisse.",
+    "Kronoma est un logiciel de suivi du temps pour freelances qui transforme vos heures en factures internationales, avec QR-facture pour les profils suisses.",
   applicationName: "Kronoma",
   manifest: "/manifest.webmanifest",
   openGraph: {
@@ -26,13 +26,13 @@ export const metadata: Metadata = {
     siteName: "Kronoma",
     title: "Kronoma",
     description:
-      "Kronoma est un logiciel suisse de suivi du temps pour freelances qui transforme vos heures en factures avec QR-facture suisse.",
+      "Kronoma est un logiciel de suivi du temps pour freelances qui transforme vos heures en factures internationales, avec QR-facture pour les profils suisses.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Kronoma",
     description:
-      "Kronoma est un logiciel suisse de suivi du temps pour freelances qui transforme vos heures en factures avec QR-facture suisse.",
+      "Kronoma est un logiciel de suivi du temps pour freelances qui transforme vos heures en factures internationales, avec QR-facture pour les profils suisses.",
   },
   appleWebApp: {
     capable: true,

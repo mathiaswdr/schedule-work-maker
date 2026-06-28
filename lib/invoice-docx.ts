@@ -15,6 +15,7 @@ import Docxtemplater from "docxtemplater";
 import PizZip from "pizzip";
 import type { InvoiceData } from "./invoice-pdf";
 import {
+  formatInvoiceAmount,
   formatInvoiceDate,
   getInvoiceTemplateMessages,
   normalizeInvoiceLocale,
@@ -22,7 +23,8 @@ import {
 
 const FONT = "Calibri";
 
-const fmt = (n: number) => n.toFixed(2);
+const fmt = (invoice: InvoiceData, n: number, locale?: string | null) =>
+  formatInvoiceAmount(n, locale, invoice.currency || "CHF");
 
 /**
  * Pre-processes the template DOCX XML to remove Word artifacts
@@ -231,8 +233,8 @@ function buildClassicDoc(invoice: InvoiceData, locale?: string | null): Document
           children: [
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.description, size: 20 })] })], borders: lightBorder }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(item.quantity), size: 20 })], alignment: AlignmentType.RIGHT })], borders: lightBorder }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: fmt(item.unitPrice), size: 20 })], alignment: AlignmentType.RIGHT })], borders: lightBorder }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: fmt(item.amount), bold: true, size: 20 })], alignment: AlignmentType.RIGHT })], borders: lightBorder }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: fmt(invoice, item.unitPrice, locale), size: 20 })], alignment: AlignmentType.RIGHT })], borders: lightBorder }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: fmt(invoice, item.amount, locale), bold: true, size: 20 })], alignment: AlignmentType.RIGHT })], borders: lightBorder }),
           ],
         })
       );
@@ -252,7 +254,7 @@ function buildClassicDoc(invoice: InvoiceData, locale?: string | null): Document
     new Paragraph({
       children: [
         new TextRun({
-          text: `${messages.labels.subtotal}: ${fmt(invoice.subtotal)}`,
+          text: `${messages.labels.subtotal}: ${fmt(invoice, invoice.subtotal, locale)}`,
           size: 20,
         }),
       ],
@@ -265,7 +267,9 @@ function buildClassicDoc(invoice: InvoiceData, locale?: string | null): Document
         children: [
           new TextRun({
             text: `${messages.labels.tax} (${invoice.taxRate}%): ${fmt(
-              invoice.taxAmount
+              invoice,
+              invoice.taxAmount,
+              locale
             )}`,
             color: "888888",
             size: 20,
@@ -279,7 +283,7 @@ function buildClassicDoc(invoice: InvoiceData, locale?: string | null): Document
     new Paragraph({
       children: [
         new TextRun({
-          text: `${messages.labels.total}: ${fmt(invoice.total)}`,
+          text: `${messages.labels.total}: ${fmt(invoice, invoice.total, locale)}`,
           bold: true,
           size: 28,
         }),
@@ -395,9 +399,9 @@ function buildFromCustomTemplate(
     description: item.description,
     quantity: String(item.quantity),
     hours: String(item.quantity),
-    unitPrice: fmt(item.unitPrice),
-    price: fmt(item.unitPrice),
-    amount: fmt(item.amount),
+    unitPrice: fmt(invoice, item.unitPrice, locale),
+    price: fmt(invoice, item.unitPrice, locale),
+    amount: fmt(invoice, item.amount, locale),
   }));
 
   try {
@@ -427,10 +431,10 @@ function buildFromCustomTemplate(
       // Items (for loop: {#items}...{/items})
       items: itemsData,
       // Totals — always pass strings for consistent rendering
-      subtotal: fmt(invoice.subtotal),
+      subtotal: fmt(invoice, invoice.subtotal, locale),
       taxRate: String(invoice.taxRate ?? 0),
-      taxAmount: fmt(invoice.taxAmount),
-      total: fmt(invoice.total),
+      taxAmount: fmt(invoice, invoice.taxAmount, locale),
+      total: fmt(invoice, invoice.total, locale),
       // Notes
       notes: invoice.notes || "",
       // Banking

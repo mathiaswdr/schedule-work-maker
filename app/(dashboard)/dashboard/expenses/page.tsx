@@ -1,15 +1,8 @@
-import { DM_Serif_Display } from "next/font/google";
 import { prisma } from "@/server/prisma";
 import ExpensesClient from "@/components/dashboard/expenses-client";
 import PlanGate from "@/components/dashboard/plan-gate";
 import { serializeForClient } from "@/lib/utils";
 import { getDashboardViewer } from "@/server/dashboard-viewer";
-
-const display = DM_Serif_Display({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
 
 export default async function DashboardExpensesPage() {
   const { userId, userPlan, currency } = await getDashboardViewer();
@@ -32,7 +25,7 @@ export default async function DashboardExpensesPage() {
   return (
     <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="expenses">
       <ExpensesClient
-        displayClassName={display.className}
+        displayClassName="font-sans tracking-tight"
         userPlan={userPlan}
         currency={currency}
         initialExpenses={serializeForClient(initialExpenses)}

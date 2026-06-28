@@ -8,6 +8,7 @@ import {
   renderToBuffer,
 } from "@react-pdf/renderer";
 import {
+  formatInvoiceAmount,
   formatInvoiceDate,
   getInvoiceTemplateMessages,
   type InvoiceLocale,
@@ -46,6 +47,7 @@ export type InvoiceData = {
   taxRate: number | null;
   taxAmount: number;
   total: number;
+  currency?: string | null;
   templateType: string;
   items: {
     category: string | null;
@@ -56,7 +58,8 @@ export type InvoiceData = {
   }[];
 };
 
-const fmt = (n: number) => n.toFixed(2);
+const fmt = (n: number, locale: InvoiceLocale, currency?: string | null) =>
+  formatInvoiceAmount(n, locale, currency || "CHF");
 
 // ─── Classic Template ───
 
@@ -183,8 +186,8 @@ function ClassicTemplate({
             { key: `${g.category}-${i}`, style: classicStyles.tableRow },
             React.createElement(Text, { style: classicStyles.colDesc }, item.description),
             React.createElement(Text, { style: classicStyles.colQty }, String(item.quantity)),
-            React.createElement(Text, { style: classicStyles.colPrice }, fmt(item.unitPrice)),
-            React.createElement(Text, { style: classicStyles.colAmount }, fmt(item.amount))
+            React.createElement(Text, { style: classicStyles.colPrice }, fmt(item.unitPrice, locale, invoice.currency)),
+            React.createElement(Text, { style: classicStyles.colAmount }, fmt(item.amount, locale, invoice.currency))
           )
         ),
       ]),
@@ -196,7 +199,7 @@ function ClassicTemplate({
           View,
           { style: classicStyles.totalRow },
           React.createElement(Text, { style: classicStyles.totalLabel }, messages.labels.subtotal),
-          React.createElement(Text, { style: classicStyles.totalValue }, fmt(invoice.subtotal))
+          React.createElement(Text, { style: classicStyles.totalValue }, fmt(invoice.subtotal, locale, invoice.currency))
         ),
         (invoice.taxRate ?? 0) > 0 &&
           React.createElement(
@@ -207,13 +210,13 @@ function ClassicTemplate({
               { style: classicStyles.totalLabel },
               `${messages.labels.tax} (${invoice.taxRate}%)`
             ),
-            React.createElement(Text, { style: classicStyles.totalValue }, fmt(invoice.taxAmount))
+            React.createElement(Text, { style: classicStyles.totalValue }, fmt(invoice.taxAmount, locale, invoice.currency))
           ),
         React.createElement(
           View,
           { style: [classicStyles.totalRow, { borderTopWidth: 1, borderTopColor: "#E5E7EB", paddingTop: 6 }] },
           React.createElement(Text, { style: classicStyles.totalLabel }, messages.labels.total),
-          React.createElement(Text, { style: [classicStyles.totalValue, classicStyles.grandTotal] }, fmt(invoice.total))
+          React.createElement(Text, { style: [classicStyles.totalValue, classicStyles.grandTotal] }, fmt(invoice.total, locale, invoice.currency))
         )
       ),
       // Notes
@@ -382,8 +385,8 @@ function ModernTemplate({
               { key: `${g.category}-${i}`, style: isEven ? modernStyles.rowEven : modernStyles.rowOdd },
               React.createElement(Text, { style: modernStyles.colDesc }, item.description),
               React.createElement(Text, { style: modernStyles.colQty }, String(item.quantity)),
-              React.createElement(Text, { style: modernStyles.colPrice }, fmt(item.unitPrice)),
-              React.createElement(Text, { style: modernStyles.colAmount }, fmt(item.amount))
+              React.createElement(Text, { style: modernStyles.colPrice }, fmt(item.unitPrice, locale, invoice.currency)),
+              React.createElement(Text, { style: modernStyles.colAmount }, fmt(item.amount, locale, invoice.currency))
             );
           }),
         ]),
@@ -395,7 +398,7 @@ function ModernTemplate({
             View,
             { style: modernStyles.totalRow },
             React.createElement(Text, { style: modernStyles.totalLabel }, messages.labels.subtotal),
-            React.createElement(Text, { style: modernStyles.totalValue }, fmt(invoice.subtotal))
+            React.createElement(Text, { style: modernStyles.totalValue }, fmt(invoice.subtotal, locale, invoice.currency))
           ),
           (invoice.taxRate ?? 0) > 0 &&
             React.createElement(
@@ -406,13 +409,13 @@ function ModernTemplate({
                 { style: modernStyles.totalLabel },
                 `${messages.labels.tax} (${invoice.taxRate}%)`
               ),
-              React.createElement(Text, { style: modernStyles.totalValue }, fmt(invoice.taxAmount))
+              React.createElement(Text, { style: modernStyles.totalValue }, fmt(invoice.taxAmount, locale, invoice.currency))
             ),
           React.createElement(
             View,
             { style: [modernStyles.totalRow, { borderTopWidth: 1, borderTopColor: "#0F766E", paddingTop: 6 }] },
             React.createElement(Text, { style: modernStyles.totalLabel }, messages.labels.total),
-            React.createElement(Text, { style: [modernStyles.totalValue, { fontSize: 14 }] }, fmt(invoice.total))
+            React.createElement(Text, { style: [modernStyles.totalValue, { fontSize: 14 }] }, fmt(invoice.total, locale, invoice.currency))
           )
         ),
         // Notes
@@ -548,8 +551,8 @@ function MinimalTemplate({
               View,
               { style: minimalStyles.row },
               React.createElement(Text, { style: minimalStyles.colDesc }, item.description),
-              React.createElement(Text, { style: minimalStyles.colRight }, `${item.quantity} x ${fmt(item.unitPrice)}`),
-              React.createElement(Text, { style: minimalStyles.colAmount }, fmt(item.amount))
+              React.createElement(Text, { style: minimalStyles.colRight }, `${item.quantity} x ${fmt(item.unitPrice, locale, invoice.currency)}`),
+              React.createElement(Text, { style: minimalStyles.colAmount }, fmt(item.amount, locale, invoice.currency))
             ),
             React.createElement(View, { style: minimalStyles.divider })
           )
@@ -562,7 +565,7 @@ function MinimalTemplate({
             View,
             { style: minimalStyles.totalRow },
             React.createElement(Text, { style: minimalStyles.totalLabel }, messages.labels.subtotal),
-            React.createElement(Text, { style: minimalStyles.totalValue }, fmt(invoice.subtotal))
+            React.createElement(Text, { style: minimalStyles.totalValue }, fmt(invoice.subtotal, locale, invoice.currency))
           ),
           (invoice.taxRate ?? 0) > 0 &&
             React.createElement(
@@ -573,13 +576,13 @@ function MinimalTemplate({
                 { style: minimalStyles.totalLabel },
                 `${messages.labels.tax} ${invoice.taxRate}%`
               ),
-              React.createElement(Text, { style: minimalStyles.totalValue }, fmt(invoice.taxAmount))
+              React.createElement(Text, { style: minimalStyles.totalValue }, fmt(invoice.taxAmount, locale, invoice.currency))
             ),
           React.createElement(
             View,
             { style: [minimalStyles.totalRow, { marginTop: 4 }] },
             React.createElement(Text, { style: [minimalStyles.totalLabel, { fontSize: 12 }] }, messages.labels.total),
-            React.createElement(Text, { style: [minimalStyles.totalValue, { fontSize: 14 }] }, fmt(invoice.total))
+            React.createElement(Text, { style: [minimalStyles.totalValue, { fontSize: 14 }] }, fmt(invoice.total, locale, invoice.currency))
           )
         ),
       invoice.notes &&

@@ -1,14 +1,8 @@
 import { Suspense } from "react";
-import { DM_Serif_Display } from "next/font/google";
 import { prisma } from "@/server/prisma";
 import DashboardPageFallback from "@/components/dashboard/dashboard-page-fallback";
 import { getDashboardViewer } from "@/server/dashboard-viewer";
 import SettingsCard from "./settings-card";
-
-const display = DM_Serif_Display({
-  subsets: ["latin"],
-  weight: "400",
-});
 
 async function SettingsContent() {
   const { session, currency, hourlyRate, userPlan, stripeCustomerId } =
@@ -33,7 +27,7 @@ async function SettingsContent() {
       hourlyRate={hourlyRate}
       plan={userPlan}
       hasStripeCustomer={!!stripeCustomerId}
-      displayClassName={display.className}
+      displayClassName="font-sans tracking-tight"
     />
   );
 }

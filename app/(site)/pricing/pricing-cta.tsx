@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import { toast } from "sonner";
 import {
   canUpgrade,
@@ -8,7 +9,8 @@ import {
   type PlanId,
   type BillingPeriod,
 } from "@/lib/plans";
-import { buildLoginCheckoutHref } from "@/lib/checkout-intent";
+import { buildSignupCheckoutHref } from "@/lib/checkout-intent";
+import { localizedPath } from "@/lib/i18n-routing";
 
 type PricingCtaProps = {
   planId: PlanId;
@@ -30,19 +32,21 @@ export function PricingCta({
   ctaCurrentLabel,
   ctaManageLabel,
 }: PricingCtaProps) {
+  const locale = useLocale();
+
   // Not logged in → link to login
   if (!userPlan) {
     return (
       <Link
         href={
           planId === "FREE"
-            ? "/auth/login?callbackUrl=%2Fdashboard"
-            : buildLoginCheckoutHref(planId, billing)
+            ? localizedPath("/auth/login?callbackUrl=%2Fdashboard", locale)
+            : localizedPath(buildSignupCheckoutHref(planId, billing), locale)
         }
-        className={`mt-auto flex w-full items-center justify-center text-center rounded-full px-4 py-3 text-sm leading-tight font-semibold transition ${
+        className={`mt-auto flex min-h-11 w-full items-center justify-center rounded-full px-4 py-3 text-center text-sm font-semibold leading-tight transition ${
           highlight
-            ? "bg-brand text-white hover:translate-y-[-1px]"
-            : "border border-line-strong bg-white/70 text-ink hover:bg-white"
+            ? "bg-brand text-white shadow-[0_18px_44px_-24px_rgba(249,115,22,0.95)] hover:bg-brand/90"
+            : "border border-line-strong bg-white text-ink hover:bg-neutral-50"
         }`}
       >
         {ctaLabel}
@@ -68,7 +72,7 @@ export function PricingCta({
             toast.error("An error occurred");
           }
         }}
-        className="mt-auto flex w-full items-center justify-center text-center rounded-full border border-line-strong bg-white/70 px-4 py-3 text-sm leading-tight font-semibold text-ink transition hover:bg-white"
+        className="mt-auto flex min-h-11 w-full items-center justify-center rounded-full border border-line-strong bg-white px-4 py-3 text-center text-sm font-semibold leading-tight text-ink transition hover:bg-neutral-50"
       >
         {ctaManageLabel}
       </button>
@@ -78,7 +82,7 @@ export function PricingCta({
   // Current plan (free) or lower → disabled
   if (isCurrent || !isUpgrade) {
     return (
-      <div className="mt-auto flex w-full items-center justify-center text-center rounded-full border border-line bg-panel px-4 py-3 text-sm leading-tight font-medium text-ink-muted">
+      <div className="mt-auto flex min-h-11 w-full items-center justify-center rounded-full border border-line bg-neutral-50 px-4 py-3 text-center text-sm font-medium leading-tight text-ink-muted">
         {ctaCurrentLabel}
       </div>
     );
@@ -101,10 +105,10 @@ export function PricingCta({
           toast.error("An error occurred");
         }
       }}
-      className={`mt-auto flex w-full items-center justify-center text-center rounded-full px-4 py-3 text-sm leading-tight font-semibold transition ${
+      className={`mt-auto flex min-h-11 w-full items-center justify-center rounded-full px-4 py-3 text-center text-sm font-semibold leading-tight transition ${
         highlight
-          ? "bg-brand text-white hover:translate-y-[-1px]"
-          : "border border-line-strong bg-white/70 text-ink hover:bg-white"
+          ? "bg-brand text-white shadow-[0_18px_44px_-24px_rgba(249,115,22,0.95)] hover:bg-brand/90"
+          : "border border-line-strong bg-white text-ink hover:bg-neutral-50"
       }`}
     >
       {ctaLabel}

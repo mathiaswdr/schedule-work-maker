@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { DM_Serif_Display } from "next/font/google";
 import { prisma } from "@/server/prisma";
 import {
   getActiveSession,
@@ -9,12 +8,6 @@ import StatsClient from "@/components/dashboard/stats-client";
 import PlanGate from "@/components/dashboard/plan-gate";
 import DashboardPageFallback from "@/components/dashboard/dashboard-page-fallback";
 import { getDashboardViewer } from "@/server/dashboard-viewer";
-
-const display = DM_Serif_Display({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
 
 const getWeekNumber = (date: Date) => {
   const target = new Date(
@@ -84,7 +77,7 @@ async function ProductivityStatsContent() {
   return (
     <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="stats">
       <StatsClient
-        displayClassName={display.className}
+        displayClassName="font-sans tracking-tight"
         currency={currency}
         hourlyRate={hourlyRate}
         invoiceRevenue={invoiceRevenue}

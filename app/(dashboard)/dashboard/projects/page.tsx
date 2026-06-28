@@ -1,4 +1,3 @@
-import { DM_Serif_Display } from "next/font/google";
 import { prisma } from "@/server/prisma";
 import ProjectsClient from "@/components/dashboard/projects-client";
 import PlanGate from "@/components/dashboard/plan-gate";
@@ -6,12 +5,6 @@ import { serializeForClient } from "@/lib/utils";
 import { getDashboardViewer } from "@/server/dashboard-viewer";
 
 const INITIAL_PROJECTS_PAGE_SIZE = 24;
-
-const display = DM_Serif_Display({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
 
 export default async function DashboardProjectsPage() {
   const { userId, userPlan } = await getDashboardViewer();
@@ -34,7 +27,7 @@ export default async function DashboardProjectsPage() {
   return (
     <PlanGate userPlan={userPlan} requiredPlan="PRO" feature="projects">
       <ProjectsClient
-        displayClassName={display.className}
+        displayClassName="font-sans tracking-tight"
         initialProjects={serializeForClient(paginatedInitialProjects)}
         initialHasMore={hasMoreInitialProjects}
       />

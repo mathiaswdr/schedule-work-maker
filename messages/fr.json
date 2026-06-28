@@ -6,32 +6,66 @@
   },
   "nav": {
     "home": "Accueil",
+    "features": "Fonctions",
     "pricing": "Tarifs",
+    "blog": "Blog",
     "about": "A propos",
     "faq": "F.A.Q",
     "dashboard": "Dashboard",
     "login": "Se connecter",
-    "trial": "Essayer Pro 7 jours"
+    "trial": "Essayer Pro 7 jours",
+    "menu": "Ouvrir la navigation"
   },
   "footer": {
     "tagline": "Le moyen le plus simple de transformer vos heures en factures.",
+    "productTitle": "Produit",
+    "trustTitle": "Confiance",
     "linksTitle": "Liens",
     "links": {
       "home": "Accueil",
       "pricing": "Tarifs",
+      "blog": "Blog",
       "about": "A propos",
+      "timeTracking": "Suivi du temps",
+      "invoicing": "Facturation freelance",
+      "qrBill": "QR-facture suisse",
+      "freelancers": "Freelances",
+      "excelCompare": "Kronoma vs Excel",
+      "contact": "Contact",
+      "privacy": "Confidentialite",
+      "terms": "Conditions",
       "login": "Connexion"
     },
     "languageLabel": "Langue",
     "copy": "Kronoma. Suivi du temps et facturation freelance."
   },
   "auth": {
-    "title": "Connectez-vous pour continuer",
-    "subtitle": "Un compte se cree automatiquement avec Google ou un lien magique. Votre essai Pro reste pret apres connexion.",
-    "backLabel": "Retour a l'accueil",
+    "eyebrow": "Espace Kronoma",
+    "loginTab": "Connexion",
+    "signupTab": "Inscription",
+    "loginHeroTitle": "Reprenez votre suivi la ou vous l'avez laisse.",
+    "loginHeroSubtitle": "Accedez a votre espace pour suivre vos heures, retrouver vos clients et transformer votre travail en factures.",
+    "signupHeroTitle": "Creez votre espace de travail en quelques secondes.",
+    "signupHeroSubtitle": "Demarrez avec un compte Kronoma pret pour le suivi du temps, les projets, les clients et la facturation freelance.",
+    "loginKicker": "Connexion",
+    "signupKicker": "Inscription",
+    "loginTitle": "Content de vous revoir",
+    "signupTitle": "Commencez avec Kronoma",
+    "loginSubtitle": "Connectez-vous avec Google ou recevez un lien magique par email.",
+    "signupSubtitle": "Votre compte se cree automatiquement avec Google ou un lien magique. Aucun mot de passe a memoriser.",
+    "loginSwitchText": "Pas encore de compte ?",
+    "loginSwitchLink": "Creer un compte",
+    "signupSwitchText": "Vous avez deja un compte ?",
+    "signupSwitchLink": "Se connecter",
+    "highlightTime": "Suivi du temps simple pour chaque journee.",
+    "highlightInvoices": "Factures et clients prets dans le meme espace.",
+    "highlightTrial": "Essai Pro de 7 jours disponible au demarrage.",
+    "securityNote": "Connexion securisee, sans mot de passe a gerer.",
+    "emailDivider": "ou par email",
     "emailLabel": "Email",
     "emailPlaceholder": "nom@entreprise.com",
-    "magicLink": "Recevoir un lien magique",
+    "loginMagicLink": "Recevoir mon lien de connexion",
+    "signupMagicLink": "Creer mon compte avec un lien",
     "sending": "Envoi en cours...",
     "helperIdle": "Recevez un lien de connexion par email.",
     "helperSent": "Lien magique envoye si le compte existe.",
@@ -41,19 +75,20 @@
     "openLocalMagicLink": "Ouvrir le lien magique local",
     "localMagicLinkMode": "Mode local actif: le lien magique est capture dans l'application au lieu d'etre envoye par email.",
     "magicLinkUnavailable": "La connexion par lien magique n'est pas configuree dans cet environnement.",
-    "google": "Se connecter avec Google"
+    "loginGoogle": "Se connecter avec Google",
+    "signupGoogle": "S'inscrire avec Google"
   },
   "home": {
     "hero": {
       "badge": "Logiciel de suivi du temps pour freelances",
       "title": "Suivez vos heures.\nGenerez vos factures.",
       "titleAccent": "Soyez paye.",
-      "subtitle": "Kronoma est un logiciel simple de suivi du temps pour freelances et petites equipes. Essayez Pro gratuitement pendant 7 jours, puis suivez vos heures, gerez vos projets et generez des factures avec QR facture suisse en quelques clics.",
+      "subtitle": "Kronoma est un logiciel simple de suivi du temps pour freelances et petites equipes. Essayez Pro gratuitement pendant 7 jours, puis suivez vos heures, gerez vos projets et generez des factures internationales, avec QR-facture suisse si votre profil est base en Suisse.",
       "ctaPrimary": "Essayer Pro 7 jours",
       "ctaSecondary": "En savoir plus",
       "bullets": [
         "Suivi du temps simple",
-        "Factures avec QR facture suisse",
+        "Factures internationales",
         "7 jours Pro gratuits"
       ]
     },
@@ -81,7 +116,7 @@
     "features": {
       "eyebrow": "Fonctions cle",
       "title": "Un suivi du temps simple pour freelances et equipes.",
-      "subtitle": "Kronoma est un logiciel de suivi du temps concu pour freelances et petites equipes qui souhaitent suivre leurs heures et generer des factures compatibles QR facture suisse.",
+      "subtitle": "Kronoma est un logiciel de suivi du temps concu pour freelances et petites equipes qui souhaitent suivre leurs heures et generer des factures compatibles a l'international.",
       "cards": [
         {
           "title": "Suivi du temps simple",
@@ -96,8 +131,8 @@
           "copy": "Transformez vos heures de travail en facture en quelques secondes."
         },
         {
-          "title": "QR facture suisse",
-          "copy": "Generez des factures compatibles avec les normes suisses."
+          "title": "Factures adaptees au pays",
+          "copy": "Utilisez des factures standard a l'international, avec QR-facture suisse pour les profils suisses en CHF."
         },
         {
           "title": "Exports propres",
@@ -201,7 +236,7 @@
         "badge": "2 mois offerts",
         "yearlyHint": "Economisez avec la facturation annuelle",
         "suffixMonthly": " /mois",
-        "suffixYearly": " /utilisateur/an",
+        "suffixYearly": " /an",
         "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
         "yearlyEquivalent": "soit ~__price__ CHF/mois"
       },
@@ -233,7 +268,7 @@
             "✓ Clients illimites",
             "✓ Projets",
             "✓ Generation de factures",
-            "✓ QR facture suisse",
+            "✓ QR-facture suisse pour profils CH",
             "✓ Rappels de paiement",
             "✓ Historique complet des sessions",
             "✓ Analytics avancees",
@@ -254,7 +289,7 @@
             "✓ Clients illimites",
             "✓ Projets",
             "✓ Generation de factures",
-            "✓ QR facture suisse",
+            "✓ QR-facture suisse pour profils CH",
             "✓ Rappels de paiement",
             "✓ Historique complet des sessions",
             "✓ Analytics avancees",
@@ -275,7 +310,7 @@
       "items": [
         {
           "q": "Peut-on generer une QR facture suisse ?",
-          "a": "Oui, Kronoma permet de generer des factures compatibles QR facture suisse."
+          "a": "Oui. La QR-facture suisse est disponible si votre profil business est en Suisse et que la devise du compte est CHF; les autres profils gardent des factures standard internationales."
         },
         {
           "q": "Est-ce un logiciel de suivi du temps pour freelances ?",
@@ -324,7 +359,7 @@
       "badge": "2 mois offerts",
       "yearlyHint": "Economisez avec la facturation annuelle",
       "suffixMonthly": " /mois",
-      "suffixYearly": " /utilisateur/an",
+      "suffixYearly": " /an",
       "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
       "yearlyEquivalent": "soit ~__price__ CHF/mois"
     },
@@ -357,7 +392,7 @@
           "✓ Import Excel/CSV des clients",
           "✓ Projets",
           "✓ Generation de factures",
-          "✓ QR facture suisse",
+          "✓ QR-facture suisse pour profils CH",
           "✓ Rappels de paiement",
           "✓ Historique complet des sessions",
           "✓ Analytics avancees",
@@ -379,7 +414,7 @@
           "✓ Import Excel/CSV des clients",
           "✓ Projets",
           "✓ Generation de factures",
-          "✓ QR facture suisse",
+          "✓ QR-facture suisse pour profils CH",
           "✓ Rappels de paiement",
           "✓ Historique complet des sessions",
           "✓ Analytics avancees",
@@ -468,12 +503,12 @@
       "ctaSecondary": "Voir les tarifs"
     },
     "impact": {
-      "title": "Impact en chiffres",
+      "title": "Positionnement",
       "stats": [
-        {"label": "Heures suivies", "value": "1.2M"},
-        {"label": "Equipes actives", "value": "480"},
-        {"label": "Pays couverts", "value": "12"},
-        {"label": "Temps gagne", "value": "22%"}
+        {"label": "Public cible", "value": "Freelances"},
+        {"label": "Marche cle", "value": "Suisse"},
+        {"label": "Usage", "value": "Temps + factures"},
+        {"label": "Devise QR", "value": "CHF"}
       ]
     },
     "mission": {
@@ -582,12 +617,12 @@
         "phone": "Telephone",
         "currency": "Devise",
         "hourlyRate": "Taux horaire",
-        "siret": "SIRET / numero d'entreprise",
-        "vatMention": "Mention TVA",
+        "siret": "ID fiscal / entreprise",
+        "vatMention": "Mention fiscale",
         "bankLabel": "Libelle du compte",
         "bankName": "Banque",
-        "iban": "IBAN",
-        "bic": "BIC / SWIFT"
+        "iban": "Compte / IBAN",
+        "bic": "Code banque / SWIFT"
       }
     },
     "time": {
@@ -829,10 +864,10 @@
         "labelPlaceholder": "Compte principal, PostFinance...",
         "bankName": "Nom de la banque",
         "bankNamePlaceholder": "Nom de la banque",
-        "iban": "IBAN",
-        "ibanPlaceholder": "CH00 0000 0000 0000 0000 0",
-        "bic": "BIC / SWIFT",
-        "bicPlaceholder": "POFICHBEXXX",
+        "iban": "Compte / IBAN",
+        "ibanPlaceholder": "IBAN ou numero de compte",
+        "bic": "Code banque / SWIFT",
+        "bicPlaceholder": "BIC, SWIFT, routing number...",
         "defaultAccount": "Compte par defaut",
         "cancel": "Annuler",
         "create": "Ajouter le compte",
@@ -861,8 +896,8 @@
         "addressPlaceholder": "123 Rue, Ville, Pays",
         "city": "Ville",
         "cityPlaceholder": "Paris",
-        "siret": "SIRET / Numero d'entreprise",
-        "siretPlaceholder": "123 456 789 00012",
+        "siret": "ID fiscal / entreprise",
+        "siretPlaceholder": "Numero TVA, registre ou identifiant local",
         "email": "Email",
         "emailPlaceholder": "facturation@entreprise.com",
         "phone": "Telephone",
@@ -870,9 +905,9 @@
         "postalCode": "Code postal",
         "postalCodePlaceholder": "1000",
         "country": "Pays",
-        "countryPlaceholder": "CH",
-        "vatMention": "Mention TVA",
-        "vatMentionPlaceholder": "TVA non applicable, art. 293B du CGI",
+        "countryPlaceholder": "Choisir un pays",
+        "vatMention": "Mention fiscale",
+        "vatMentionPlaceholder": "Taxe non applicable, autoliquidation, exonere...",
         "logo": "Logo de l'entreprise",
         "uploadLogo": "Importer un logo",
         "uploading": "Envoi en cours...",
@@ -1097,6 +1132,11 @@
     "invoices": {
       "title": "Factures",
       "subtitle": "Creez, gerez et exportez vos factures clients.",
+      "quickActions": {
+        "export": "Export",
+        "create": "Creer",
+        "upload": "Importer"
+      },
       "addInvoice": "Nouvelle facture",
       "editInvoice": "Modifier la facture",
       "deleteInvoice": "Supprimer la facture",
@@ -1146,8 +1186,8 @@
         "manualEntry": "Saisie manuelle",
         "defaultLabel": "par defaut",
         "bankNamePlaceholder": "Nom de la banque",
-        "ibanPlaceholder": "IBAN",
-        "bicPlaceholder": "BIC / SWIFT",
+        "ibanPlaceholder": "IBAN ou numero de compte",
+        "bicPlaceholder": "BIC, SWIFT, routing number...",
         "paymentTerms": "Modalites de paiement",
         "paymentTermsPlaceholder": "50% a la commande, solde a la livraison..."
       },
@@ -1160,8 +1200,8 @@
         "addItem": "Ajouter une ligne",
         "removeItem": "Supprimer",
         "subtotal": "Sous-total",
-        "taxRate": "Taux de TVA (%)",
-        "taxAmount": "TVA",
+        "taxRate": "Taux de taxe (%)",
+        "taxAmount": "Taxe",
         "total": "Total"
       },
       "notes": "Notes",
@@ -1225,7 +1265,8 @@
         "amount": "Montant",
         "reference": "Reference",
         "generate": "Generer la QR-facture",
-        "generating": "Generation en cours..."
+        "generating": "Generation en cours...",
+        "swissOnly": "La QR-facture est disponible uniquement pour les profils suisses en CHF."
       },
       "uploadInvoice": "Importer une facture",
       "uploaded": "Importee",
@@ -1349,7 +1390,7 @@
         "invoiceNumber": "Numero de facture",
         "invoiceNumberPlaceholder": "INV-CHATGPT-2026-04",
         "notes": "Notes",
-        "notesPlaceholder": "Paiement d'avril, TVA, commentaire interne...",
+        "notesPlaceholder": "Paiement d'avril, taxe, commentaire interne...",
         "submit": "Enregistrer la facture"
       }
     },
@@ -1389,7 +1430,7 @@
         "badge": "2 mois offerts",
         "yearlyHint": "Economisez avec la facturation annuelle",
         "suffixMonthly": " /mois",
-        "suffixYearly": " /utilisateur/an",
+        "suffixYearly": " /an",
         "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
         "yearlyEquivalent": "soit ~__price__ CHF/mois",
         "lifetimeHint": "Paiement unique, acces Pro à vie"
@@ -1416,7 +1457,7 @@
           "✓ Import Excel/CSV des clients",
           "✓ Projets",
           "✓ Generation de factures",
-            "✓ QR facture suisse",
+            "✓ QR-facture suisse pour profils CH",
             "✓ Rappels de paiement",
             "✓ Historique complet des sessions",
             "✓ Analytics avancees",
@@ -1435,7 +1476,7 @@
             "✓ Import Excel/CSV des clients",
             "✓ Projets",
             "✓ Generation de factures",
-            "✓ QR facture suisse",
+            "✓ QR-facture suisse pour profils CH",
             "✓ Rappels de paiement",
             "✓ Historique complet des sessions",
             "✓ Analytics avancees",

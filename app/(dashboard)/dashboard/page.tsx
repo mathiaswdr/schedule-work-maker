@@ -1,4 +1,3 @@
-import { DM_Serif_Display } from "next/font/google";
 import TimeTrackingClient from "@/components/dashboard/time-tracking-client";
 import {
   getActiveSession,
@@ -9,13 +8,8 @@ import { prisma } from "@/server/prisma";
 import { serializeForClient } from "@/lib/utils";
 import { getDashboardViewer } from "@/server/dashboard-viewer";
 
-const display = DM_Serif_Display({
-  subsets: ["latin"],
-  weight: "400",
-});
-
 export default async function DashboardPage() {
-  const { userId, hourlyRate } = await getDashboardViewer();
+  const { userId, hourlyRate, currency } = await getDashboardViewer();
 
   const [session, summary, recentSessions, clients, projects] = await Promise.all([
     getActiveSession(userId),
@@ -39,8 +33,9 @@ export default async function DashboardPage() {
 
   return (
     <TimeTrackingClient
-      displayClassName={display.className}
+      displayClassName="font-sans tracking-tight"
       defaultHourlyRate={hourlyRate}
+      currency={currency}
       initialData={serializeForClient({ session, summary, recentSessions })}
       initialClients={serializeForClient(clients)}
       initialProjects={serializeForClient(projects)}
