@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, FileSpreadsheet, HelpCircle } from "lucide-react";
+import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,11 @@ import {
 } from "@/lib/seo";
 import { buildSignupCheckoutHref } from "@/lib/checkout-intent";
 import { localizedPath } from "@/lib/i18n-routing";
+import {
+  getCountryFromHeaders,
+  getPricingCurrency,
+} from "@/lib/pricing-currency";
+import { getPlanCurrencyPrice, type PlanId } from "@/lib/plans";
 import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import { PricingCards } from "./pricing-cards";
@@ -67,6 +73,11 @@ export default async function PricingPage() {
   const migrationItems = t.raw("migration.items") as string[];
   const exampleStats = t.raw("example.stats") as StatItem[];
   const faqItems = t.raw("faq.items") as FaqItem[];
+  const requestHeaders = await headers();
+  const pricingCurrency = getPricingCurrency({
+    country: getCountryFromHeaders(requestHeaders),
+    locale,
+  });
 
   const session = await auth();
   let userPlan: string | null = null;
@@ -89,15 +100,18 @@ export default async function PricingPage() {
       operatingSystem: "Web",
       inLanguage: locale,
       description: t("hero.subtitle"),
-      offers: plans.map((plan) => ({
-        "@type": "Offer",
-        name: plan.name,
-        price: plan.price.replace(/[^\d.]/g, "") || "0",
-        priceCurrency: "CHF",
-        description: plan.desc,
-        url: canonicalUrl,
-        availability: "https://schema.org/InStock",
-      })),
+      offers: plans.map((plan) => {
+        const planPrice = getPlanCurrencyPrice(plan.planId as PlanId, pricingCurrency);
+        return {
+          "@type": "Offer",
+          name: plan.name,
+          price: String(planPrice.priceAmount),
+          priceCurrency: pricingCurrency,
+          description: plan.desc,
+          url: canonicalUrl,
+          availability: "https://schema.org/InStock",
+        };
+      }),
     },
     {
       "@context": "https://schema.org",
@@ -133,7 +147,7 @@ export default async function PricingPage() {
               asChild
               className="h-12 rounded-full bg-brand px-6 text-sm font-semibold text-white shadow-[0_18px_44px_-24px_rgba(249,115,22,0.95)] hover:bg-brand/90"
             >
-              <Link href={localizedPath(buildSignupCheckoutHref(), locale)}>
+              <Link href={localizedPath(buildSignupCheckoutHref("PRO", "monthly", pricingCurrency), locale)}>
                 {t("hero.ctaPrimary")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -157,6 +171,8 @@ export default async function PricingPage() {
         <section className="mx-auto w-full maxW px-6 pb-16">
           <PricingCards
             plans={plans}
+            currency={pricingCurrency}
+            locale={locale}
             userPlan={userPlan}
             ctaLabelTemplate={t("cta", { plan: "{plan}" })}
             ctaFreeLabel={t("ctaFree")}

@@ -9,6 +9,7 @@ import {
   type PlanId,
   type BillingPeriod,
 } from "@/lib/plans";
+import type { PricingCurrency } from "@/lib/pricing-currency";
 import { buildSignupCheckoutHref } from "@/lib/checkout-intent";
 import { localizedPath } from "@/lib/i18n-routing";
 
@@ -18,6 +19,7 @@ type PricingCtaProps = {
   highlight: boolean;
   userPlan: string | null;
   billing: BillingPeriod;
+  currency: PricingCurrency;
   ctaLabel: string;
   ctaCurrentLabel: string;
   ctaManageLabel: string;
@@ -28,6 +30,7 @@ export function PricingCta({
   highlight,
   userPlan,
   billing,
+  currency,
   ctaLabel,
   ctaCurrentLabel,
   ctaManageLabel,
@@ -41,7 +44,7 @@ export function PricingCta({
         href={
           planId === "FREE"
             ? localizedPath("/auth/login?callbackUrl=%2Fdashboard", locale)
-            : localizedPath(buildSignupCheckoutHref(planId, billing), locale)
+            : localizedPath(buildSignupCheckoutHref(planId, billing, currency), locale)
         }
         className={`mt-auto flex min-h-11 w-full items-center justify-center rounded-full px-4 py-3 text-center text-sm font-semibold leading-tight transition ${
           highlight
@@ -96,7 +99,7 @@ export function PricingCta({
           const res = await fetch("/api/checkout", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ plan: planId, billing }),
+            body: JSON.stringify({ plan: planId, billing, currency }),
           });
           const data = await res.json();
           if (data.url) window.location.href = data.url;

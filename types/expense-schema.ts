@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-export const ExpenseSchema = z.object({
+const ExpenseBaseSchema = z.object({
   name: z.string().min(1).max(200),
   amount: z.number().min(0),
   recurrence: z.enum(["MONTHLY", "ANNUAL", "ONE_TIME"]),
@@ -9,11 +9,32 @@ export const ExpenseSchema = z.object({
   color: z.string().max(20).optional(),
   isActive: z.boolean().optional(),
   startDate: z.string().optional(),
+  endDate: z.string().optional(),
 })
 
-export const ExpenseUpdateSchema = ExpenseSchema.extend({
+export const ExpenseSchema = ExpenseBaseSchema.refine(
+  (values) =>
+    !values.startDate ||
+    !values.endDate ||
+    new Date(values.endDate) >= new Date(values.startDate),
+  {
+    path: ["endDate"],
+    message: "End date must be after the start date",
+  }
+)
+
+export const ExpenseUpdateSchema = ExpenseBaseSchema.extend({
   id: z.string().cuid(),
-})
+}).refine(
+  (values) =>
+    !values.startDate ||
+    !values.endDate ||
+    new Date(values.endDate) >= new Date(values.startDate),
+  {
+    path: ["endDate"],
+    message: "End date must be after the start date",
+  }
+)
 
 export const ExpenseDeleteSchema = z.object({
   id: z.string().cuid(),

@@ -220,7 +220,7 @@
       "eyebrow": "Simple pricing",
       "socialProof": "Ideal for developers, designers, consultants and freelancers.",
       "title": "Simple plans for freelancers and small teams.",
-      "subtitle": "Try Pro free for 7 days, continue at 9.90 CHF/month, or choose Lifetime once for 149 CHF.",
+      "subtitle": "Try Pro free for 7 days, then choose the plan that fits your business.",
       "cta": "Choose {plan}",
       "ctaFree": "Create free account",
       "ctaTrial": "Try {plan} 7 days",
@@ -237,8 +237,8 @@
         "yearlyHint": "Save with annual billing",
         "suffixMonthly": " /month",
         "suffixYearly": " /year",
-        "monthlyHint": "or __price__ CHF/yr with annual billing",
-        "yearlyEquivalent": "~__price__ CHF/month equivalent"
+        "monthlyHint": "or __price__/yr with annual billing",
+        "yearlyEquivalent": "~__price__/month equivalent"
       },
       "plans": [
         {
@@ -338,7 +338,7 @@
     "hero": {
       "eyebrow": "Pricing",
       "title": "Simple pricing to track your hours without friction.",
-      "subtitle": "Try Pro free for 7 days, continue at 9.90 CHF/month, or choose Lifetime once for 149 CHF.",
+      "subtitle": "Try Pro free for 7 days, then choose the plan that fits your business.",
       "ctaPrimary": "Try Pro 7 days",
       "ctaSecondary": "See the demo"
     },
@@ -360,8 +360,8 @@
       "yearlyHint": "Save with annual billing",
       "suffixMonthly": " /month",
       "suffixYearly": " /year",
-      "monthlyHint": "or __price__ CHF/yr with annual billing",
-      "yearlyEquivalent": "~__price__ CHF/month equivalent"
+      "monthlyHint": "or __price__/yr with annual billing",
+      "yearlyEquivalent": "~__price__/month equivalent"
     },
     "plans": [
       {
@@ -1112,6 +1112,7 @@
       "unknownSender": "Unknown sender",
       "vendor": "Vendor",
       "amount": "Amount",
+      "invoiceTotal": "Invoice total",
       "date": "Date",
       "category": "Category",
       "notes": "Notes",
@@ -1311,6 +1312,7 @@
       "pageSubtitle": "Track your subscriptions, one-time expenses, and other professional costs.",
       "addExpense": "Add expense",
       "editExpense": "Edit expense",
+      "duplicateExpense": "Duplicate expense",
       "deleteConfirm": "Delete this expense?",
       "name": "Name",
       "amount": "Amount",
@@ -1322,8 +1324,10 @@
       "categoryPlaceholder": "Design, Hosting, Software...",
       "color": "Color",
       "startDate": "Start date",
+      "endDate": "End date",
+      "noEndDate": "None",
       "isActive": "Active expense",
-      "isActiveHint": "Turn off an ended subscription without losing its history.",
+      "isActiveHint": "Turn off an ended subscription without losing its history, or set an end date.",
       "notes": "Notes",
       "emptyTitle": "No expenses yet",
       "emptySubtitle": "Add your first subscription or professional expense.",
@@ -1346,6 +1350,7 @@
       "addReceipt": "Add receipt",
       "invoiceAdded": "Invoice added",
       "invoiceDeleted": "Invoice deleted",
+      "recordedInvoices": "{count} recorded invoice(s)",
       "deleteInvoiceConfirm": "Delete this invoice?",
       "noInvoices": "No invoices recorded for this expense yet.",
       "noInvoicesYet": "No invoices recorded yet",
@@ -1354,8 +1359,8 @@
       "invoiceSectionHint": "Add each invoice you receive to track payments for this subscription.",
       "oneTimeInvoiceSectionHint": "Add the invoice or receipt for this one-time expense.",
       "invoiceFallbackName": "Invoice without number",
-      "dropInvoice": "Drop an invoice here or click to choose one",
-      "dropInvoiceHere": "Drop the invoice here",
+      "dropInvoice": "Drop one or more invoices here or click to choose them",
+      "dropInvoiceHere": "Drop the invoices here",
       "dropInvoiceHint": "PDF, JPG or PNG",
       "filteredChartTitle": "Expense breakdown",
       "filteredChartSubtitle": "Recorded amounts for the __period__ period.",
@@ -1364,6 +1369,13 @@
       "download": "Download",
       "back": "Back to expenses",
       "details": "Details",
+      "listFilters": {
+        "title": "Filter list",
+        "subtitle": "Show expenses active or invoiced in a given year.",
+        "allYears": "All",
+        "emptyTitle": "No expenses for this year",
+        "emptySubtitle": "Try another year or show all expenses."
+      },
       "filters": {
         "type": {
           "all": "All",
@@ -1382,6 +1394,7 @@
         "filePlaceholder": "No file selected",
         "dropFileHere": "Drop the invoice here",
         "dropFileHint": "Release to use this file",
+        "batchProgress": "Invoice {current} / {total}",
         "chooseFile": "Choose",
         "fileRequired": "Add an invoice file.",
         "uploadError": "Unable to upload the invoice.",
@@ -1431,8 +1444,8 @@
         "yearlyHint": "Save with annual billing",
         "suffixMonthly": " /month",
         "suffixYearly": " /year",
-        "monthlyHint": "or __price__ CHF/yr with annual billing",
-        "yearlyEquivalent": "~__price__ CHF/month equivalent",
+        "monthlyHint": "or __price__/yr with annual billing",
+        "yearlyEquivalent": "~__price__/month equivalent",
         "lifetimeHint": "One-time payment, Pro access for life"
       },
       "plans": {

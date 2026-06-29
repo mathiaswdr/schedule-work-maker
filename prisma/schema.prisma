@@ -351,6 +351,7 @@ model Expense {
   color      String?
   isActive   Boolean            @default(true)
   startDate  DateTime           @default(now())
+  endDate    DateTime?
   createdAt  DateTime           @default(now())
   updatedAt  DateTime           @updatedAt
 

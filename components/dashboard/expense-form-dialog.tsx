@@ -55,6 +55,18 @@ type ExpenseFormDialogProps = {
     color: string | null;
     isActive: boolean;
     startDate: string;
+    endDate: string | null;
+  } | null;
+  prefilledExpense?: {
+    name: string;
+    amount: number;
+    recurrence: "MONTHLY" | "ANNUAL" | "ONE_TIME";
+    category: string | null;
+    notes: string | null;
+    color: string | null;
+    isActive: boolean;
+    startDate: string;
+    endDate: string | null;
   } | null;
 };
 
@@ -63,9 +75,11 @@ export default function ExpenseFormDialog({
   onOpenChange,
   onSuccess,
   editingExpense,
+  prefilledExpense,
 }: ExpenseFormDialogProps) {
   const t = useTranslations("dashboard");
   const isEditing = !!editingExpense;
+  const initialExpense = editingExpense ?? prefilledExpense;
 
   const form = useForm<ExpenseFormValues>({
     resolver: zodResolver(ExpenseSchema),
@@ -78,25 +92,29 @@ export default function ExpenseFormDialog({
       color: COLOR_PALETTE[0],
       isActive: true,
       startDate: new Date().toISOString().slice(0, 10),
+      endDate: "",
     },
   });
 
   useEffect(() => {
     if (open) {
       form.reset({
-        name: editingExpense?.name ?? "",
-        amount: editingExpense?.amount ?? 0,
-        recurrence: editingExpense?.recurrence ?? "MONTHLY",
-        category: editingExpense?.category ?? "",
-        notes: editingExpense?.notes ?? "",
-        color: editingExpense?.color ?? COLOR_PALETTE[0],
-        isActive: editingExpense?.isActive ?? true,
-        startDate: editingExpense?.startDate
-          ? new Date(editingExpense.startDate).toISOString().slice(0, 10)
+        name: initialExpense?.name ?? "",
+        amount: initialExpense?.amount ?? 0,
+        recurrence: initialExpense?.recurrence ?? "MONTHLY",
+        category: initialExpense?.category ?? "",
+        notes: initialExpense?.notes ?? "",
+        color: initialExpense?.color ?? COLOR_PALETTE[0],
+        isActive: initialExpense?.isActive ?? true,
+        startDate: initialExpense?.startDate
+          ? new Date(initialExpense.startDate).toISOString().slice(0, 10)
           : new Date().toISOString().slice(0, 10),
+        endDate: initialExpense?.endDate
+          ? new Date(initialExpense.endDate).toISOString().slice(0, 10)
+          : "",
       });
     }
-  }, [open, editingExpense, form]);
+  }, [open, initialExpense, form]);
 
   const { execute: executeCreate, status: createStatus } = useAction(
     createExpense,
@@ -242,16 +260,33 @@ export default function ExpenseFormDialog({
             </div>
           </div>
 
-          {/* Start date */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-ink-muted">
-              {t("expenses.startDate")}
-            </label>
-            <Input
-              {...form.register("startDate")}
-              type="date"
-              className="rounded-xl"
-            />
+          {/* Date range */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-ink-muted">
+                {t("expenses.startDate")}
+              </label>
+              <Input
+                {...form.register("startDate")}
+                type="date"
+                className="rounded-xl"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-ink-muted">
+                {t("expenses.endDate")}
+              </label>
+              <Input
+                {...form.register("endDate")}
+                type="date"
+                className="rounded-xl"
+              />
+              {form.formState.errors.endDate && (
+                <p className="text-xs text-red-600">
+                  {form.formState.errors.endDate.message}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Active */}

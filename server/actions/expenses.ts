@@ -31,6 +31,7 @@ export const createExpense = action
         color: values.color || null,
         isActive: values.isActive ?? true,
         startDate: values.startDate ? new Date(values.startDate) : new Date(),
+        endDate: values.endDate ? new Date(values.endDate) : null,
       },
     })
 
@@ -55,6 +56,7 @@ export const updateExpense = action
         color: values.color || null,
         isActive: values.isActive ?? true,
         startDate: values.startDate ? new Date(values.startDate) : undefined,
+        endDate: values.endDate ? new Date(values.endDate) : null,
       },
     })
 

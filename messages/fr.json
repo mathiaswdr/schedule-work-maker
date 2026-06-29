@@ -220,7 +220,7 @@
       "eyebrow": "Tarifs simples",
       "socialProof": "Ideal pour developpeurs, designers, consultants et freelances.",
       "title": "Des offres simples pour freelances et petites equipes.",
-      "subtitle": "Essayez Pro gratuitement pendant 7 jours, continuez a 9.90 CHF/mois, ou choisissez Lifetime a 149 CHF une seule fois.",
+      "subtitle": "Essayez Pro gratuitement pendant 7 jours, puis choisissez l'offre adaptee a votre activite.",
       "cta": "Choisir {plan}",
       "ctaFree": "Creer mon compte gratuit",
       "ctaTrial": "Essayer {plan} 7 jours",
@@ -237,8 +237,8 @@
         "yearlyHint": "Economisez avec la facturation annuelle",
         "suffixMonthly": " /mois",
         "suffixYearly": " /an",
-        "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
-        "yearlyEquivalent": "soit ~__price__ CHF/mois"
+        "monthlyHint": "ou __price__/an avec le plan annuel",
+        "yearlyEquivalent": "soit ~__price__/mois"
       },
       "plans": [
         {
@@ -338,7 +338,7 @@
     "hero": {
       "eyebrow": "Tarifs",
       "title": "Des tarifs simples pour suivre vos heures sans friction.",
-      "subtitle": "Essayez Pro gratuitement pendant 7 jours, continuez a 9.90 CHF/mois, ou choisissez Lifetime a 149 CHF une seule fois.",
+      "subtitle": "Essayez Pro gratuitement pendant 7 jours, puis choisissez l'offre adaptee a votre activite.",
       "ctaPrimary": "Essayer Pro 7 jours",
       "ctaSecondary": "Voir la demo"
     },
@@ -360,8 +360,8 @@
       "yearlyHint": "Economisez avec la facturation annuelle",
       "suffixMonthly": " /mois",
       "suffixYearly": " /an",
-      "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
-      "yearlyEquivalent": "soit ~__price__ CHF/mois"
+      "monthlyHint": "ou __price__/an avec le plan annuel",
+      "yearlyEquivalent": "soit ~__price__/mois"
     },
     "plans": [
       {
@@ -1112,6 +1112,7 @@
       "unknownSender": "Expediteur inconnu",
       "vendor": "Fournisseur",
       "amount": "Montant",
+      "invoiceTotal": "Total factures",
       "date": "Date",
       "category": "Categorie",
       "notes": "Notes",
@@ -1311,6 +1312,7 @@
       "pageSubtitle": "Suivez vos abonnements, frais uniques et autres depenses professionnelles.",
       "addExpense": "Ajouter un frais",
       "editExpense": "Modifier le frais",
+      "duplicateExpense": "Dupliquer le frais",
       "deleteConfirm": "Supprimer ce frais ?",
       "name": "Nom",
       "amount": "Montant",
@@ -1322,8 +1324,10 @@
       "categoryPlaceholder": "Design, Hebergement, Logiciel...",
       "color": "Couleur",
       "startDate": "Date de debut",
+      "endDate": "Date de fin",
+      "noEndDate": "Aucune",
       "isActive": "Frais actif",
-      "isActiveHint": "Desactivez un abonnement termine sans perdre son historique.",
+      "isActiveHint": "Desactivez un abonnement termine sans perdre son historique, ou indiquez une date de fin.",
       "notes": "Notes",
       "emptyTitle": "Aucun frais",
       "emptySubtitle": "Ajoutez votre premier abonnement ou frais professionnel.",
@@ -1346,6 +1350,7 @@
       "addReceipt": "Ajouter un justificatif",
       "invoiceAdded": "Facture ajoutee",
       "invoiceDeleted": "Facture supprimee",
+      "recordedInvoices": "{count} facture(s) enregistree(s)",
       "deleteInvoiceConfirm": "Supprimer cette facture ?",
       "noInvoices": "Aucune facture enregistree pour ce frais.",
       "noInvoicesYet": "Aucune facture enregistree",
@@ -1354,8 +1359,8 @@
       "invoiceSectionHint": "Ajoutez chaque facture recue pour suivre les paiements de cet abonnement.",
       "oneTimeInvoiceSectionHint": "Ajoutez le justificatif ou la facture de ce frais unique.",
       "invoiceFallbackName": "Facture sans numero",
-      "dropInvoice": "Deposez une facture ici ou cliquez pour la choisir",
-      "dropInvoiceHere": "Deposez la facture ici",
+      "dropInvoice": "Deposez une ou plusieurs factures ici ou cliquez pour les choisir",
+      "dropInvoiceHere": "Deposez les factures ici",
       "dropInvoiceHint": "PDF, JPG ou PNG",
       "filteredChartTitle": "Repartition des depenses",
       "filteredChartSubtitle": "Montants enregistres sur la periode __period__.",
@@ -1364,6 +1369,13 @@
       "download": "Telecharger",
       "back": "Retour aux frais",
       "details": "Details",
+      "listFilters": {
+        "title": "Filtrer la liste",
+        "subtitle": "Affichez les frais actifs ou factures sur une annee donnee.",
+        "allYears": "Toutes",
+        "emptyTitle": "Aucun frais sur cette annee",
+        "emptySubtitle": "Essayez une autre annee ou affichez toutes les depenses."
+      },
       "filters": {
         "type": {
           "all": "Tous",
@@ -1382,6 +1394,7 @@
         "filePlaceholder": "Aucun fichier selectionne",
         "dropFileHere": "Deposez la facture ici",
         "dropFileHint": "Relachez pour selectionner ce fichier",
+        "batchProgress": "Facture {current} / {total}",
         "chooseFile": "Choisir",
         "fileRequired": "Ajoutez un fichier de facture.",
         "uploadError": "Impossible d'importer la facture.",
@@ -1431,8 +1444,8 @@
         "yearlyHint": "Economisez avec la facturation annuelle",
         "suffixMonthly": " /mois",
         "suffixYearly": " /an",
-        "monthlyHint": "ou __price__ CHF/an avec le plan annuel",
-        "yearlyEquivalent": "soit ~__price__ CHF/mois",
+        "monthlyHint": "ou __price__/an avec le plan annuel",
+        "yearlyEquivalent": "soit ~__price__/mois",
         "lifetimeHint": "Paiement unique, acces Pro à vie"
       },
       "plans": {

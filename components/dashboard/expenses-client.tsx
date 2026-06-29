@@ -9,6 +9,7 @@ import { EASE, pickVariants } from "@/lib/motion-variants";
 import { useAction } from "next-safe-action/hooks";
 import {
   ArrowLeft,
+  Copy,
   Download,
   FileArchive,
   FileText,
@@ -65,11 +66,16 @@ type ExpenseItem = {
   color: string | null;
   isActive: boolean;
   startDate: string;
+  endDate: string | null;
   invoices: ExpenseInvoiceSummaryItem[];
 };
 
 type ExpenseDetail = Omit<ExpenseItem, "invoices"> & {
   invoices: ExpenseInvoiceItem[];
+};
+
+type ExpenseWithInvoiceAmounts = Omit<ExpenseItem, "invoices"> & {
+  invoices: Array<{ amount: number | null }>;
 };
 
 type ExpensesClientProps = {
@@ -100,8 +106,51 @@ type ChartPeriodFilter =
   | "THIS_MONTH"
   | "THIS_YEAR"
   | "PREVIOUS_YEAR";
+type ExpenseYearFilter = "ALL" | string;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+const isRecurringExpenseActiveOn = (expense: ExpenseItem, date: Date) => {
+  if (!expense.isActive || expense.recurrence === "ONE_TIME") {
+    return false;
+  }
+
+  const startDate = new Date(expense.startDate);
+  const endDate = expense.endDate ? new Date(expense.endDate) : null;
+
+  return startDate <= date && (!endDate || endDate >= date);
+};
+
+const getYearBounds = (year: number) => ({
+  start: new Date(year, 0, 1),
+  end: new Date(year, 11, 31, 23, 59, 59, 999),
+});
+
+const dateRangeOverlapsYear = (
+  startDateValue: string,
+  endDateValue: string | null,
+  year: number
+) => {
+  const { start, end } = getYearBounds(year);
+  const startDate = new Date(startDateValue);
+  const endDate = endDateValue ? new Date(endDateValue) : startDate;
+
+  return startDate <= end && endDate >= start;
+};
+
+const expenseMatchesYear = (expense: ExpenseItem, year: number) => {
+  if (expense.invoices.some((invoice) => new Date(invoice.billedAt).getFullYear() === year)) {
+    return true;
+  }
+
+  if (expense.recurrence === "ONE_TIME") {
+    return dateRangeOverlapsYear(expense.startDate, expense.endDate, year);
+  }
+
+  const { end } = getYearBounds(year);
+  const effectiveEndDate = expense.endDate ?? end.toISOString();
+  return dateRangeOverlapsYear(expense.startDate, effectiveEndDate, year);
+};
 
 // ── Component ──
 
@@ -126,11 +175,16 @@ export default function ExpensesClient({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
   const [accountingExportOpen, setAccountingExportOpen] = useState(false);
-  const [pendingInvoiceFile, setPendingInvoiceFile] = useState<File | null>(
-    null
-  );
+  const [pendingInvoiceFiles, setPendingInvoiceFiles] = useState<File[]>([]);
+  const pendingInvoiceFile = pendingInvoiceFiles[0] ?? null;
+  const [pendingInvoiceBatchTotal, setPendingInvoiceBatchTotal] = useState(0);
+  const [pendingInvoiceBatchCurrent, setPendingInvoiceBatchCurrent] =
+    useState(1);
   const [isInvoiceDragging, setIsInvoiceDragging] = useState(false);
   const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(
+    null
+  );
+  const [prefilledExpense, setPrefilledExpense] = useState<ExpenseItem | null>(
     null
   );
   const invoiceFileInputRef = useRef<HTMLInputElement>(null);
@@ -144,6 +198,8 @@ export default function ExpensesClient({
     useState<ChartTypeFilter>("ALL");
   const [chartPeriodFilter, setChartPeriodFilter] =
     useState<ChartPeriodFilter>("LAST_90_DAYS");
+  const [expenseYearFilter, setExpenseYearFilter] =
+    useState<ExpenseYearFilter>("ALL");
   const expenseDetailCacheRef = useRef(new Map<string, ExpenseDetail>());
 
   // ── Actions ──
@@ -231,12 +287,21 @@ export default function ExpensesClient({
 
   const handleEdit = (expense: ExpenseItem, e?: React.MouseEvent) => {
     e?.stopPropagation();
+    setPrefilledExpense(null);
     setEditingExpense(expense);
+    setDialogOpen(true);
+  };
+
+  const handleDuplicate = (expense: ExpenseItem, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setEditingExpense(null);
+    setPrefilledExpense(expense);
     setDialogOpen(true);
   };
 
   const handleAdd = () => {
     setEditingExpense(null);
+    setPrefilledExpense(null);
     setDialogOpen(true);
   };
 
@@ -258,7 +323,15 @@ export default function ExpensesClient({
   };
 
   const handleInvoiceDialogSuccess = () => {
-    setPendingInvoiceFile(null);
+    const hasNextQueuedFile = pendingInvoiceFiles.length > 1;
+    setPendingInvoiceFiles((files) => files.slice(1));
+    if (!hasNextQueuedFile) {
+      setInvoiceDialogOpen(false);
+      setPendingInvoiceBatchTotal(0);
+      setPendingInvoiceBatchCurrent(1);
+    } else {
+      setPendingInvoiceBatchCurrent((current) => current + 1);
+    }
     expenseDetailCacheRef.current.clear();
     fetchExpenses();
     if (selectedExpense) fetchExpenseDetail(selectedExpense.id);
@@ -266,7 +339,9 @@ export default function ExpensesClient({
 
   const handleBack = () => {
     setInvoiceDialogOpen(false);
-    setPendingInvoiceFile(null);
+    setPendingInvoiceFiles([]);
+    setPendingInvoiceBatchTotal(0);
+    setPendingInvoiceBatchCurrent(1);
     setSelectedExpense(null);
     router.push("/dashboard/expenses");
   };
@@ -274,20 +349,40 @@ export default function ExpensesClient({
   const handleInvoiceDialogOpenChange = (open: boolean) => {
     setInvoiceDialogOpen(open);
     if (!open) {
-      setPendingInvoiceFile(null);
+      setPendingInvoiceFiles([]);
+      setPendingInvoiceBatchTotal(0);
+      setPendingInvoiceBatchCurrent(1);
     }
   };
 
-  const queueInvoiceFile = (file?: File | null) => {
-    if (!file) return;
+  const queueInvoiceFiles = (fileList?: FileList | File[] | null) => {
+    const files = Array.from(fileList ?? []);
+    if (files.length === 0) return;
 
     const acceptedMimeList = ["application/pdf", "image/jpeg", "image/png"];
-    if (!acceptedMimeList.includes(file.type)) {
+    const acceptedFiles = files.filter((file) =>
+      acceptedMimeList.includes(file.type)
+    );
+
+    if (acceptedFiles.length !== files.length) {
       toast.error("PDF, JPG, PNG");
+    }
+
+    if (acceptedFiles.length === 0) {
       return;
     }
 
-    setPendingInvoiceFile(file);
+    const hasActiveQueue = invoiceDialogOpen || pendingInvoiceFiles.length > 0;
+    if (hasActiveQueue) {
+      setPendingInvoiceBatchTotal((total) => total + acceptedFiles.length);
+    } else {
+      setPendingInvoiceBatchTotal(acceptedFiles.length);
+      setPendingInvoiceBatchCurrent(1);
+    }
+
+    setPendingInvoiceFiles((currentFiles) =>
+      hasActiveQueue ? [...currentFiles, ...acceptedFiles] : acceptedFiles
+    );
     setInvoiceDialogOpen(true);
   };
 
@@ -313,28 +408,59 @@ export default function ExpensesClient({
     [locale]
   );
 
+  const getInvoiceTotal = (expense: ExpenseWithInvoiceAmounts) =>
+    expense.invoices.reduce(
+      (sum, invoice) => sum + (invoice.amount ?? expense.amount),
+      0
+    );
+
+  const getDisplayedExpenseAmount = (expense: ExpenseWithInvoiceAmounts) => {
+    if (expense.recurrence === "ONE_TIME" && expense.invoices.length > 0) {
+      return getInvoiceTotal(expense);
+    }
+
+    return expense.amount;
+  };
+
+  const getExpenseAmountHint = (expense: ExpenseWithInvoiceAmounts) => {
+    if (expense.recurrence === "ONE_TIME" && expense.invoices.length > 0) {
+      return t("expenses.recordedInvoices", {
+        count: expense.invoices.length,
+      });
+    }
+
+    if (expense.recurrence === "ONE_TIME") {
+      return t("expenses.singleCharge");
+    }
+
+    return expense.recurrence === "ANNUAL"
+      ? `~${currencyFormatter.format(expense.amount / 12)}${t("expenses.perMonth")}`
+      : `~${currencyFormatter.format(expense.amount * 12)}${t("expenses.perYear")}`;
+  };
+
   // ── Stats ──
 
   const monthlyTotal = useMemo(() => {
+    const now = new Date();
     return expenses
-      .filter((e) => e.isActive && e.recurrence !== "ONE_TIME")
+      .filter((e) => isRecurringExpenseActiveOn(e, now))
       .reduce((sum, e) => {
         return sum + (e.recurrence === "ANNUAL" ? e.amount / 12 : e.amount);
       }, 0);
   }, [expenses]);
 
   const annualTotal = useMemo(() => {
+    const now = new Date();
     return expenses
-      .filter((e) => e.isActive && e.recurrence !== "ONE_TIME")
+      .filter((e) => isRecurringExpenseActiveOn(e, now))
       .reduce((sum, e) => {
         return sum + (e.recurrence === "MONTHLY" ? e.amount * 12 : e.amount);
       }, 0);
   }, [expenses]);
 
   const activeCount = useMemo(() => {
-    return expenses.filter(
-      (e) => e.isActive && e.recurrence !== "ONE_TIME"
-    ).length;
+    const now = new Date();
+    return expenses.filter((e) => isRecurringExpenseActiveOn(e, now)).length;
   }, [expenses]);
 
   const avgPerSubscription = useMemo(() => {
@@ -342,6 +468,50 @@ export default function ExpensesClient({
   }, [monthlyTotal, activeCount]);
 
   const previousYear = useMemo(() => new Date().getFullYear() - 1, []);
+
+  const expenseYearOptions = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const years = new Set<number>();
+
+    expenses.forEach((expense) => {
+      const startYear = new Date(expense.startDate).getFullYear();
+      const endYear = expense.endDate
+        ? new Date(expense.endDate).getFullYear()
+        : expense.recurrence === "ONE_TIME"
+          ? startYear
+          : currentYear;
+
+      const lowerYear = Math.min(startYear, endYear);
+      const upperYear = Math.max(startYear, endYear);
+      for (let year = lowerYear; year <= upperYear; year += 1) {
+        years.add(year);
+      }
+
+      expense.invoices.forEach((invoice) => {
+        years.add(new Date(invoice.billedAt).getFullYear());
+      });
+    });
+
+    return Array.from(years).sort((a, b) => b - a);
+  }, [expenses]);
+
+  useEffect(() => {
+    if (
+      expenseYearFilter !== "ALL" &&
+      !expenseYearOptions.includes(Number(expenseYearFilter))
+    ) {
+      setExpenseYearFilter("ALL");
+    }
+  }, [expenseYearFilter, expenseYearOptions]);
+
+  const filteredExpenseList = useMemo(() => {
+    if (expenseYearFilter === "ALL") {
+      return expenses;
+    }
+
+    const year = Number(expenseYearFilter);
+    return expenses.filter((expense) => expenseMatchesYear(expense, year));
+  }, [expenseYearFilter, expenses]);
 
   const chartRange = useMemo(() => {
     const now = new Date();
@@ -438,19 +608,34 @@ export default function ExpensesClient({
           if (expense.recurrence === "ONE_TIME") {
             fallbackTotal = isWithinRange(startDate) ? expense.amount : 0;
           } else if (expense.isActive) {
+            const endDate = expense.endDate ? new Date(expense.endDate) : null;
+            const effectiveRangeEnd =
+              endDate && endDate < chartRange.end ? endDate : chartRange.end;
+
+            if (effectiveRangeEnd < chartRange.start) {
+              return {
+                id: expense.id,
+                name: expense.name,
+                totalAmount: 0,
+                color:
+                  expense.color || DONUT_COLORS[index % DONUT_COLORS.length],
+                recurrence: expense.recurrence,
+              };
+            }
+
             fallbackTotal =
               expense.recurrence === "MONTHLY"
                 ? countOccurrences(
                     startDate,
                     "month",
                     chartRange.start,
-                    chartRange.end
+                    effectiveRangeEnd
                   ) * expense.amount
                 : countOccurrences(
                     startDate,
                     "year",
                     chartRange.start,
-                    chartRange.end
+                    effectiveRangeEnd
                   ) * expense.amount;
           }
         }
@@ -542,6 +727,14 @@ export default function ExpensesClient({
                 <div className="flex gap-2 self-start">
                   <button
                     type="button"
+                    onClick={(e) => handleDuplicate(selectedExpense, e)}
+                    className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink"
+                  >
+                    <Copy className="h-4 w-4" />
+                    {t("expenses.duplicateExpense")}
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => handleEdit(selectedExpense)}
                     className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink"
                   >
@@ -563,21 +756,22 @@ export default function ExpensesClient({
             {/* Info cards */}
             <motion.section
               variants={v.fadeUp}
-              className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+              className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
             >
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
                 <p className="text-xs uppercase text-ink-muted">
-                  {t("expenses.amount")}
+                  {selectedExpense.recurrence === "ONE_TIME" &&
+                  selectedExpense.invoices.length > 0
+                    ? t("expenses.invoiceTotal")
+                    : t("expenses.amount")}
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
-                  {currencyFormatter.format(selectedExpense.amount)}
+                  {currencyFormatter.format(
+                    getDisplayedExpenseAmount(selectedExpense)
+                  )}
                 </p>
                 <p className="text-xs text-ink-muted">
-                  {selectedExpense.recurrence === "ONE_TIME"
-                    ? t("expenses.singleCharge")
-                    : selectedExpense.recurrence === "ANNUAL"
-                    ? `~${currencyFormatter.format(selectedExpense.amount / 12)}${t("expenses.perMonth")}`
-                    : `~${currencyFormatter.format(selectedExpense.amount * 12)}${t("expenses.perYear")}`}
+                  {getExpenseAmountHint(selectedExpense)}
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
@@ -598,6 +792,16 @@ export default function ExpensesClient({
                 </p>
                 <p className="mt-2 text-2xl font-semibold">
                   {dateFormatter.format(new Date(selectedExpense.startDate))}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
+                <p className="text-xs uppercase text-ink-muted">
+                  {t("expenses.endDate")}
+                </p>
+                <p className="mt-2 text-2xl font-semibold">
+                  {selectedExpense.endDate
+                    ? dateFormatter.format(new Date(selectedExpense.endDate))
+                    : t("expenses.noEndDate")}
                 </p>
               </div>
               <div className="rounded-2xl border border-line bg-white/80 px-5 py-4">
@@ -647,7 +851,12 @@ export default function ExpensesClient({
                 </div>
                 <button
                   type="button"
-                  onClick={() => setInvoiceDialogOpen(true)}
+                  onClick={() => {
+                    setPendingInvoiceFiles([]);
+                    setPendingInvoiceBatchTotal(0);
+                    setPendingInvoiceBatchCurrent(1);
+                    setInvoiceDialogOpen(true);
+                  }}
                   className="flex items-center gap-2 self-start rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
                 >
                   <Plus className="h-4 w-4" />
@@ -660,10 +869,11 @@ export default function ExpensesClient({
               <input
                 ref={invoiceFileInputRef}
                 type="file"
+                multiple
                 accept=".pdf,.jpg,.jpeg,.png"
                 className="hidden"
                 onChange={(event) => {
-                  queueInvoiceFile(event.target.files?.[0] ?? null);
+                  queueInvoiceFiles(event.target.files);
                   event.currentTarget.value = "";
                 }}
               />
@@ -687,7 +897,7 @@ export default function ExpensesClient({
                 onDrop={(event) => {
                   event.preventDefault();
                   setIsInvoiceDragging(false);
-                  queueInvoiceFile(event.dataTransfer.files?.[0] ?? null);
+                  queueInvoiceFiles(event.dataTransfer.files);
                 }}
                 onClick={() => invoiceFileInputRef.current?.click()}
                 className={`group cursor-pointer rounded-2xl border-2 border-dashed px-4 py-6 text-center transition ${
@@ -801,6 +1011,7 @@ export default function ExpensesClient({
           onOpenChange={setDialogOpen}
           onSuccess={handleDialogSuccess}
           editingExpense={editingExpense}
+          prefilledExpense={prefilledExpense}
         />
         <ExpenseInvoiceDialog
           open={invoiceDialogOpen}
@@ -810,6 +1021,8 @@ export default function ExpensesClient({
           expenseName={selectedExpense.name}
           defaultAmount={selectedExpense.amount}
           initialFile={pendingInvoiceFile}
+          batchCurrent={pendingInvoiceBatchCurrent}
+          batchTotal={pendingInvoiceBatchTotal}
         />
         {ConfirmDialogElement}
       </main>
@@ -911,6 +1124,49 @@ export default function ExpensesClient({
             </motion.section>
           )}
 
+          {!isLoading && expenses.length > 0 && (
+            <motion.section
+              variants={v.fadeUp}
+              className="flex flex-col gap-3 rounded-2xl border border-line bg-white/65 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p className="text-sm font-semibold">
+                  {t("expenses.listFilters.title")}
+                </p>
+                <p className="text-xs text-ink-muted">
+                  {t("expenses.listFilters.subtitle")}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setExpenseYearFilter("ALL")}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                    expenseYearFilter === "ALL"
+                      ? "bg-ink text-white"
+                      : "bg-white text-ink-muted hover:bg-ink-soft hover:text-ink"
+                  }`}
+                >
+                  {t("expenses.listFilters.allYears")}
+                </button>
+                {expenseYearOptions.map((year) => (
+                  <button
+                    key={year}
+                    type="button"
+                    onClick={() => setExpenseYearFilter(String(year))}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                      expenseYearFilter === String(year)
+                        ? "bg-brand text-white"
+                        : "bg-white text-ink-muted hover:bg-brand/10 hover:text-brand"
+                    }`}
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
+            </motion.section>
+          )}
+
           {/* Expense list */}
           {isLoading ? (
             <motion.div variants={v.fadeUp} className="space-y-3">
@@ -933,9 +1189,21 @@ export default function ExpensesClient({
                 </p>
               </div>
             </motion.section>
+          ) : filteredExpenseList.length === 0 ? (
+            <motion.section
+              variants={v.fadeUp}
+              className="rounded-3xl border border-dashed border-line bg-white/50 px-4 py-10 text-center"
+            >
+              <p className="font-semibold">
+                {t("expenses.listFilters.emptyTitle")}
+              </p>
+              <p className="mt-1 text-sm text-ink-muted">
+                {t("expenses.listFilters.emptySubtitle")}
+              </p>
+            </motion.section>
           ) : (
             <motion.section variants={v.fadeUp} className="space-y-3">
-              {expenses.map((expense) => (
+              {filteredExpenseList.map((expense) => (
                 <motion.div key={expense.id} variants={v.item}>
                 <div
                   onClick={() => router.push(`/dashboard/expenses/${expense.id}`)}
@@ -974,22 +1242,28 @@ export default function ExpensesClient({
                   <div className="flex items-center gap-3">
                     <div className="text-right">
                       <p className="font-semibold">
-                        {currencyFormatter.format(expense.amount)}
+                        {currencyFormatter.format(
+                          getDisplayedExpenseAmount(expense)
+                        )}
                       </p>
                       <p className="text-[10px] text-ink-muted">
-                        {expense.recurrence === "ONE_TIME"
-                          ? t("expenses.singleCharge")
-                          : expense.recurrence === "ANNUAL"
-                          ? `~${currencyFormatter.format(expense.amount / 12)}${t("expenses.perMonth")}`
-                          : `~${currencyFormatter.format(expense.amount * 12)}${t("expenses.perYear")}`}
+                        {getExpenseAmountHint(expense)}
                       </p>
                     </div>
-                    <div className="flex gap-1 opacity-0 transition group-hover:opacity-100">
+                    <div className="flex gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+                      <button
+                        type="button"
+                        onClick={(e) => handleDuplicate(expense, e)}
+                        aria-label={t("expenses.duplicateExpense")}
+                        className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
                       <button
                         type="button"
                         onClick={(e) => handleEdit(expense, e)}
                         aria-label={t("expenses.editExpense")}
-                        className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink"
+                        className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
@@ -1174,6 +1448,7 @@ export default function ExpensesClient({
         onOpenChange={setDialogOpen}
         onSuccess={handleDialogSuccess}
         editingExpense={editingExpense}
+        prefilledExpense={prefilledExpense}
       />
       <AccountingExportDialog
         open={accountingExportOpen}

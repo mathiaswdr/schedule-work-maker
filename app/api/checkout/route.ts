@@ -12,11 +12,17 @@ import {
   type PlanId,
   type BillingPeriod,
 } from "@/lib/plans";
+import {
+  getCountryFromHeaders,
+  getPricingCurrency,
+  normalizePricingCurrency,
+} from "@/lib/pricing-currency";
 import { SUBSCRIPTION_TRIAL_DAYS } from "@/lib/checkout-intent";
 
 const CheckoutBody = z.object({
   plan: z.enum(["STARTER", "PRO", "LIFETIME"]),
   billing: z.enum(["monthly", "yearly"]).default("monthly"),
+  currency: z.enum(["CHF", "EUR", "USD"]).optional(),
 });
 
 const isResourceMissingError = (error: unknown): error is { code: string } =>
@@ -54,6 +60,13 @@ export async function POST(req: NextRequest) {
         plan: true,
         email: true,
         name: true,
+        currency: true,
+        onboardingCompletedAt: true,
+        businessProfile: {
+          select: {
+            country: true,
+          },
+        },
       }
     });
 
@@ -65,13 +78,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "You cannot upgrade to this plan.", success: false }, { status: 400 });
     }
 
+    const requestedCurrency = normalizePricingCurrency(parsed.data.currency);
+    const profileCurrency = user.onboardingCompletedAt
+      ? normalizePricingCurrency(user.currency)
+      : null;
+    const checkoutCurrency =
+      requestedCurrency ??
+      profileCurrency ??
+      getPricingCurrency({
+        country: user.businessProfile?.country ?? getCountryFromHeaders(req.headers),
+      });
+
     let stripeCustomerId = user.stripeCustomerId;
 
     if (!stripeCustomerId) {
       stripeCustomerId = await createStripeCustomer(authSession.user.id, user.email, user.name);
     }
 
-    const priceId = getStripePriceId(targetPlan, billing);
+    const priceId = getStripePriceId(targetPlan, billing, checkoutCurrency);
     if (!priceId) {
       return NextResponse.json({ message: "Price not configured.", success: false }, { status: 500 });
     }
@@ -85,6 +109,7 @@ export async function POST(req: NextRequest) {
         customer: stripeCustomerId,
         priceId,
         targetPlan,
+        currency: checkoutCurrency,
         isLifetime,
       });
     } catch (stripeError: unknown) {
@@ -95,6 +120,7 @@ export async function POST(req: NextRequest) {
           customer: stripeCustomerId,
           priceId,
           targetPlan,
+          currency: checkoutCurrency,
           isLifetime,
         });
       } else {
@@ -136,11 +162,13 @@ function createCheckoutSession({
   customer,
   priceId,
   targetPlan,
+  currency,
   isLifetime,
 }: {
   customer: string;
   priceId: string;
   targetPlan: PlanId;
+  currency: string;
   isLifetime: boolean;
 }) {
   return stripe.checkout.sessions.create({
@@ -162,13 +190,17 @@ function createCheckoutSession({
       },
     ],
     ...(isLifetime
-      ? {}
+      ? {
+          invoice_creation: {
+            enabled: true,
+          },
+        }
       : {
           subscription_data: {
             trial_period_days: SUBSCRIPTION_TRIAL_DAYS,
           },
         }),
-    metadata: { planId: targetPlan },
+    metadata: { planId: targetPlan, currency },
     success_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription?success=true`,
     cancel_url: `${process.env.NEXT_PUBLIC_URL!}/dashboard/subscription`,
   });

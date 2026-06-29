@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/server/stripe";
 import { prisma } from "@/server/prisma";
+import { sendPaidStripeInvoiceEmail } from "@/server/stripe-invoice-email";
 import { getPlanByStripePrice, isPlanId, normalizePlanId } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 
@@ -64,6 +65,15 @@ export async function POST(req: NextRequest) {
         planId = getPlanByStripePrice(priceId);
       }
       await updateUserPlanPreservingLifetime(user, planId);
+      try {
+        await sendPaidStripeInvoiceEmail({
+          invoice,
+          fallbackEmail: user.email,
+          fallbackName: user.name,
+        });
+      } catch (error) {
+        console.error("Invoice paid email failed:", error);
+      }
       console.log("Invoice paid - plan set to", planId);
       break;
     }
@@ -102,7 +112,7 @@ const findUserFromCustomerId = async (stripeCustomerId: unknown) => {
   }
   return prisma.user.findFirst({
     where: { stripeCustomerId },
-    select: { id: true, plan: true },
+    select: { id: true, plan: true, email: true, name: true },
   });
 };
 

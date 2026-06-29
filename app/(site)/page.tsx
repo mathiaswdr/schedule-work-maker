@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import {
   ArrowRight,
   BarChart3,
@@ -38,7 +39,17 @@ import {
 } from "@/components/ui/card";
 import { buildSignupCheckoutHref } from "@/lib/checkout-intent";
 import { localizedPath } from "@/lib/i18n-routing";
-import { getVisiblePlans } from "@/lib/plans";
+import {
+  formatPlanAmount,
+  getPlanCurrencyPrice,
+  getVisiblePlans,
+  type PlanId,
+} from "@/lib/plans";
+import {
+  getCountryFromHeaders,
+  getPricingCurrency,
+  type PricingCurrency,
+} from "@/lib/pricing-currency";
 import {
   buildMarketingMetadata,
   localizedAbsoluteUrl,
@@ -384,7 +395,7 @@ const copy = {
       menu: "Open navigation",
     },
     hero: {
-      title: "Keep a clear view of your business.",
+      title: "Keep a clear view of your\u00a0business.",
       subtitle: "No scattered notes, separate files or complicated tools.",
       subtitleLines: [
         "No scattered notes, separate files",
@@ -700,18 +711,31 @@ function planDisplayName(planId: string) {
   return planId === "PRO" ? "Pro" : "Free";
 }
 
-function formatPrice(plan: ReturnType<typeof getVisiblePlans>[number]) {
-  if (plan.priceAmount === 0) return "0 CHF";
-  return `${plan.priceAmount} CHF`;
+function formatPrice({
+  currency,
+  locale,
+  planId,
+}: {
+  currency: PricingCurrency;
+  locale: string;
+  planId: PlanId;
+}) {
+  const planPrice = getPlanCurrencyPrice(planId, currency);
+  return formatPlanAmount(planPrice.priceAmount, currency, locale);
 }
 
 export default async function LandingPage() {
   const locale = await getLocale();
   const c = getCopy(locale);
   const visiblePlans = getVisiblePlans();
+  const requestHeaders = await headers();
+  const pricingCurrency = getPricingCurrency({
+    country: getCountryFromHeaders(requestHeaders),
+    locale,
+  });
   const canonicalUrl = localizedAbsoluteUrl("/", locale);
   const signInHref = localizedPath("/auth/login", locale);
-  const startHref = localizedPath(buildSignupCheckoutHref(), locale);
+  const startHref = localizedPath(buildSignupCheckoutHref("PRO", "monthly", pricingCurrency), locale);
   const pricingHref = localizedPath("/pricing", locale);
 
   const jsonLd = [
@@ -1049,7 +1073,8 @@ export default async function LandingPage() {
                 c.pricing.perks[plan.id as keyof typeof c.pricing.perks] ??
                 c.pricing.perks.PRO;
               const isLifetime = plan.billingType === "lifetime";
-              const isFree = plan.priceAmount === 0;
+              const planPrice = getPlanCurrencyPrice(plan.id, pricingCurrency);
+              const isFree = planPrice.priceAmount === 0;
 
               return (
                 <Card
@@ -1073,7 +1098,11 @@ export default async function LandingPage() {
                     </div>
                     <div className="mt-4">
                       <span className="text-4xl font-semibold text-ink">
-                        {formatPrice(plan)}
+                        {formatPrice({
+                          currency: pricingCurrency,
+                          locale,
+                          planId: plan.id,
+                        })}
                       </span>
                       {!isFree ? (
                         <span className="ml-2 text-sm text-ink-muted">
@@ -1116,7 +1145,16 @@ export default async function LandingPage() {
                       asChild
                       className="mt-auto h-11 rounded-full bg-brand text-white hover:bg-brand/90"
                     >
-                      <Link href={isFree ? startHref : localizedPath(`/auth/login?plan=${plan.id}`, locale)}>
+                      <Link
+                        href={
+                          isFree
+                            ? startHref
+                            : localizedPath(
+                                buildSignupCheckoutHref(plan.id, "monthly", pricingCurrency),
+                                locale,
+                              )
+                        }
+                      >
                         {isFree ? c.pricing.freeCta : c.pricing.cta}
                       </Link>
                     </Button>

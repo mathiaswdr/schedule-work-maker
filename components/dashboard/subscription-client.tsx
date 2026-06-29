@@ -4,32 +4,45 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { EASE, pickVariants } from "@/lib/motion-variants";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   canUpgrade,
+  formatPlanAmount,
+  getPlanCurrencyPrice,
   getVisiblePlans,
   normalizePlanId,
   type PlanId,
   type BillingPeriod,
 } from "@/lib/plans";
+import {
+  normalizePricingCurrency,
+  type PricingCurrency,
+} from "@/lib/pricing-currency";
 
 type SubscriptionClientProps = {
   plan: string;
+  currency: string;
   hasStripeCustomer: boolean;
   displayClassName: string;
 };
 
 export default function SubscriptionClient({
   plan,
+  currency,
   hasStripeCustomer,
   displayClassName,
 }: SubscriptionClientProps) {
   const t = useTranslations("dashboard");
+  const locale = useLocale();
   const shouldReduceMotion = useReducedMotion();
   const searchParams = useSearchParams();
   const requestedBilling =
     searchParams.get("billing") === "yearly" ? "yearly" : "monthly";
+  const requestedCurrency =
+    normalizePricingCurrency(searchParams.get("currency")) ??
+    normalizePricingCurrency(currency) ??
+    "CHF";
   const [billing, setBilling] = useState<BillingPeriod>(requestedBilling);
   const [checkoutLoadingPlan, setCheckoutLoadingPlan] = useState<PlanId | null>(null);
   const autoCheckoutStarted = useRef(false);
@@ -46,6 +59,7 @@ export default function SubscriptionClient({
   const handleUpgrade = useCallback(async (
     targetPlan: PlanId,
     billingOverride: BillingPeriod = billing,
+    currencyOverride: PricingCurrency = requestedCurrency,
   ) => {
     setCheckoutLoadingPlan(targetPlan);
 
@@ -53,7 +67,11 @@ export default function SubscriptionClient({
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: targetPlan, billing: billingOverride }),
+        body: JSON.stringify({
+          plan: targetPlan,
+          billing: billingOverride,
+          currency: currencyOverride,
+        }),
       });
 
       const data = await response.json();
@@ -68,7 +86,7 @@ export default function SubscriptionClient({
     } finally {
       setCheckoutLoadingPlan(null);
     }
-  }, [billing]);
+  }, [billing, requestedCurrency]);
 
   const handleManageBilling = async () => {
     try {
@@ -107,8 +125,8 @@ export default function SubscriptionClient({
 
     autoCheckoutStarted.current = true;
     setBilling(requestedBilling);
-    void handleUpgrade(targetPlan, requestedBilling);
-  }, [currentPlan, handleUpgrade, requestedBilling, searchParams]);
+    void handleUpgrade(targetPlan, requestedBilling, requestedCurrency);
+  }, [currentPlan, handleUpgrade, requestedBilling, requestedCurrency, searchParams]);
 
   return (
     <main className="w-full">
@@ -186,9 +204,10 @@ export default function SubscriptionClient({
                 const i18nKey = planDef.i18nKey as "free" | "pro" | "lifetime";
                 const perks = t.raw(`subscriptionPage.plans.${i18nKey}.perks`) as string[];
                 const isLifetime = planDef.billingType === "lifetime";
-                const monthlyPrice = planDef.priceAmount;
-                const yearlyPrice = planDef.yearlyPriceAmount;
-                const compareAtPrice = isLifetime ? planDef.compareAtPriceAmount : undefined;
+                const currencyPrice = getPlanCurrencyPrice(planDef.id, requestedCurrency);
+                const monthlyPrice = currencyPrice.priceAmount;
+                const yearlyPrice = currencyPrice.yearlyPriceAmount;
+                const compareAtPrice = isLifetime ? currencyPrice.compareAtPriceAmount : undefined;
                 const displayPrice = isLifetime ? monthlyPrice : isYearly ? yearlyPrice : monthlyPrice;
                 const isPaid = monthlyPrice > 0;
                 const isSubscription = isPaid && !isLifetime;
@@ -245,7 +264,7 @@ export default function SubscriptionClient({
                           transition={{ duration: 0.25, ease: EASE }}
                           className="flex items-baseline gap-2 whitespace-nowrap text-3xl font-semibold text-ink"
                         >
-                          <span>{displayPrice === 0 ? "0" : displayPrice} CHF</span>
+                          <span>{formatPlanAmount(displayPrice, requestedCurrency, locale)}</span>
                           {suffix && (
                             <span className="text-sm font-normal text-ink-muted">
                               {suffix}
@@ -253,7 +272,7 @@ export default function SubscriptionClient({
                           )}
                           {compareAtPrice && (
                             <span className="text-sm font-semibold text-ink-muted line-through decoration-brand/70 decoration-2">
-                              {compareAtPrice} CHF
+                              {formatPlanAmount(compareAtPrice, requestedCurrency, locale)}
                             </span>
                           )}
                         </motion.p>
@@ -273,8 +292,8 @@ export default function SubscriptionClient({
                             className="text-xs font-medium text-brand"
                           >
                             {isYearly
-                              ? t("subscriptionPage.billingToggle.yearlyEquivalent").replace("__price__", (yearlyPrice / 12).toFixed(2))
-                              : t("subscriptionPage.billingToggle.monthlyHint").replace("__price__", String(yearlyPrice))}
+                              ? t("subscriptionPage.billingToggle.yearlyEquivalent").replace("__price__", formatPlanAmount(yearlyPrice / 12, requestedCurrency, locale))
+                              : t("subscriptionPage.billingToggle.monthlyHint").replace("__price__", formatPlanAmount(yearlyPrice, requestedCurrency, locale))}
                           </motion.p>
                         </AnimatePresence>
                       ) : isLifetime ? (

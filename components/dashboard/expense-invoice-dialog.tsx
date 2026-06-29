@@ -37,6 +37,8 @@ type ExpenseInvoiceDialogProps = {
   expenseName: string;
   defaultAmount: number;
   initialFile?: File | null;
+  batchCurrent?: number;
+  batchTotal?: number;
 };
 
 export default function ExpenseInvoiceDialog({
@@ -47,6 +49,8 @@ export default function ExpenseInvoiceDialog({
   expenseName,
   defaultAmount,
   initialFile,
+  batchCurrent = 1,
+  batchTotal = 0,
 }: ExpenseInvoiceDialogProps) {
   const t = useTranslations("dashboard");
   const [file, setFile] = useState<File | null>(null);
@@ -78,7 +82,6 @@ export default function ExpenseInvoiceDialog({
   const { execute, status } = useAction(addExpenseInvoice, {
     onSuccess: () => {
       toast.success(t("expenses.invoiceAdded"));
-      onOpenChange(false);
       onSuccess();
     },
   });
@@ -149,7 +152,17 @@ export default function ExpenseInvoiceDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-3xl border-line sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("expenses.addInvoice")}</DialogTitle>
+          <DialogTitle className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <span>{t("expenses.addInvoice")}</span>
+            {batchTotal > 1 && (
+              <span className="w-fit rounded-full bg-ink-soft px-2.5 py-1 text-xs font-medium text-ink-muted">
+                {t("expenses.invoiceForm.batchProgress", {
+                  current: batchCurrent,
+                  total: batchTotal,
+                })}
+              </span>
+            )}
+          </DialogTitle>
           <DialogDescription className="text-ink-muted">
             {t("expenses.invoiceForm.subtitle").replace("__name__", expenseName)}
           </DialogDescription>

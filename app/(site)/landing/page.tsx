@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DM_Serif_Display, Space_Grotesk } from "next/font/google";
+import { headers } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import ScrollSectionButton from "@/components/ui/scroll-section-button";
 import {
@@ -10,6 +11,10 @@ import {
 } from "@/lib/seo";
 import { buildSignupCheckoutHref } from "@/lib/checkout-intent";
 import { localizedPath } from "@/lib/i18n-routing";
+import {
+  getCountryFromHeaders,
+  getPricingCurrency,
+} from "@/lib/pricing-currency";
 import { PricingCards } from "../pricing/pricing-cards";
 
 const display = DM_Serif_Display({
@@ -102,6 +107,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home() {
   const locale = await getLocale();
   const t = await getTranslations("home");
+  const requestHeaders = await headers();
+  const pricingCurrency = getPricingCurrency({
+    country: getCountryFromHeaders(requestHeaders),
+    locale,
+  });
   const heroBullets = t.raw("hero.bullets") as string[];
   const demoEvents = t.raw("demo.events") as DemoEvent[];
   const demoStats = t.raw("demo.stats") as DemoStat[];
@@ -560,6 +570,8 @@ export default async function Home() {
           <div className="mt-10">
             <PricingCards
               plans={pricingPlans}
+              currency={pricingCurrency}
+              locale={locale}
               userPlan={null}
               ctaLabelTemplate={t("pricing.cta", { plan: "{plan}" })}
               ctaFreeLabel={t("pricing.ctaFree")}

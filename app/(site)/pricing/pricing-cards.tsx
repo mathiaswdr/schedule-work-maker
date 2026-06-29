@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, X } from "lucide-react";
-import { type PlanId, type BillingPeriod, PLANS } from "@/lib/plans";
+import {
+  type PlanId,
+  type BillingPeriod,
+  PLANS,
+  formatPlanAmount,
+  getPlanCurrencyPrice,
+} from "@/lib/plans";
+import type { PricingCurrency } from "@/lib/pricing-currency";
 import { EASE } from "@/lib/motion-variants";
 import { PricingCta } from "./pricing-cta";
 
@@ -37,6 +44,8 @@ type PricingCardsProps = {
   suffixYearly: string;
   monthlyHint: string;
   yearlyEquivalent: string;
+  currency: PricingCurrency;
+  locale: string;
   gridMaxWidthClassName?: string;
 };
 
@@ -60,6 +69,8 @@ export function PricingCards({
   suffixYearly,
   monthlyHint,
   yearlyEquivalent,
+  currency,
+  locale,
   gridMaxWidthClassName = "max-w-none",
 }: PricingCardsProps) {
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
@@ -117,9 +128,10 @@ export function PricingCards({
         {plans.map((plan) => {
           const planDef = PLANS.find((p) => p.id === plan.planId);
           const isLifetime = planDef?.billingType === "lifetime";
-          const monthlyPrice = planDef?.priceAmount ?? 0;
-          const yearlyPrice = planDef?.yearlyPriceAmount ?? 0;
-          const compareAtPrice = isLifetime ? planDef?.compareAtPriceAmount : undefined;
+          const currencyPrice = getPlanCurrencyPrice(plan.planId as PlanId, currency);
+          const monthlyPrice = currencyPrice.priceAmount;
+          const yearlyPrice = currencyPrice.yearlyPriceAmount;
+          const compareAtPrice = isLifetime ? currencyPrice.compareAtPriceAmount : undefined;
           const displayPrice = isLifetime ? monthlyPrice : isYearly ? yearlyPrice : monthlyPrice;
           const isPaid = monthlyPrice > 0;
           const isSubscription = isPaid && !isLifetime;
@@ -174,7 +186,7 @@ export function PricingCards({
                     transition={{ duration: 0.25, ease: EASE }}
                     className="flex items-baseline gap-2 whitespace-nowrap text-4xl font-semibold text-ink"
                   >
-                    <span>{displayPrice === 0 ? "0" : displayPrice} CHF</span>
+                    <span>{formatPlanAmount(displayPrice, currency, locale)}</span>
                     {suffix && (
                       <span className="text-sm font-normal text-ink-muted">
                         {suffix}
@@ -182,7 +194,7 @@ export function PricingCards({
                     )}
                     {compareAtPrice && (
                       <span className="text-sm font-semibold text-ink-muted line-through decoration-brand/70 decoration-2">
-                        {compareAtPrice} CHF
+                        {formatPlanAmount(compareAtPrice, currency, locale)}
                       </span>
                     )}
                   </motion.p>
@@ -201,8 +213,8 @@ export function PricingCards({
                       className="text-xs font-medium leading-5 text-brand"
                     >
                       {isYearly
-                        ? yearlyEquivalent.replace("__price__", (yearlyPrice / 12).toFixed(2))
-                        : monthlyHint.replace("__price__", String(yearlyPrice))}
+                        ? yearlyEquivalent.replace("__price__", formatPlanAmount(yearlyPrice / 12, currency, locale))
+                        : monthlyHint.replace("__price__", formatPlanAmount(yearlyPrice, currency, locale))}
                     </motion.p>
                   </AnimatePresence>
                 ) : isLifetime ? (
@@ -249,6 +261,7 @@ export function PricingCards({
                 highlight={!!plan.highlight}
                 userPlan={userPlan}
                 billing={billing}
+                currency={currency}
                 ctaLabel={ctaLabel || ctaLabelTemplate.replace("{plan}", plan.name)}
                 ctaCurrentLabel={ctaCurrentLabel}
                 ctaManageLabel={ctaManageLabel}
