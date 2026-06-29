@@ -35,6 +35,13 @@ export const completeOnboarding = action
     const userId = user.id;
     const iban = values.iban?.trim();
     const bankLabel = values.bankLabel?.trim();
+    const existingBankAccountCount = await prisma.bankAccount.count({
+      where: { userId },
+    });
+
+    if (existingBankAccountCount === 0 && (!iban || !bankLabel)) {
+      return { error: "Bank account required" };
+    }
 
     await prisma.$transaction(async (tx) => {
       await tx.user.update({
@@ -75,11 +82,7 @@ export const completeOnboarding = action
       });
 
       if (iban && bankLabel) {
-        const bankAccountCount = await tx.bankAccount.count({
-          where: { userId },
-        });
-
-        if (bankAccountCount === 0) {
+        if (existingBankAccountCount === 0) {
           await tx.bankAccount.create({
             data: {
               userId,

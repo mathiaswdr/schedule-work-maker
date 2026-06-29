@@ -248,12 +248,11 @@ export default function DashboardOnboardingModal({
     setStepIndex((current) => Math.max(current - 1, 0));
   };
 
-  const onSubmit = (values: OnboardingValues) => {
-    execute(values);
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
   };
 
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleFinish = async () => {
     if (isExecuting) return;
 
     if (!isLastStep) {
@@ -261,7 +260,27 @@ export default function DashboardOnboardingModal({
       return;
     }
 
-    await form.handleSubmit(onSubmit)();
+    const bankLabel = form.getValues("bankLabel")?.trim();
+    const iban = form.getValues("iban")?.trim();
+
+    if (!initialData.hasBankAccount && (!bankLabel || !iban)) {
+      if (!bankLabel) {
+        form.setError("bankLabel", {
+          type: "manual",
+          message: t("bankRequired"),
+        });
+      }
+      if (!iban) {
+        form.setError("iban", {
+          type: "manual",
+          message: t("bankRequired"),
+        });
+      }
+      toast.error(t("bankRequired"));
+      return;
+    }
+
+    await form.handleSubmit((values) => execute(values))();
   };
 
   const StepIcon = step.icon;
@@ -421,7 +440,7 @@ export default function DashboardOnboardingModal({
                       name="bankLabel"
                       label={t("fields.bankLabel")}
                       form={form}
-                      optional
+                      optional={initialData.hasBankAccount}
                     />
                     <TextField
                       name="bankName"
@@ -435,7 +454,7 @@ export default function DashboardOnboardingModal({
                       form={form}
                       className="sm:col-span-2"
                       placeholder={countryProfile.bankAccountPlaceholder}
-                      optional
+                      optional={initialData.hasBankAccount}
                     />
                     <TextField
                       name="bic"
@@ -469,7 +488,8 @@ export default function DashboardOnboardingModal({
 
                     {isLastStep ? (
                       <button
-                        type="submit"
+                        type="button"
+                        onClick={handleFinish}
                         disabled={isExecuting}
                         className="inline-flex min-h-11 flex-1 items-center justify-center rounded-2xl bg-brand px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
                       >

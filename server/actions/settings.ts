@@ -61,6 +61,68 @@ const hashDeletionFeedbackIdentifier = (value: string | null | undefined) => {
     .digest("hex");
 };
 
+const isStripeMissingResourceError = (error: unknown) => {
+  if (!error || typeof error !== "object") return false;
+
+  const stripeError = error as {
+    code?: unknown;
+    statusCode?: unknown;
+    raw?: { code?: unknown };
+  };
+
+  return (
+    stripeError.statusCode === 404 ||
+    stripeError.code === "resource_missing" ||
+    stripeError.raw?.code === "resource_missing"
+  );
+};
+
+const cleanupStripeCustomer = async (stripeCustomerId: string) => {
+  try {
+    const customer = await stripe.customers.retrieve(stripeCustomerId);
+
+    if ("deleted" in customer && customer.deleted) {
+      return { success: true };
+    }
+  } catch (error) {
+    if (isStripeMissingResourceError(error)) {
+      return { success: true };
+    }
+
+    throw error;
+  }
+
+  const subscriptions = await stripe.subscriptions.list({
+    customer: stripeCustomerId,
+    status: "all",
+    limit: 100,
+  });
+
+  for (const subscription of subscriptions.data) {
+    if (!STRIPE_SUBSCRIPTION_STATUSES_TO_CANCEL.has(subscription.status)) {
+      continue;
+    }
+
+    try {
+      await stripe.subscriptions.cancel(subscription.id);
+    } catch (error) {
+      if (!isStripeMissingResourceError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  try {
+    await stripe.customers.del(stripeCustomerId);
+  } catch (error) {
+    if (!isStripeMissingResourceError(error)) {
+      throw error;
+    }
+  }
+
+  return { success: true };
+};
+
 export const settings = action
   .schema(SettingsSchema)
   .action(async ({ parsedInput: values }) => {
@@ -125,21 +187,7 @@ export const deleteAccount = action
 
     if (user.stripeCustomerId) {
       try {
-        const subscriptions = await stripe.subscriptions.list({
-          customer: user.stripeCustomerId,
-          status: "all",
-          limit: 100,
-        });
-
-        await Promise.all(
-          subscriptions.data
-            .filter((subscription) =>
-              STRIPE_SUBSCRIPTION_STATUSES_TO_CANCEL.has(subscription.status)
-            )
-            .map((subscription) => stripe.subscriptions.cancel(subscription.id))
-        );
-
-        await stripe.customers.del(user.stripeCustomerId);
+        await cleanupStripeCustomer(user.stripeCustomerId);
       } catch (error) {
         console.error("Stripe cleanup failed during account deletion:", error);
         return { error: "stripe_cleanup_failed" };

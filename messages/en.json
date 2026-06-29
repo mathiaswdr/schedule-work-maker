@@ -587,6 +587,7 @@
       "saving": "Saving...",
       "success": "Your workspace is configured.",
       "error": "Unable to save the setup.",
+      "bankRequired": "Add an account label and account / IBAN, or click Later.",
       "steps": {
         "identity": {
           "title": "Start with your business",

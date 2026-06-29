@@ -587,6 +587,7 @@
       "saving": "Enregistrement...",
       "success": "Votre espace est configure.",
       "error": "Impossible d'enregistrer la configuration.",
+      "bankRequired": "Ajoutez un libelle et un compte / IBAN, ou cliquez sur Plus tard.",
       "steps": {
         "identity": {
           "title": "Commencons par votre activite",
