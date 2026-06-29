@@ -61,8 +61,14 @@ const sectionTitle =
   "mt-3 max-w-3xl text-3xl font-semibold leading-tight text-ink sm:text-4xl lg:text-5xl";
 const sectionIntro = "mt-4 max-w-2xl text-base leading-7 text-ink-muted";
 const LANDING_SECTION_OFFSET = -96;
-const DEMO_VIDEO_SRC =
-  "https://res.cloudinary.com/dwxnpxmyw/video/upload/f_auto,q_auto:good,vc_auto,c_limit,w_1600/v1782680543/saas/kronoma_demo_web_j0qkxa.mp4";
+const DEMO_VIDEO_SOURCES = {
+  fr: "https://res.cloudinary.com/dwxnpxmyw/video/upload/f_auto,q_auto:good,vc_auto,c_limit,w_1600/v1782743532/saas/kronoma_demo_fr_mvqg4o.mov",
+  en: "https://res.cloudinary.com/dwxnpxmyw/video/upload/f_auto,q_auto:good,vc_auto,c_limit,w_1600/v1782743540/saas/kronoma_demo_en_w4xkuf.mov",
+} as const;
+
+function getDemoVideoSrc(locale: string) {
+  return locale.startsWith("fr") ? DEMO_VIDEO_SOURCES.fr : DEMO_VIDEO_SOURCES.en;
+}
 
 const copy = {
   fr: {
@@ -803,7 +809,7 @@ export default async function LandingPage() {
             </div>
           </div>
 
-          <DemoVideoCard c={c} />
+          <DemoVideoCard c={c} src={getDemoVideoSrc(locale)} />
         </section>
 
         <section className="relative mx-auto w-full maxW px-6 py-16">
@@ -1218,7 +1224,7 @@ export default async function LandingPage() {
   );
 }
 
-function DemoVideoCard({ c }: { c: LandingCopy }) {
+function DemoVideoCard({ c, src }: { c: LandingCopy; src: string }) {
   return (
     <div className="relative z-10 mt-12 aspect-[16/10] w-full max-w-4xl overflow-hidden rounded-[22px] bg-ink shadow-[0_28px_90px_-58px_rgba(29,27,22,0.72)] [clip-path:inset(0_round_22px)] sm:mt-14">
       <video
@@ -1232,7 +1238,7 @@ function DemoVideoCard({ c }: { c: LandingCopy }) {
         preload="auto"
         tabIndex={-1}
       >
-        <source src={DEMO_VIDEO_SRC} />
+        <source src={src} />
       </video>
     </div>
   );
