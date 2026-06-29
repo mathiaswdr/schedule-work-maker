@@ -1226,11 +1226,11 @@ export default async function LandingPage() {
 
 function DemoVideoCard({ c, src }: { c: LandingCopy; src: string }) {
   return (
-    <div className="relative z-10 mt-12 aspect-[16/10] w-full max-w-4xl overflow-hidden rounded-[22px] bg-ink shadow-[0_28px_90px_-58px_rgba(29,27,22,0.72)] [clip-path:inset(0_round_22px)] sm:mt-14">
+    <div className="relative z-10 mt-12 aspect-[16/8.7] w-full max-w-[60rem] overflow-hidden rounded-[22px] bg-ink shadow-[0_28px_90px_-58px_rgba(29,27,22,0.72)] [clip-path:inset(0_round_22px)] sm:mt-14">
       <video
         aria-label={c.hero.videoTitle}
         autoPlay
-        className="pointer-events-none absolute inset-0 z-10 h-full w-full scale-[1.012] object-cover"
+        className="pointer-events-none absolute inset-0 z-10 h-full w-full scale-[1.002] object-cover"
         disablePictureInPicture
         loop
         muted
