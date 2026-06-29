@@ -122,6 +122,19 @@ model VerificationToken {
   @@id([identifier, token])
 }
 
+model AccountDeletionFeedback {
+  id           String   @id @default(cuid())
+  userIdHash   String
+  emailHash    String?
+  plan         UserPlan
+  reasons      String[] @default([])
+  customReason String?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([plan])
+}
+
 model WorkSession {
   id        String             @id @default(cuid())
   userId    String

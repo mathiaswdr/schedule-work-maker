@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { EASE, pickVariants } from "@/lib/motion-variants";
 import { useAction } from "next-safe-action/hooks";
 import {
@@ -199,7 +199,7 @@ export default function ExpensesClient({
   const [chartPeriodFilter, setChartPeriodFilter] =
     useState<ChartPeriodFilter>("LAST_90_DAYS");
   const [expenseYearFilter, setExpenseYearFilter] =
-    useState<ExpenseYearFilter>("ALL");
+    useState<ExpenseYearFilter>(() => String(new Date().getFullYear()));
   const expenseDetailCacheRef = useRef(new Map<string, ExpenseDetail>());
 
   // ── Actions ──
@@ -471,7 +471,7 @@ export default function ExpensesClient({
 
   const expenseYearOptions = useMemo(() => {
     const currentYear = new Date().getFullYear();
-    const years = new Set<number>();
+    const years = new Set<number>([currentYear]);
 
     expenses.forEach((expense) => {
       const startYear = new Date(expense.startDate).getFullYear();
@@ -1202,84 +1202,94 @@ export default function ExpensesClient({
               </p>
             </motion.section>
           ) : (
-            <motion.section variants={v.fadeUp} className="space-y-3">
-              {filteredExpenseList.map((expense) => (
-                <motion.div key={expense.id} variants={v.item}>
-                <div
-                  onClick={() => router.push(`/dashboard/expenses/${expense.id}`)}
-                  className="group flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 transition hover:shadow-md"
-                >
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`h-2.5 w-2.5 shrink-0 rounded-full ${!expense.isActive ? "bg-ink-muted" : ""}`}
-                      style={expense.isActive ? {
-                        backgroundColor: expense.color || DONUT_COLORS[expenses.indexOf(expense) % DONUT_COLORS.length],
-                      } : undefined}
-                    />
-                    <div>
-                      <p className="font-medium">{expense.name}</p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                        {expense.category && (
-                          <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">
-                            {expense.category}
-                          </span>
-                        )}
-                        <span className="text-xs text-ink-muted">
-                          {expense.recurrence === "MONTHLY"
-                            ? t("expenses.monthly")
-                            : expense.recurrence === "ANNUAL"
-                              ? t("expenses.annual")
-                              : t("expenses.oneTime")}
-                        </span>
-                        {!expense.isActive && expense.recurrence !== "ONE_TIME" && (
-                          <span className="rounded-full bg-ink-soft px-2 py-0.5 text-[10px] font-medium text-ink-muted">
-                            {t("expenses.inactive")}
-                          </span>
-                        )}
+            <motion.section layout variants={v.fadeUp} className="space-y-3">
+              <AnimatePresence initial={false} mode="popLayout">
+                {filteredExpenseList.map((expense) => (
+                  <motion.div
+                    key={expense.id}
+                    layout
+                    variants={v.item}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                    animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                    exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+                    transition={{ duration: 0.18, ease: EASE }}
+                  >
+                    <div
+                      onClick={() => router.push(`/dashboard/expenses/${expense.id}`)}
+                      className="group flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 transition hover:shadow-md"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`h-2.5 w-2.5 shrink-0 rounded-full ${!expense.isActive ? "bg-ink-muted" : ""}`}
+                          style={expense.isActive ? {
+                            backgroundColor: expense.color || DONUT_COLORS[expenses.indexOf(expense) % DONUT_COLORS.length],
+                          } : undefined}
+                        />
+                        <div>
+                          <p className="font-medium">{expense.name}</p>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                            {expense.category && (
+                              <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">
+                                {expense.category}
+                              </span>
+                            )}
+                            <span className="text-xs text-ink-muted">
+                              {expense.recurrence === "MONTHLY"
+                                ? t("expenses.monthly")
+                                : expense.recurrence === "ANNUAL"
+                                  ? t("expenses.annual")
+                                  : t("expenses.oneTime")}
+                            </span>
+                            {!expense.isActive && expense.recurrence !== "ONE_TIME" && (
+                              <span className="rounded-full bg-ink-soft px-2 py-0.5 text-[10px] font-medium text-ink-muted">
+                                {t("expenses.inactive")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="font-semibold">
+                            {currencyFormatter.format(
+                              getDisplayedExpenseAmount(expense)
+                            )}
+                          </p>
+                          <p className="text-[10px] text-ink-muted">
+                            {getExpenseAmountHint(expense)}
+                          </p>
+                        </div>
+                        <div className="flex gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+                          <button
+                            type="button"
+                            onClick={(e) => handleDuplicate(expense, e)}
+                            aria-label={t("expenses.duplicateExpense")}
+                            className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => handleEdit(expense, e)}
+                            aria-label={t("expenses.editExpense")}
+                            className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => handleDelete(expense.id, e)}
+                            aria-label={tc("delete")}
+                            className="rounded-lg p-1.5 text-ink-muted hover:bg-red-50 hover:text-red-600"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="font-semibold">
-                        {currencyFormatter.format(
-                          getDisplayedExpenseAmount(expense)
-                        )}
-                      </p>
-                      <p className="text-[10px] text-ink-muted">
-                        {getExpenseAmountHint(expense)}
-                      </p>
-                    </div>
-                    <div className="flex gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
-                      <button
-                        type="button"
-                        onClick={(e) => handleDuplicate(expense, e)}
-                        aria-label={t("expenses.duplicateExpense")}
-                        className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
-                      >
-                        <Copy className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => handleEdit(expense, e)}
-                        aria-label={t("expenses.editExpense")}
-                        className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => handleDelete(expense.id, e)}
-                        aria-label={tc("delete")}
-                        className="rounded-lg p-1.5 text-ink-muted hover:bg-red-50 hover:text-red-600"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </motion.section>
           )}
 

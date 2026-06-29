@@ -107,14 +107,14 @@ const STRIPE_PRICE_ENV_VARS: Record<
     STARTER: {
       monthly: "PRO_SUBSCRIPTION_PRICE_ID_CHF",
       yearly: "PRO_SUBSCRIPTION_YEAR_PRICE_ID_CHF",
-      fallbackMonthly: "PRO_SUBSCRIPTION_PRICE_ID",
-      fallbackYearly: "PRO_SUBSCRIPTION_YEAR_PRICE_ID",
+      fallbackMonthly: "SUBSCRIPTION_PRICE_ID",
+      fallbackYearly: "SUBSCRIPTION_YEAR_PRICE_ID",
     },
     PRO: {
       monthly: "PRO_SUBSCRIPTION_PRICE_ID_CHF",
       yearly: "PRO_SUBSCRIPTION_YEAR_PRICE_ID_CHF",
-      fallbackMonthly: "PRO_SUBSCRIPTION_PRICE_ID",
-      fallbackYearly: "PRO_SUBSCRIPTION_YEAR_PRICE_ID",
+      fallbackMonthly: "SUBSCRIPTION_PRICE_ID",
+      fallbackYearly: "SUBSCRIPTION_YEAR_PRICE_ID",
     },
     LIFETIME: {
       monthly: "LIFETIME_PRICE_ID_CHF",

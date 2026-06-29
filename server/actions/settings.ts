@@ -3,6 +3,7 @@
 import { createSafeActionClient } from 'next-safe-action';
 import { SettingsSchema } from '@/types/settings-schema';
 import { z } from 'zod';
+import { createHmac } from 'node:crypto';
 import { auth } from '@/server/auth';
 import { prisma } from '@/server/prisma';
 import { revalidatePath } from 'next/cache';
@@ -10,7 +11,34 @@ import { stripe } from '@/server/stripe';
 import { cloudinary } from '@/server/cloudinary';
 
 const action = createSafeActionClient();
-const DeleteAccountSchema = z.object({});
+const AccountDeletionReasonSchema = z.enum([
+  "noLongerNeed",
+  "tooExpensive",
+  "missingFeature",
+  "hardToUse",
+  "switchedTool",
+  "privacy",
+  "other",
+]);
+const DeleteAccountSchema = z.object({
+  feedback: z
+    .object({
+      reasons: z.array(AccountDeletionReasonSchema).min(1),
+      customReason: z.string().trim().max(500).optional(),
+    })
+    .superRefine((feedback, ctx) => {
+      if (
+        feedback.reasons.includes("other") &&
+        !feedback.customReason?.trim()
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Custom reason is required when other is selected",
+          path: ["customReason"],
+        });
+      }
+    }),
+});
 const STRIPE_SUBSCRIPTION_STATUSES_TO_CANCEL = new Set([
   "active",
   "trialing",
@@ -19,6 +47,19 @@ const STRIPE_SUBSCRIPTION_STATUSES_TO_CANCEL = new Set([
   "paused",
 ]);
 const CLOUDINARY_RESOURCE_TYPES = ["image", "raw", "video"] as const;
+const ACCOUNT_DELETION_FEEDBACK_HASH_SECRET =
+  process.env.ACCOUNT_DELETION_FEEDBACK_HASH_SECRET ||
+  process.env.AUTH_SECRET ||
+  process.env.NEXTAUTH_SECRET ||
+  "kronoma-account-deletion-feedback";
+
+const hashDeletionFeedbackIdentifier = (value: string | null | undefined) => {
+  if (!value) return null;
+
+  return createHmac("sha256", ACCOUNT_DELETION_FEEDBACK_HASH_SECRET)
+    .update(value.trim().toLowerCase())
+    .digest("hex");
+};
 
 export const settings = action
   .schema(SettingsSchema)
@@ -61,7 +102,7 @@ export const settings = action
 
 export const deleteAccount = action
   .schema(DeleteAccountSchema)
-  .action(async () => {
+  .action(async ({ parsedInput }) => {
     const session = await auth();
 
     if (!session?.user?.id) {
@@ -72,6 +113,8 @@ export const deleteAccount = action
       where: { id: session.user.id },
       select: {
         id: true,
+        email: true,
+        plan: true,
         stripeCustomerId: true,
       },
     });
@@ -133,6 +176,15 @@ export const deleteAccount = action
     }
 
     await prisma.$transaction([
+      prisma.accountDeletionFeedback.create({
+        data: {
+          userIdHash: hashDeletionFeedbackIdentifier(user.id)!,
+          emailHash: hashDeletionFeedbackIdentifier(user.email),
+          plan: user.plan,
+          reasons: parsedInput.feedback.reasons,
+          customReason: parsedInput.feedback.customReason || null,
+        },
+      }),
       prisma.accessCodeRedemption.deleteMany({
         where: { userId: user.id },
       }),

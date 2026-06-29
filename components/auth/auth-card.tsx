@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, CheckCircle2, Clock3, FileText, ShieldCheck } from "lucide-react";
 
 import { localizedPath } from "@/lib/i18n-routing";
@@ -29,6 +30,12 @@ const highlights = [
 export const AuthCard = ({ children, mode, alternateHref }: AuthCardProps) => {
   const locale = useLocale();
   const t = useTranslations("auth");
+  const searchParams = useSearchParams();
+  const rawCallbackUrl = searchParams.get("callbackUrl");
+  const callbackUrl =
+    rawCallbackUrl?.startsWith("/") && !rawCallbackUrl.startsWith("//")
+      ? rawCallbackUrl
+      : null;
 
   return (
     <section className="min-h-screen bg-paper px-4 pb-12 pt-28 text-ink sm:px-6 lg:pb-16 lg:pt-32">
@@ -69,11 +76,14 @@ export const AuthCard = ({ children, mode, alternateHref }: AuthCardProps) => {
           <div className="grid grid-cols-2 gap-1 rounded-lg border border-line bg-panel p-1">
             {modeLinks.map((item) => {
               const isActive = item.mode === mode;
+              const href = callbackUrl
+                ? `${item.href}?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                : item.href;
 
               return (
                 <Link
                   key={item.mode}
-                  href={localizedPath(item.href, locale)}
+                  href={localizedPath(href, locale)}
                   className={cn(
                     "rounded-md px-3 py-2.5 text-center text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40",
                     isActive

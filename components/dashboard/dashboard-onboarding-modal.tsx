@@ -13,7 +13,14 @@ import {
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { type ComponentProps, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  type FormEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -245,6 +252,18 @@ export default function DashboardOnboardingModal({
     execute(values);
   };
 
+  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isExecuting) return;
+
+    if (!isLastStep) {
+      await handleNext();
+      return;
+    }
+
+    await form.handleSubmit(onSubmit)();
+  };
+
   const StepIcon = step.icon;
 
   return (
@@ -316,7 +335,7 @@ export default function DashboardOnboardingModal({
 
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={handleFormSubmit}
                 className="mt-6 space-y-5"
               >
                 {stepIndex === 0 && (

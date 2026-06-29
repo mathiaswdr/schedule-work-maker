@@ -20,6 +20,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SettingsSchema } from "@/types/settings-schema";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
@@ -36,7 +38,6 @@ import BusinessProfileForm from "@/components/dashboard/business-profile-form";
 import type { BusinessProfileFormHandle } from "@/components/dashboard/business-profile-form";
 import { deleteBankAccount } from "@/server/actions/bank-accounts";
 import { Pencil, Trash2 } from "lucide-react";
-import { useConfirm } from "@/components/ui/confirm-dialog";
 import { EASE } from "@/lib/motion-variants";
 import { getPlanDisplayName } from "@/lib/plans";
 import {
@@ -45,6 +46,14 @@ import {
   getDefaultCurrencyForCountry,
   type CountryUiLocale,
 } from "@/lib/country";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const CloudinaryUploadButton = dynamic(
   () =>
@@ -56,6 +65,18 @@ const CloudinaryUploadButton = dynamic(
 const BankAccountFormDialog = dynamic(
   () => import("@/components/dashboard/bank-account-form-dialog")
 );
+
+const ACCOUNT_DELETION_REASON_KEYS = [
+  "noLongerNeed",
+  "tooExpensive",
+  "missingFeature",
+  "hardToUse",
+  "switchedTool",
+  "privacy",
+  "other",
+] as const;
+
+type AccountDeletionReasonKey = (typeof ACCOUNT_DELETION_REASON_KEYS)[number];
 
 type BusinessProfileData = {
   companyName: string | null;
@@ -106,10 +127,15 @@ export default function SettingsCard({
   const uiLocale: CountryUiLocale = locale.startsWith("fr") ? "fr" : "en";
   const shouldReduceMotion = useReducedMotion();
   const router = useRouter();
-  const { confirm, ConfirmDialogElement } = useConfirm();
 
   const [imageUploading, setImageUploading] = useState(false);
   const [billingLoading, setBillingLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteReasons, setDeleteReasons] = useState<AccountDeletionReasonKey[]>([]);
+  const [deleteCustomReason, setDeleteCustomReason] = useState("");
+  const [deleteReasonError, setDeleteReasonError] = useState<
+    "missing" | "custom" | null
+  >(null);
   const businessProfileRef = useRef<BusinessProfileFormHandle>(null);
   const businessProfileSectionRef = useRef<HTMLElement | null>(null);
 
@@ -231,19 +257,41 @@ export default function SettingsCard({
   };
 
   const handleDeleteAccount = async () => {
-    const confirmed = await confirm({
-      title: t("settingsPage.account.deleteConfirmTitle"),
-      description: t("settingsPage.account.deleteConfirmDescription"),
-      confirmLabel: t("settingsPage.account.deleteAction"),
-      cancelLabel: tc("cancel"),
-      variant: "destructive",
-    });
+    setDeleteDialogOpen(true);
+  };
 
-    if (!confirmed) {
+  const handleDeleteReasonToggle = (
+    reason: AccountDeletionReasonKey,
+    checked: boolean
+  ) => {
+    setDeleteReasons((current) =>
+      checked
+        ? Array.from(new Set([...current, reason]))
+        : current.filter((item) => item !== reason)
+    );
+    setDeleteReasonError(null);
+  };
+
+  const handleConfirmDeleteAccount = () => {
+    const customReason = deleteCustomReason.trim();
+    const requiresCustomReason = deleteReasons.includes("other");
+
+    if (deleteReasons.length === 0) {
+      setDeleteReasonError("missing");
       return;
     }
 
-    executeDeleteAccount({});
+    if (requiresCustomReason && customReason.length === 0) {
+      setDeleteReasonError("custom");
+      return;
+    }
+
+    executeDeleteAccount({
+      feedback: {
+        reasons: deleteReasons,
+        customReason: requiresCustomReason ? customReason : undefined,
+      },
+    });
   };
 
   const isSaving =
@@ -251,6 +299,7 @@ export default function SettingsCard({
     imageUploading ||
     (businessProfileRef.current?.isExecuting ?? false);
   const isDeletingAccount = deleteAccountStatus === "executing";
+  const isOtherDeleteReasonSelected = deleteReasons.includes("other");
   const businessProfileFields = [
     businessProfile?.companyName,
     businessProfile?.address,
@@ -325,7 +374,121 @@ export default function SettingsCard({
 
   return (
     <main className="w-full">
-      {ConfirmDialogElement}
+      <Dialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          if (isDeletingAccount) return;
+          setDeleteDialogOpen(open);
+          if (!open) {
+            setDeleteReasonError(null);
+          }
+        }}
+      >
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-red-200 bg-white p-5 sm:max-w-xl sm:p-6">
+          <DialogHeader className="pr-7">
+            <DialogTitle className="text-red-700">
+              {t("settingsPage.account.deleteConfirmTitle")}
+            </DialogTitle>
+            <DialogDescription className="text-red-600">
+              {t("settingsPage.account.deleteConfirmDescription")}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700">
+            {t("settingsPage.account.deleteHint")}
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-semibold text-ink">
+                {t("settingsPage.account.deleteReasonTitle")}
+              </p>
+              <p className="mt-1 text-xs text-ink-muted">
+                {t("settingsPage.account.deleteReasonDescription")}
+              </p>
+            </div>
+
+            <div className="grid gap-2">
+              {ACCOUNT_DELETION_REASON_KEYS.map((reason) => {
+                const checkboxId = `delete-account-reason-${reason}`;
+                const checked = deleteReasons.includes(reason);
+
+                return (
+                  <label
+                    key={reason}
+                    htmlFor={checkboxId}
+                    className="flex cursor-pointer items-start gap-3 rounded-2xl border border-line bg-white px-3 py-3 text-sm text-ink transition hover:border-red-200 hover:bg-red-50/50"
+                  >
+                    <Checkbox
+                      id={checkboxId}
+                      checked={checked}
+                      onCheckedChange={(value) =>
+                        handleDeleteReasonToggle(reason, value === true)
+                      }
+                      className="mt-0.5 border-red-300 data-[state=checked]:bg-red-600 data-[state=checked]:text-white"
+                    />
+                    <span>{t(`settingsPage.account.deleteReasons.${reason}`)}</span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {isOtherDeleteReasonSelected && (
+              <div className="space-y-2">
+                <label
+                  htmlFor="delete-account-custom-reason"
+                  className="text-sm font-medium text-ink"
+                >
+                  {t("settingsPage.account.deleteReasonOtherLabel")}
+                </label>
+                <Textarea
+                  id="delete-account-custom-reason"
+                  value={deleteCustomReason}
+                  onChange={(event) => {
+                    setDeleteCustomReason(event.target.value);
+                    setDeleteReasonError(null);
+                  }}
+                  maxLength={500}
+                  placeholder={t(
+                    "settingsPage.account.deleteReasonOtherPlaceholder"
+                  )}
+                  className="min-h-24 resize-none border-line bg-white focus:bg-white"
+                />
+              </div>
+            )}
+
+            {deleteReasonError && (
+              <p className="text-sm font-medium text-red-600">
+                {deleteReasonError === "custom"
+                  ? t("settingsPage.account.deleteReasonOtherRequired")
+                  : t("settingsPage.account.deleteReasonRequired")}
+              </p>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <button
+              type="button"
+              disabled={isDeletingAccount}
+              onClick={() => setDeleteDialogOpen(false)}
+              className="rounded-2xl border border-line-strong bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {tc("cancel")}
+            </button>
+            <button
+              type="button"
+              disabled={isDeletingAccount}
+              onClick={handleConfirmDeleteAccount}
+              className="rounded-2xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isDeletingAccount
+                ? t("settingsPage.account.deleting")
+                : t("settingsPage.account.deleteAction")}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-4 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
         <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
         <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />

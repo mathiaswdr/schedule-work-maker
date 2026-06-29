@@ -8,7 +8,6 @@ import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { buildSignupCheckoutHref } from "@/lib/checkout-intent";
 import { localizedPath, unlocalizedPath } from "@/lib/i18n-routing";
 import type { ExtendUser } from "@/next-auth";
 import { scrollToSection } from "@/utils/tools";
@@ -23,6 +22,7 @@ type NavLinkItem = {
 
 type NavClientProps = {
   user: ExtendUser | null;
+  trialHref: string;
   labels: {
     home: string;
     features: string;
@@ -37,7 +37,7 @@ type NavClientProps = {
   };
 };
 
-export default function NavClient({ user, labels }: NavClientProps) {
+export default function NavClient({ user, trialHref, labels }: NavClientProps) {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -217,7 +217,7 @@ export default function NavClient({ user, labels }: NavClientProps) {
                     asChild
                     className="h-10 rounded-full bg-brand px-4 text-white shadow-[0_12px_28px_-18px_rgba(249,115,22,0.95)] hover:bg-brand/90"
                   >
-                    <Link href={localizedPath(buildSignupCheckoutHref(), locale)}>
+                    <Link href={localizedPath(trialHref, locale)}>
                       {labels.trial}
                     </Link>
                   </Button>
@@ -257,9 +257,7 @@ export default function NavClient({ user, labels }: NavClientProps) {
                     return (
                       <Link
                         key={`${link.href}-${link.sectionId ?? "page"}`}
-                        href={
-                          link.sectionId ? `${linkHref}#${link.sectionId}` : linkHref
-                        }
+                        href={linkHref}
                         onClick={(event) =>
                           handleAnchorClick(event, linkHref, link.sectionId)
                         }
@@ -295,7 +293,7 @@ export default function NavClient({ user, labels }: NavClientProps) {
                         {labels.login}
                       </Link>
                       <Link
-                        href={localizedPath(buildSignupCheckoutHref(), locale)}
+                        href={localizedPath(trialHref, locale)}
                         onClick={() => setMobileOpen(false)}
                         className="flex items-center justify-center rounded-2xl bg-brand px-4 py-3 text-sm font-semibold text-white"
                       >
