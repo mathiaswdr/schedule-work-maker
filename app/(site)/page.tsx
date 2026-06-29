@@ -26,7 +26,6 @@ import { getLocale } from "next-intl/server";
 import { AnimatedGradientText } from "@/components/magicui/animated-gradient-text";
 import { BentoCard, BentoGrid } from "@/components/magicui/bento-grid";
 import { MagicCard } from "@/components/magicui/magic-card";
-import LanguageSwitcher from "@/components/footer/language-switcher";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import ScrollSectionButton from "@/components/ui/scroll-section-button";
@@ -734,7 +733,6 @@ export default async function LandingPage() {
     locale,
   });
   const canonicalUrl = localizedAbsoluteUrl("/", locale);
-  const signInHref = localizedPath("/auth/login", locale);
   const startHref = localizedPath(buildSignupCheckoutHref("PRO", "monthly", pricingCurrency), locale);
   const pricingHref = localizedPath("/pricing", locale);
 
@@ -1215,29 +1213,6 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <footer className="border-t border-line bg-white">
-          <div className="mx-auto flex w-full maxW flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-ink">Kronoma</p>
-              <p className="mt-1 max-w-2xl text-sm leading-6 text-ink-muted">
-                {c.footer}
-              </p>
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex gap-4 text-sm text-ink-muted">
-                <Link href={pricingHref} className="hover:text-ink">
-                  {c.nav.pricing}
-                </Link>
-                <Link href={signInHref} className="hover:text-ink">
-                  {c.nav.signIn}
-                </Link>
-              </div>
-              <div className="w-full sm:w-36">
-                <LanguageSwitcher />
-              </div>
-            </div>
-          </div>
-        </footer>
       </div>
     </main>
   );

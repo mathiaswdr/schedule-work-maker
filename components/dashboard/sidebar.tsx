@@ -37,7 +37,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -188,12 +187,10 @@ export default function DashboardSidebar({
                           className="h-9 rounded-lg text-ink-muted hover:bg-ink-soft hover:text-ink data-[active=true]:bg-ink-soft data-[active=true]:text-ink"
                         >
                           <Icon />
-                          <span>{labels.items[item.key]}</span>
                           {locked ? (
-                            <SidebarMenuBadge>
-                              <PlanBadge requiredPlan={FEATURE_PLAN_MAP[item.key]} />
-                            </SidebarMenuBadge>
+                            <PlanBadge requiredPlan={FEATURE_PLAN_MAP[item.key]} />
                           ) : null}
+                          <span>{labels.items[item.key]}</span>
                           <ChevronRight
                             className={`ml-auto transition-transform ${
                               statsOpen ? "rotate-90" : ""
@@ -238,14 +235,12 @@ export default function DashboardSidebar({
                       >
                         <Link href={item.href} onClick={() => handleNavigate(item.href)}>
                           <Icon />
+                          {locked ? (
+                            <PlanBadge requiredPlan={FEATURE_PLAN_MAP[item.key]} />
+                          ) : null}
                           <span>{labels.items[item.key]}</span>
                         </Link>
                       </SidebarMenuButton>
-                      {locked ? (
-                        <SidebarMenuBadge>
-                          <PlanBadge requiredPlan={FEATURE_PLAN_MAP[item.key]} />
-                        </SidebarMenuBadge>
-                      ) : null}
                     </SidebarMenuItem>
                   );
                 })}
