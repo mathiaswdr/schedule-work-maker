@@ -191,6 +191,7 @@ export default async function PricingPage() {
             suffixYearly={t("billingToggle.suffixYearly")}
             monthlyHint={t("billingToggle.monthlyHint")}
             yearlyEquivalent={t("billingToggle.yearlyEquivalent")}
+            showPlanNotes={false}
           />
         </section>
 

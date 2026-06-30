@@ -47,6 +47,7 @@ type PricingCardsProps = {
   currency: PricingCurrency;
   locale: string;
   gridMaxWidthClassName?: string;
+  showPlanNotes?: boolean;
 };
 
 export function PricingCards({
@@ -72,6 +73,7 @@ export function PricingCards({
   currency,
   locale,
   gridMaxWidthClassName = "max-w-none",
+  showPlanNotes = true,
 }: PricingCardsProps) {
   const [billing, setBilling] = useState<BillingPeriod>("monthly");
   const isYearly = billing === "yearly";
@@ -223,15 +225,17 @@ export function PricingCards({
               </div>
 
               <p className="mt-3 min-h-[48px] text-sm leading-6 text-ink-muted">{plan.desc}</p>
-              <p
-                className={`mt-4 rounded-2xl px-3 py-2 text-xs font-semibold leading-5 ${
-                  isPaid
-                    ? "bg-brand/10 text-brand"
-                    : "bg-ink-soft text-ink-muted"
-                }`}
-              >
-                {isLifetime ? lifetimeNote : isPaid ? trialNote : freeNote}
-              </p>
+              {showPlanNotes ? (
+                <p
+                  className={`mt-4 rounded-2xl px-3 py-2 text-xs font-semibold leading-5 ${
+                    isPaid
+                      ? "bg-brand/10 text-brand"
+                      : "bg-ink-soft text-ink-muted"
+                  }`}
+                >
+                  {isLifetime ? lifetimeNote : isPaid ? trialNote : freeNote}
+                </p>
+              ) : null}
 
               <div className="mt-6 space-y-3 text-sm">
                 {plan.perks.map((perk) => {
@@ -255,17 +259,19 @@ export function PricingCards({
                 })}
               </div>
 
-              <PricingCta
-                planId={plan.planId as PlanId}
-                planName={plan.name}
-                highlight={!!plan.highlight}
-                userPlan={userPlan}
-                billing={billing}
-                currency={currency}
-                ctaLabel={ctaLabel || ctaLabelTemplate.replace("{plan}", plan.name)}
-                ctaCurrentLabel={ctaCurrentLabel}
-                ctaManageLabel={ctaManageLabel}
-              />
+              <div className="mt-auto pt-8">
+                <PricingCta
+                  planId={plan.planId as PlanId}
+                  planName={plan.name}
+                  highlight={!!plan.highlight}
+                  userPlan={userPlan}
+                  billing={billing}
+                  currency={currency}
+                  ctaLabel={ctaLabel || ctaLabelTemplate.replace("{plan}", plan.name)}
+                  ctaCurrentLabel={ctaCurrentLabel}
+                  ctaManageLabel={ctaManageLabel}
+                />
+              </div>
             </div>
           );
         })}

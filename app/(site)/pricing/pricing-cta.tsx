@@ -46,7 +46,7 @@ export function PricingCta({
             ? localizedPath("/auth/login?callbackUrl=%2Fdashboard", locale)
             : localizedPath(buildSignupCheckoutHref(planId, billing, currency), locale)
         }
-        className={`mt-auto flex min-h-11 w-full items-center justify-center rounded-full px-4 py-3 text-center text-sm font-semibold leading-tight transition ${
+        className={`flex min-h-11 w-full items-center justify-center rounded-full px-4 py-3 text-center text-sm font-semibold leading-tight transition ${
           highlight
             ? "bg-brand text-white shadow-[0_18px_44px_-24px_rgba(249,115,22,0.95)] hover:bg-brand/90"
             : "border border-line-strong bg-white text-ink hover:bg-neutral-50"
@@ -75,7 +75,7 @@ export function PricingCta({
             toast.error("An error occurred");
           }
         }}
-        className="mt-auto flex min-h-11 w-full items-center justify-center rounded-full border border-line-strong bg-white px-4 py-3 text-center text-sm font-semibold leading-tight text-ink transition hover:bg-neutral-50"
+        className="flex min-h-11 w-full items-center justify-center rounded-full border border-line-strong bg-white px-4 py-3 text-center text-sm font-semibold leading-tight text-ink transition hover:bg-neutral-50"
       >
         {ctaManageLabel}
       </button>
@@ -85,7 +85,7 @@ export function PricingCta({
   // Current plan (free) or lower → disabled
   if (isCurrent || !isUpgrade) {
     return (
-      <div className="mt-auto flex min-h-11 w-full items-center justify-center rounded-full border border-line bg-neutral-50 px-4 py-3 text-center text-sm font-medium leading-tight text-ink-muted">
+      <div className="flex min-h-11 w-full items-center justify-center rounded-full border border-line bg-neutral-50 px-4 py-3 text-center text-sm font-medium leading-tight text-ink-muted">
         {ctaCurrentLabel}
       </div>
     );
@@ -108,7 +108,7 @@ export function PricingCta({
           toast.error("An error occurred");
         }
       }}
-      className={`mt-auto flex min-h-11 w-full items-center justify-center rounded-full px-4 py-3 text-center text-sm font-semibold leading-tight transition ${
+      className={`flex min-h-11 w-full items-center justify-center rounded-full px-4 py-3 text-center text-sm font-semibold leading-tight transition ${
         highlight
           ? "bg-brand text-white shadow-[0_18px_44px_-24px_rgba(249,115,22,0.95)] hover:bg-brand/90"
           : "border border-line-strong bg-white text-ink hover:bg-neutral-50"
