@@ -98,7 +98,6 @@ export default async function BlogPage() {
       />
 
       <section className="relative overflow-hidden border-b border-line bg-white">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_50%_0%,rgba(249,115,22,0.13),transparent_62%)]" />
         <div className="relative mx-auto grid w-full maxW gap-10 px-6 pb-14 pt-32 lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:pb-20 lg:pt-36">
           <div className="max-w-3xl">
             <p className={sectionLabel}>Blog Kronoma</p>
