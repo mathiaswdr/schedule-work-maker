@@ -7,6 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
+    "seed:blog:file": "tsx prisma/import-blog-articles.ts",
     "seed:blog": "tsx prisma/seed-blog.ts",
     "seed:demo": "tsx prisma/seed-demo.ts",
     "analyze:dashboard-bundles": "node scripts/analyze-dashboard-bundles.mjs",
