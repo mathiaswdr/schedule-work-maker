@@ -437,7 +437,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
   if (selectedClient) {
     return (
       <main className="w-full">
-        <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
+        <div className="relative overflow-hidden rounded-[28px] border border-line bg-white/70 p-4 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:rounded-[32px] sm:p-8">
           <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
           <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
@@ -461,31 +461,31 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
               </button>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-4">
+                <div className="flex min-w-0 items-center gap-4">
                   <div
-                    className="flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-bold text-white"
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-xl font-bold text-white"
                     style={{ backgroundColor: selectedClient.color ?? "#6B7280" }}
                   >
                     {selectedClient.name.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <h1 className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}>
+                  <div className="min-w-0">
+                    <h1 className={`${displayClassName} break-words text-2xl font-semibold sm:text-3xl`}>
                       {selectedClient.name}
                     </h1>
                     {selectedClient.email && (
-                      <p className="flex items-center gap-1.5 text-sm text-ink-muted">
-                        <Mail className="h-3.5 w-3.5" />
+                      <p className="flex min-w-0 items-center gap-1.5 break-all text-sm text-ink-muted">
+                        <Mail className="h-3.5 w-3.5 shrink-0" />
                         {selectedClient.email}
                       </p>
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2 self-start">
+                <div className="flex w-full flex-wrap gap-2 self-start sm:w-auto">
                   <button
                     type="button"
                     onClick={() => handleEdit(selectedClient)}
                     aria-label={t("clients.editClient")}
-                    className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink"
+                    className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink sm:flex-none"
                   >
                     <Pencil className="h-4 w-4" />
                     {t("clients.editClient")}
@@ -494,7 +494,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                     type="button"
                     onClick={(e) => handleDelete(selectedClient.id, e)}
                     aria-label={t("clients.deleteClient")}
-                    className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                    className="flex min-h-11 w-11 items-center justify-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -642,7 +642,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                         <motion.div
                           key={item.label}
                           variants={v.item}
-                          className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3"
+                          className="flex flex-col gap-1 rounded-2xl border border-line bg-white/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                         >
                           <span className="text-sm text-ink-muted">
                             {item.label}
@@ -677,9 +677,9 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                             <motion.div
                               key={p.name}
                               variants={v.item}
-                              className="flex items-center gap-4"
+                              className="flex items-center gap-3 sm:gap-4"
                             >
-                              <span className="w-28 shrink-0 truncate text-xs text-ink-muted">
+                              <span className="w-20 shrink-0 truncate text-xs text-ink-muted sm:w-28">
                                 {p.name}
                               </span>
                               <div className="h-2.5 flex-1 rounded-full bg-ink-soft">
@@ -763,11 +763,11 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                       <motion.div
                         key={ws.id}
                         variants={v.item}
-                        className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
+                        className="flex flex-col gap-2 rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
                           <span
-                            className={`h-2.5 w-2.5 rounded-full ${
+                            className={`h-2.5 w-2.5 shrink-0 rounded-full ${
                               ws.status === "RUNNING"
                                 ? "bg-brand"
                                 : ws.status === "PAUSED"
@@ -779,7 +779,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                             {dateFormatter.format(new Date(ws.startedAt))}
                           </span>
                           {ws.project && (
-                            <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">
+                            <span className="max-w-full truncate rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">
                               {ws.project.name}
                             </span>
                           )}
@@ -810,10 +810,10 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
 
             {/* Invoices */}
             <motion.section variants={v.fadeUp}>
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm font-semibold">{t("clients.invoices")}</p>
                 {selectedClient.recentInvoices.length > 0 && (
-                  <div className="flex gap-3 text-xs">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
                     <span className="text-ink-muted">
                       {t("clients.invoicesPending")}:{" "}
                       <span className="font-semibold text-brand">
@@ -837,7 +837,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                         onClick={() => router.push(`/dashboard/invoices?id=${inv.id}`)}
                         className="flex cursor-pointer flex-col gap-2 rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between sm:gap-0"
                       >
-                        <div className="flex items-center gap-2 overflow-hidden">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2 overflow-hidden">
                           <FileText className="h-4 w-4 shrink-0 text-ink-muted/60" />
                           <span className="shrink-0 font-medium">{inv.displayNumber}</span>
                           {inv.source === "UPLOADED" && (
@@ -851,7 +851,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 pl-6 sm:gap-4 sm:pl-0">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                           <span className="text-xs text-ink-muted">
                             {invoiceDateFormatter.format(new Date(inv.issueDate))}
                           </span>
@@ -921,7 +921,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
   // ─── List View ───
   return (
     <main className="w-full">
-      <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
+      <div className="relative overflow-hidden rounded-[28px] border border-line bg-white/70 p-4 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:rounded-[32px] sm:p-8">
         <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
         <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
@@ -944,7 +944,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                 {t("clients.subtitle")}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3 self-start">
+            <div className="flex w-full flex-col gap-2 self-start sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
               {clientLimit?.max !== null && clientLimit?.max !== undefined && (
                 <span className="rounded-full bg-ink-soft px-3 py-1 text-xs font-semibold text-ink-muted">
                   {clientLimit.current}/{clientLimit.max}
@@ -954,7 +954,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                 type="button"
                 onClick={() => setImportDialogOpen(true)}
                 disabled={clientLimit ? !clientLimit.allowed : false}
-                className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <FileSpreadsheet className="h-4 w-4" />
                 {t("clients.import.cta")}
@@ -963,7 +963,7 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                 type="button"
                 onClick={handleAdd}
                 disabled={clientLimit ? !clientLimit.allowed : false}
-                className="flex items-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" />
                 {t("clients.addClient")}
@@ -1002,20 +1002,20 @@ export default function ClientsClient({ displayClassName, currency, clientLimit,
                     }}
                     className="group relative h-full cursor-pointer rounded-2xl border border-line bg-white/80 px-5 py-4 transition hover:shadow-md"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
                         <div
-                          className="h-3 w-3 rounded-full"
+                          className="h-3 w-3 shrink-0 rounded-full"
                           style={{ backgroundColor: client.color ?? "#6B7280" }}
                         />
-                        <div>
-                          <p className="font-semibold">{client.name}</p>
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold">{client.name}</p>
                           {client.email && (
-                            <p className="text-xs text-ink-muted">{client.email}</p>
+                            <p className="truncate text-xs text-ink-muted">{client.email}</p>
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-1 opacity-0 pointer-events-none transition group-hover:opacity-100 group-hover:pointer-events-auto">
+                      <div className="flex shrink-0 gap-1 transition sm:pointer-events-none sm:opacity-0 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100">
                         <button
                           type="button"
                           onClick={(e) => handleEdit(client, e)}

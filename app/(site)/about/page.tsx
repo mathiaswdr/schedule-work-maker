@@ -92,8 +92,7 @@ export default async function AboutPage() {
       <div className="relative overflow-hidden">
         <section className="mx-auto grid w-full maxW gap-10 px-6 pb-14 pt-28 sm:pt-32 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:pb-20 lg:pt-36">
           <div>
-            <p className={sectionLabel}>{t("hero.eyebrow")}</p>
-            <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-[1.06] text-ink sm:text-6xl lg:text-7xl">
+            <h1 className="max-w-4xl text-4xl font-semibold leading-[1.06] text-ink sm:text-6xl lg:text-7xl">
               <AnimatedGradientText>{t("hero.title")}</AnimatedGradientText>
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-ink-muted sm:text-lg">

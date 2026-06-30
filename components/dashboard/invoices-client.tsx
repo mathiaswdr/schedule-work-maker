@@ -379,7 +379,7 @@ export default function InvoicesClient({
 
   return (
     <main className="w-full">
-      <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
+      <div className="relative overflow-hidden rounded-[28px] border border-line bg-white/70 p-4 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:rounded-[32px] sm:p-8">
         <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
         <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
@@ -421,9 +421,9 @@ export default function InvoicesClient({
                 variants={v.fadeUp}
                 className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
               >
-                <div className="flex items-center gap-4">
+                <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4">
                   <h1
-                    className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}
+                    className={`${displayClassName} min-w-0 break-words text-2xl font-semibold sm:text-3xl`}
                   >
                     {selected.displayNumber}
                   </h1>
@@ -443,7 +443,7 @@ export default function InvoicesClient({
                           status: "SENT",
                         })
                       }
-                      className="shrink-0 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-4 py-2 text-xs font-semibold transition hover:bg-white"
+                    className="min-h-10 shrink-0 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-4 py-2 text-xs font-semibold transition hover:bg-white"
                     >
                       {t("invoices.detail.markAsSent")}
                     </button>
@@ -457,7 +457,7 @@ export default function InvoicesClient({
                           status: "PAID",
                         })
                       }
-                      className="shrink-0 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-4 py-2 text-xs font-semibold transition hover:bg-white"
+                    className="min-h-10 shrink-0 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-4 py-2 text-xs font-semibold transition hover:bg-white"
                     >
                       {t("invoices.detail.markAsPaid")}
                     </button>
@@ -465,14 +465,14 @@ export default function InvoicesClient({
                   <button
                     type="button"
                     onClick={() => handleEditInvoice(selected.id, selected.source)}
-                    className="rounded-2xl border border-line bg-white/80 px-3 py-2 text-xs text-ink-muted transition hover:bg-white"
+                    className="flex h-10 w-10 items-center justify-center rounded-2xl border border-line bg-white/80 text-xs text-ink-muted transition hover:bg-white"
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(selected.id)}
-                    className="rounded-2xl border border-line bg-white/80 px-3 py-2 text-xs text-red-500 transition hover:bg-red-50"
+                    className="flex h-10 w-10 items-center justify-center rounded-2xl border border-line bg-white/80 text-xs text-red-500 transition hover:bg-red-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -525,12 +525,12 @@ export default function InvoicesClient({
                     <p className="text-sm font-semibold">
                       {t("invoices.detail.uploadedFile")}
                     </p>
-                    <div className="mt-4 flex flex-wrap gap-3">
+                    <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                       <button
                         type="button"
                         onClick={() => handleDownload(selected.id, "pdf")}
                         disabled={downloading !== null}
-                        className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl bg-brand px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:opacity-60"
+                        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:opacity-60 sm:w-auto"
                       >
                         <Download className="h-4 w-4" />
                         {downloading
@@ -541,7 +541,7 @@ export default function InvoicesClient({
                         <button
                           type="button"
                           onClick={() => setQrBillDialogOpen(true)}
-                          className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-5 py-3 text-sm font-semibold text-ink transition hover:bg-white"
+                          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-5 py-3 text-center text-sm font-semibold text-ink transition hover:bg-white sm:w-auto"
                         >
                           <QrCode className="h-4 w-4" />
                           {t("invoices.detail.generateQrBill")}
@@ -586,10 +586,10 @@ export default function InvoicesClient({
                             <motion.div
                               key={item.id}
                               variants={v.item}
-                              className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 mb-2"
+                              className="mb-2 flex flex-col gap-2 rounded-2xl border border-line bg-white/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                             >
-                              <div>
-                                <p className="text-sm font-medium">
+                              <div className="min-w-0">
+                                <p className="break-words text-sm font-medium">
                                   {item.description}
                                 </p>
                                 <p className="text-xs text-ink-muted">
@@ -597,7 +597,7 @@ export default function InvoicesClient({
                                   {currencyFormatter.format(item.unitPrice)}
                                 </p>
                               </div>
-                              <span className="text-sm font-semibold">
+                              <span className="shrink-0 self-end text-sm font-semibold sm:self-auto">
                                 {currencyFormatter.format(item.amount)}
                               </span>
                             </motion.div>
@@ -657,7 +657,7 @@ export default function InvoicesClient({
                           type="button"
                           onClick={() => handleDownload(selected.id, "pdf")}
                           disabled={downloading !== null}
-                          className="flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-brand px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:opacity-60"
+                          className="flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-3 text-center text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:opacity-60"
                         >
                           <Download className="h-4 w-4" />
                           {downloading === "pdf"
@@ -668,7 +668,7 @@ export default function InvoicesClient({
                           type="button"
                           onClick={() => handleDownload(selected.id, "docx")}
                           disabled={downloading !== null}
-                          className="flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-5 py-3 text-sm font-semibold text-ink transition hover:bg-white disabled:opacity-60"
+                          className="flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-5 py-3 text-center text-sm font-semibold text-ink transition hover:bg-white disabled:opacity-60"
                         >
                           <Download className="h-4 w-4" />
                           {downloading === "docx"
@@ -680,7 +680,7 @@ export default function InvoicesClient({
                             type="button"
                             onClick={() => handleDownload(selected.id, "qrbill")}
                             disabled={downloading !== null}
-                            className="flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-5 py-3 text-sm font-semibold text-ink transition hover:bg-white disabled:opacity-60 xl:col-span-2"
+                            className="flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-5 py-3 text-center text-sm font-semibold text-ink transition hover:bg-white disabled:opacity-60 xl:col-span-2"
                           >
                             <Download className="h-4 w-4" />
                             {downloading === "qrbill"
@@ -709,7 +709,7 @@ export default function InvoicesClient({
                       href={invoicePreviewSrc}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white"
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-2.5 text-center text-sm font-semibold text-ink transition hover:bg-white"
                     >
                       <ExternalLink className="h-4 w-4" />
                       {t("invoices.detail.openPreview")}
@@ -758,10 +758,12 @@ export default function InvoicesClient({
                       onClick={() => setAccountingExportOpen(true)}
                       aria-label={t("accountingExport.open")}
                       title={t("accountingExport.open")}
-                      className="flex h-11 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-2 text-xs font-semibold text-ink transition hover:bg-white sm:h-12 sm:gap-2 sm:px-4 sm:text-sm"
+                      className="flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-2xl border border-line-strong bg-white/80 px-2 text-xs font-semibold text-ink transition hover:bg-white sm:h-12 sm:gap-2 sm:px-4 sm:text-sm"
                     >
                       <FileArchive className="h-4 w-4 shrink-0" />
-                      {t("invoices.quickActions.export")}
+                      <span className="hidden min-w-0 truncate sm:inline">
+                        {t("invoices.quickActions.export")}
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -772,10 +774,12 @@ export default function InvoicesClient({
                       disabled={invoiceLimit ? !invoiceLimit.allowed : false}
                       aria-label={t("invoices.addInvoice")}
                       title={t("invoices.addInvoice")}
-                      className="flex h-11 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl bg-brand px-2 text-xs font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50 sm:h-12 sm:gap-2 sm:px-4 sm:text-sm"
+                      className="flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-2xl bg-brand px-2 text-xs font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50 sm:h-12 sm:gap-2 sm:px-4 sm:text-sm"
                     >
                       <Plus className="h-4 w-4 shrink-0" />
-                      {t("invoices.quickActions.create")}
+                      <span className="hidden min-w-0 truncate sm:inline">
+                        {t("invoices.quickActions.create")}
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -786,10 +790,12 @@ export default function InvoicesClient({
                       disabled={invoiceLimit ? !invoiceLimit.allowed : false}
                       aria-label={t("invoices.uploadInvoice")}
                       title={t("invoices.uploadInvoice")}
-                      className="flex h-11 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl border border-line-strong bg-white/80 px-2 text-xs font-semibold text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 sm:h-12 sm:gap-2 sm:px-4 sm:text-sm"
+                      className="flex h-11 min-w-0 items-center justify-center gap-1.5 rounded-2xl border border-line-strong bg-white/80 px-2 text-xs font-semibold text-ink transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 sm:h-12 sm:gap-2 sm:px-4 sm:text-sm"
                     >
                       <Upload className="h-4 w-4 shrink-0" />
-                      {t("invoices.quickActions.upload")}
+                      <span className="hidden min-w-0 truncate sm:inline">
+                        {t("invoices.quickActions.upload")}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -838,9 +844,9 @@ export default function InvoicesClient({
                           onClick={() => handleOpenInvoice(inv.id)}
                           className="group cursor-pointer rounded-2xl border border-line bg-white/80 p-5 transition hover:border-line-strong hover:shadow-[0_20px_40px_-32px_rgba(15,118,110,0.45)]"
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-semibold">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2">
+                              <p className="truncate text-sm font-semibold">
                                 {inv.displayNumber}
                               </p>
                               {inv.source === "UPLOADED" && (
@@ -850,12 +856,12 @@ export default function InvoicesClient({
                               )}
                             </div>
                             <span
-                              className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${statusColors[inv.status]}`}
+                              className={`shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${statusColors[inv.status]}`}
                             >
                               {t(`invoices.status.${inv.status}`)}
                             </span>
                           </div>
-                          <div className="mt-3 flex items-center gap-2">
+                          <div className="mt-3 flex min-w-0 items-center gap-2">
                             {inv.client?.color && (
                               <span
                                 className="h-2.5 w-2.5 rounded-full"
@@ -864,11 +870,11 @@ export default function InvoicesClient({
                                 }}
                               />
                             )}
-                            <span className="text-sm text-ink-muted">
+                            <span className="truncate text-sm text-ink-muted">
                               {inv.clientName || "—"}
                             </span>
                           </div>
-                          <div className="mt-2 flex items-center justify-between">
+                          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                             <span className="text-xs text-ink-muted">
                               {dateFormatter.format(
                                 new Date(inv.issueDate)
@@ -880,14 +886,14 @@ export default function InvoicesClient({
                           </div>
 
                           {/* Hover actions */}
-                          <div className="mt-3 flex gap-2 opacity-0 transition group-hover:opacity-100">
+                          <div className="mt-3 flex gap-2 transition sm:opacity-0 sm:group-hover:opacity-100">
                             <button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 void handleEditInvoice(inv.id, inv.source);
                               }}
-                              className="rounded-xl border border-line bg-white px-2 py-1 text-xs text-ink-muted hover:bg-white/80"
+                              className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white text-xs text-ink-muted hover:bg-white/80"
                             >
                               <Pencil className="h-3 w-3" />
                             </button>
@@ -897,7 +903,7 @@ export default function InvoicesClient({
                                 e.stopPropagation();
                                 handleDelete(inv.id);
                               }}
-                              className="rounded-xl border border-line bg-white px-2 py-1 text-xs text-red-500 hover:bg-red-50"
+                              className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white text-xs text-red-500 hover:bg-red-50"
                             >
                               <Trash2 className="h-3 w-3" />
                             </button>

@@ -683,7 +683,7 @@ export default function ExpensesClient({
   if (selectedExpense) {
     return (
       <main className="w-full">
-        <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
+        <div className="relative overflow-hidden rounded-[28px] border border-line bg-white/70 p-4 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:rounded-[32px] sm:p-8">
           <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
           <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
@@ -707,13 +707,13 @@ export default function ExpensesClient({
               </button>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/10">
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-brand/10">
                     <Receipt className="h-6 w-6 text-brand" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h1
-                      className={`${displayClassName} text-2xl font-semibold sm:text-3xl`}
+                      className={`${displayClassName} break-words text-2xl font-semibold sm:text-3xl`}
                     >
                       {selectedExpense.name}
                     </h1>
@@ -724,19 +724,21 @@ export default function ExpensesClient({
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2 self-start">
+                <div className="flex w-full flex-wrap gap-2 self-start sm:w-auto">
                   <button
                     type="button"
                     onClick={(e) => handleDuplicate(selectedExpense, e)}
-                    className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink"
+                    className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink sm:flex-none"
                   >
                     <Copy className="h-4 w-4" />
-                    {t("expenses.duplicateExpense")}
+                    <span className="hidden sm:inline">
+                      {t("expenses.duplicateExpense")}
+                    </span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleEdit(selectedExpense)}
-                    className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink"
+                    className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-ink-muted transition hover:bg-white hover:text-ink sm:flex-none"
                   >
                     <Pencil className="h-4 w-4" />
                     {t("expenses.editExpense")}
@@ -745,7 +747,7 @@ export default function ExpensesClient({
                     type="button"
                     onClick={(e) => handleDelete(selectedExpense.id, e)}
                     aria-label={tc("delete")}
-                    className="flex items-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                    className="flex min-h-11 w-11 items-center justify-center gap-2 rounded-2xl border border-line bg-white/80 px-4 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -857,7 +859,7 @@ export default function ExpensesClient({
                     setPendingInvoiceBatchCurrent(1);
                     setInvoiceDialogOpen(true);
                   }}
-                  className="flex items-center gap-2 self-start rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
+                  className="flex min-h-11 w-full items-center justify-center gap-2 self-start rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90 sm:w-auto"
                 >
                   <Plus className="h-4 w-4" />
                   {selectedExpense.recurrence === "ONE_TIME"
@@ -966,7 +968,7 @@ export default function ExpensesClient({
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           aria-label={t("expenses.download")}
-                          className="rounded-lg p-1.5 text-ink-muted transition hover:bg-ink-soft hover:text-ink"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted transition hover:bg-ink-soft hover:text-ink"
                         >
                           <Download className="h-3.5 w-3.5" />
                         </a>
@@ -982,7 +984,7 @@ export default function ExpensesClient({
                             if (ok) executeDeleteInvoice({ id: invoice.id });
                           }}
                           aria-label={tc("delete")}
-                          className="rounded-lg p-1.5 text-ink-muted transition hover:bg-red-50 hover:text-red-600"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted transition hover:bg-red-50 hover:text-red-600"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -1035,7 +1037,7 @@ export default function ExpensesClient({
 
   return (
     <main className="w-full">
-      <div className="relative overflow-hidden rounded-[32px] border border-line bg-white/70 p-6 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:p-8">
+      <div className="relative overflow-hidden rounded-[28px] border border-line bg-white/70 p-4 shadow-[0_30px_80px_-60px_rgba(15,118,110,0.45)] sm:rounded-[32px] sm:p-8">
         <div className="pointer-events-none absolute -top-24 right-[-6rem] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(15,118,110,0.22),transparent_60%)] blur-2xl will-change-transform" />
         <div className="pointer-events-none absolute bottom-[-12rem] left-[-6rem] h-[320px] w-[320px] rounded-full bg-[radial-gradient(circle_at_40%_40%,rgba(249,115,22,0.22),transparent_60%)] blur-3xl will-change-transform" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(29,27,22,0.07)_1px,transparent_0)] bg-[length:18px_18px] opacity-30 will-change-transform" />
@@ -1061,12 +1063,12 @@ export default function ExpensesClient({
                 {t("expenses.pageSubtitle")}
               </p>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               {/* Email invoice import is intentionally hidden for now. Re-enable the inbox entry when the product decision is confirmed. */}
               <button
                 type="button"
                 onClick={() => setAccountingExportOpen(true)}
-                className="flex items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line-strong bg-white/80 px-4 py-2.5 text-sm font-semibold text-ink transition hover:bg-white"
               >
                 <FileArchive className="h-4 w-4" />
                 {t("accountingExport.open")}
@@ -1074,7 +1076,7 @@ export default function ExpensesClient({
               <button
                 type="button"
                 onClick={handleAdd}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
+                className="flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_-26px_rgba(249,115,22,0.9)] transition hover:bg-brand/90"
               >
                 <Plus className="h-4 w-4" />
                 {t("expenses.addExpense")}
@@ -1216,17 +1218,17 @@ export default function ExpensesClient({
                   >
                     <div
                       onClick={() => router.push(`/dashboard/expenses/${expense.id}`)}
-                      className="group flex cursor-pointer items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 transition hover:shadow-md"
+                      className="group flex cursor-pointer flex-col gap-3 rounded-2xl border border-line bg-white/70 px-4 py-3 transition hover:shadow-md sm:flex-row sm:items-center sm:justify-between"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
                         <span
                           className={`h-2.5 w-2.5 shrink-0 rounded-full ${!expense.isActive ? "bg-ink-muted" : ""}`}
                           style={expense.isActive ? {
                             backgroundColor: expense.color || DONUT_COLORS[expenses.indexOf(expense) % DONUT_COLORS.length],
                           } : undefined}
                         />
-                        <div>
-                          <p className="font-medium">{expense.name}</p>
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">{expense.name}</p>
                           <div className="mt-0.5 flex flex-wrap items-center gap-2">
                             {expense.category && (
                               <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs text-brand">
@@ -1248,7 +1250,7 @@ export default function ExpensesClient({
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-between gap-3 sm:justify-start">
                         <div className="text-right">
                           <p className="font-semibold">
                             {currencyFormatter.format(
@@ -1259,12 +1261,12 @@ export default function ExpensesClient({
                             {getExpenseAmountHint(expense)}
                           </p>
                         </div>
-                        <div className="flex gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+                        <div className="flex shrink-0 gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
                           <button
                             type="button"
                             onClick={(e) => handleDuplicate(expense, e)}
                             aria-label={t("expenses.duplicateExpense")}
-                            className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
                           >
                             <Copy className="h-3.5 w-3.5" />
                           </button>
@@ -1272,7 +1274,7 @@ export default function ExpensesClient({
                             type="button"
                             onClick={(e) => handleEdit(expense, e)}
                             aria-label={t("expenses.editExpense")}
-                            className="rounded-lg p-1.5 text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted hover:bg-ink-soft hover:text-ink focus-visible:bg-ink-soft focus-visible:text-ink"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
@@ -1280,7 +1282,7 @@ export default function ExpensesClient({
                             type="button"
                             onClick={(e) => handleDelete(expense.id, e)}
                             aria-label={tc("delete")}
-                            className="rounded-lg p-1.5 text-ink-muted hover:bg-red-50 hover:text-red-600"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted hover:bg-red-50 hover:text-red-600"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -1421,16 +1423,16 @@ export default function ExpensesClient({
                     {chartSegments.segments.map((seg) => (
                       <div
                         key={seg.name}
-                        className="flex items-center justify-between"
+                        className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
                       >
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex min-w-0 items-center gap-2.5">
                           <span
                             className="h-3 w-3 shrink-0 rounded-full"
                             style={{ backgroundColor: seg.color }}
                           />
-                          <span className="text-sm">{seg.name}</span>
+                          <span className="truncate text-sm">{seg.name}</span>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-between gap-3 sm:justify-start">
                           <span className="text-sm font-medium">
                             {currencyFormatter.format(seg.totalAmount)}
                           </span>

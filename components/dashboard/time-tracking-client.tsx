@@ -541,7 +541,7 @@ export default function TimeTrackingClient({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="flex items-center gap-3"
+                    className="flex flex-wrap items-center justify-center gap-3"
                   >
                     <motion.div whileTap={{ scale: 0.95 }}>
                       <button
@@ -549,7 +549,7 @@ export default function TimeTrackingClient({
                         onClick={() => handleAction(secondaryAction.action)}
                         disabled={secondaryAction.disabled}
                         aria-label={secondaryAction.label}
-                        className="flex items-center gap-2 rounded-full border border-line-strong bg-white/80 px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-white disabled:opacity-50"
+                        className="flex min-h-11 items-center gap-2 rounded-full border border-line-strong bg-white/80 px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-white disabled:opacity-50"
                       >
                         <Square className="h-4 w-4" />
                         {secondaryAction.label}
@@ -712,7 +712,7 @@ export default function TimeTrackingClient({
                         timeline.map((item) => (
                           <div
                             key={`${item.label}-${item.time}`}
-                            className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
+                            className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
                           >
                             <div className="flex items-center gap-3">
                               <span className={`h-2.5 w-2.5 rounded-full ${item.state}`} />
@@ -740,11 +740,11 @@ export default function TimeTrackingClient({
                   {recentSessions.map((rs) => (
                     <div
                       key={rs.id}
-                      className="flex items-center justify-between rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm"
+                      className="flex flex-col gap-3 rounded-2xl border border-line bg-white/70 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
                     >
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                          <span className="h-2 w-2 rounded-full bg-ink-muted" />
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <span className="h-2 w-2 shrink-0 rounded-full bg-ink-muted" />
                           <span className="font-medium">
                             {new Date(rs.startedAt).toLocaleDateString(locale, { day: "numeric", month: "short" })}
                           </span>
@@ -752,21 +752,21 @@ export default function TimeTrackingClient({
                             {timeFormatter.format(new Date(rs.startedAt))} - {rs.endedAt ? timeFormatter.format(new Date(rs.endedAt)) : "..."}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 pl-4">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2 pl-4">
                           {rs.client && (
-                            <span className="flex items-center gap-1 rounded-full bg-ink-soft px-2 py-0.5 text-[10px]">
-                              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: rs.client.color ?? "#6B7280" }} />
+                            <span className="flex max-w-full items-center gap-1 rounded-full bg-ink-soft px-2 py-0.5 text-[10px]">
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: rs.client.color ?? "#6B7280" }} />
                               {rs.client.name}
                             </span>
                           )}
                           {rs.project && (
-                            <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[10px] text-brand">
+                            <span className="max-w-full truncate rounded-full bg-brand/10 px-2 py-0.5 text-[10px] text-brand">
                               {rs.project.name}
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-end gap-2 sm:justify-start">
                         <span className="text-xs text-ink-muted">{formatDuration(getSessionDurationMs(rs))}</span>
                         <button
                           type="button"
@@ -774,7 +774,7 @@ export default function TimeTrackingClient({
                             setEditingSession(rs);
                             setEditDialogOpen(true);
                           }}
-                          className="rounded-lg p-1.5 text-ink-muted transition hover:bg-ink-soft hover:text-ink"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted transition hover:bg-ink-soft hover:text-ink"
                           title={t("sessionEdit.title")}
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -790,7 +790,7 @@ export default function TimeTrackingClient({
                             });
                             if (ok) executeDeleteSession({ sessionId: rs.id });
                           }}
-                          className="rounded-lg p-1.5 text-ink-muted transition hover:bg-red-50 hover:text-red-500"
+                          className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted transition hover:bg-red-50 hover:text-red-500"
                           title={t("sessionEdit.delete")}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
